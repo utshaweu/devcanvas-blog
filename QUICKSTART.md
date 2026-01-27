@@ -135,7 +135,7 @@ CREATE POLICY "Users can delete own comments"
 npm run dev
 ```
 
-Your app will be running at `http://localhost:3000`!
+Your app will be running at `http://localhost:3012`!
 
 ## 📋 What You Get
 
