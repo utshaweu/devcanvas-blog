@@ -133,24 +133,6 @@ CREATE TABLE users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Posts table
-CREATE TABLE posts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  title TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  content TEXT NOT NULL,
-  excerpt TEXT,
-  featured_image TEXT,
-  author_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  category_id UUID REFERENCES categories(id),
-  published BOOLEAN DEFAULT FALSE,
-  published_at TIMESTAMP WITH TIME ZONE,
-  views INTEGER DEFAULT 0,
-  likes INTEGER DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Categories table
 CREATE TABLE categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -170,6 +152,35 @@ CREATE TABLE tags (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Posts table
+CREATE TABLE posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  content TEXT NOT NULL,
+  excerpt TEXT,
+  featured_image TEXT,
+  author_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  category_id UUID REFERENCES categories(id),
+  published BOOLEAN DEFAULT FALSE,
+  published_at TIMESTAMP WITH TIME ZONE,
+  views INTEGER DEFAULT 0,
+  likes INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Comments table
+CREATE TABLE comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+  author_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Post Tags junction table
 CREATE TABLE post_tags (
   post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
@@ -177,36 +188,41 @@ CREATE TABLE post_tags (
   PRIMARY KEY (post_id, tag_id)
 );
 
--- Functions for incrementing views and likes
-CREATE OR REPLACE FUNCTION increment_post_views(post_id UUID)
-RETURNS VOID AS $$
-BEGIN
-  UPDATE posts SET views = views + 1 WHERE id = post_id;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION toggle_post_like(post_id UUID)
-RETURNS VOID AS $$
-BEGIN
-  UPDATE posts SET likes = likes + 1 WHERE id = post_id;
-END;
-$$ LANGUAGE plpgsql;
-
 -- Enable Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
-ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
+-- RLS Policies for users
 CREATE POLICY "Users can read all profiles" ON users FOR SELECT USING (true);
 CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (auth.uid() = id);
 
+-- RLS Policies for posts
 CREATE POLICY "Anyone can read published posts" ON posts FOR SELECT USING (published = true OR author_id = auth.uid());
 CREATE POLICY "Users can create own posts" ON posts FOR INSERT WITH CHECK (author_id = auth.uid());
 CREATE POLICY "Users can update own posts" ON posts FOR UPDATE USING (author_id = auth.uid());
 CREATE POLICY "Users can delete own posts" ON posts FOR DELETE USING (author_id = auth.uid());
+
+-- RLS Policies for comments
+CREATE POLICY "Anyone can read comments on published posts or own comments"
+  ON comments
+  FOR SELECT
+  USING (
+    (SELECT published FROM posts WHERE posts.id = comments.post_id) = true
+    OR author_id = auth.uid()
+  );
+CREATE POLICY "Users can create own comments"
+  ON comments
+  FOR INSERT
+  WITH CHECK (author_id = auth.uid());
+CREATE POLICY "Users can update own comments"
+  ON comments
+  FOR UPDATE
+  USING (author_id = auth.uid());
+CREATE POLICY "Users can delete own comments"
+  ON comments
+  FOR DELETE
+  USING (author_id = auth.uid());
 ```
 
 5. **Start the development server**
@@ -343,15 +359,3 @@ VITE_APP_URL=https://your-domain.com
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👨‍💻 Author
-
-Built with ❤️ using modern web technologies
-
----
-
-**Note**: This is a production-ready boilerplate. Customize it according to your needs!
