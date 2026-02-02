@@ -192,6 +192,9 @@ CREATE TABLE post_tags (
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for users
 CREATE POLICY "Users can read all profiles" ON users FOR SELECT USING (true);
@@ -223,6 +226,18 @@ CREATE POLICY "Users can delete own comments"
   ON comments
   FOR DELETE
   USING (author_id = auth.uid());
+
+-- RLS Policies for categories (read-only for everyone)
+CREATE POLICY "Anyone can read categories" ON categories FOR SELECT USING (true);
+
+-- RLS Policies for tags (read-only for everyone)
+CREATE POLICY "Anyone can read tags" ON tags FOR SELECT USING (true);
+
+-- RLS Policies for post_tags (read-only for everyone, managed through posts)
+CREATE POLICY "Anyone can read post_tags" ON post_tags FOR SELECT USING (true);
+CREATE POLICY "Users can manage tags for own posts" ON post_tags 
+  FOR ALL 
+  USING ((SELECT author_id FROM posts WHERE posts.id = post_tags.post_id) = auth.uid());
 ```
 
 5. **Start the development server**
