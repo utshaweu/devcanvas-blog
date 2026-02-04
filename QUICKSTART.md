@@ -102,6 +102,7 @@ ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for users
 CREATE POLICY "Users can read all profiles" ON users FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own record" ON users FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (auth.uid() = id);
 
 -- RLS Policies for posts
