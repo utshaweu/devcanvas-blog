@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
-import type { BlogPost, CreatePostData, UpdatePostData, PaginatedResponse } from '@/types';
+import type { BlogPost, CreatePostData, UpdatePostData, Category, Tag } from '@/types';
 
 interface BlogState {
   posts: BlogPost[];
   currentPost: BlogPost | null;
+  categories: Category[];
+  tags: Tag[];
   isLoading: boolean;
   error: string | null;
   pagination: {
@@ -18,6 +20,8 @@ interface BlogState {
   fetchPosts: (page?: number, limit?: number) => Promise<void>;
   fetchPostById: (id: string) => Promise<void>;
   fetchPostBySlug: (slug: string) => Promise<void>;
+  fetchCategories: () => Promise<void>;
+  fetchTags: () => Promise<void>;
   createPost: (data: CreatePostData) => Promise<BlogPost>;
   updatePost: (data: UpdatePostData) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
@@ -29,6 +33,8 @@ interface BlogState {
 export const useBlogStore = create<BlogState>((set, get) => ({
   posts: [],
   currentPost: null,
+  categories: [],
+  tags: [],
   isLoading: false,
   error: null,
   pagination: {
@@ -59,10 +65,15 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
-      const posts = data?.map((post: any) => ({
-        ...post,
-        tags: post.tags?.map((t: any) => t.tag) || [],
-      })) || [];
+      const posts = (data?.map((post: unknown) => {
+        const postData = post as Record<string, unknown>;
+        return {
+          ...postData,
+          tags: Array.isArray(postData.tags) 
+            ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
+            : [],
+        };
+      }) || []) as BlogPost[];
 
       set({
         posts,
@@ -74,9 +85,9 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         },
         isLoading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ 
-        error: error.message || 'Failed to fetch posts',
+        error: error instanceof Error ? error.message : 'Failed to fetch posts',
         isLoading: false,
       });
     }
@@ -99,18 +110,21 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
+      const postData = data as Record<string, unknown>;
       const post = {
-        ...data,
-        tags: data.tags?.map((t: any) => t.tag) || [],
-      };
+        ...postData,
+        tags: Array.isArray(postData.tags) 
+          ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
+          : [],
+      } as BlogPost;
 
       set({
         currentPost: post,
         isLoading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ 
-        error: error.message || 'Failed to fetch post',
+        error: error instanceof Error ? error.message : 'Failed to fetch post',
         isLoading: false,
       });
     }
@@ -134,20 +148,53 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
+      const postData = data as Record<string, unknown>;
       const post = {
-        ...data,
-        tags: data.tags?.map((t: any) => t.tag) || [],
-      };
+        ...postData,
+        tags: Array.isArray(postData.tags) 
+          ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
+          : [],
+      } as BlogPost;
 
       set({
         currentPost: post,
         isLoading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ 
-        error: error.message || 'Failed to fetch post',
+        error: error instanceof Error ? error.message : 'Failed to fetch post',
         isLoading: false,
       });
+    }
+  },
+
+  fetchCategories: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      set({ categories: data || [] });
+    } catch (error: unknown) {
+      console.error('Failed to fetch categories:', error);
+    }
+  },
+
+  fetchTags: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tags')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      set({ tags: data || [] });
+    } catch (error: unknown) {
+      console.error('Failed to fetch tags:', error);
     }
   },
 
@@ -178,9 +225,9 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       set({ isLoading: false });
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ 
-        error: error.message || 'Failed to create post',
+        error: error instanceof Error ? error.message : 'Failed to create post',
         isLoading: false,
       });
       throw error;
@@ -219,9 +266,9 @@ export const useBlogStore = create<BlogState>((set, get) => ({
       }
 
       set({ isLoading: false });
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ 
-        error: error.message || 'Failed to update post',
+        error: error instanceof Error ? error.message : 'Failed to update post',
         isLoading: false,
       });
       throw error;
@@ -243,9 +290,9 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         posts: state.posts.filter(post => post.id !== id),
         isLoading: false,
       }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       set({ 
-        error: error.message || 'Failed to delete post',
+        error: error instanceof Error ? error.message : 'Failed to delete post',
         isLoading: false,
       });
       throw error;
@@ -256,7 +303,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     try {
       const { error } = await supabase.rpc('increment_post_views', { post_id: id });
       if (error) throw error;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to increment views:', error);
     }
   },
@@ -271,7 +318,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
       if (currentPost?.id === id) {
         await get().fetchPostById(id);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to toggle like:', error);
     }
   },

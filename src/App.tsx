@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { SignupPage } from '@/features/auth/SignupPage';
+import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { BlogListPage } from '@/features/blog/BlogListPage';
 import { BlogPostPage } from '@/features/blog/BlogPostPage';
@@ -55,6 +57,7 @@ function App() {
             <Route path="/" element={<BlogListPage />} />
             <Route path="/blog" element={<BlogListPage />} />
             <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Guest Only Routes */}
             <Route
@@ -70,6 +73,14 @@ function App() {
               element={
                 <GuestRoute>
                   <SignupPage />
+                </GuestRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <GuestRoute>
+                  <ForgotPasswordPage />
                 </GuestRoute>
               }
             />

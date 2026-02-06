@@ -52,6 +52,7 @@ export interface CreatePostData {
   content: string;
   excerpt?: string;
   featured_image?: string;
+  author_id: string;
   category_id?: string;
   tags?: string[];
   published: boolean;
@@ -172,7 +173,7 @@ export interface RouteConfig {
 // Editor Types
 export interface EditorContent {
   type: 'doc';
-  content: any[];
+  content: unknown[];
 }
 
 // Search Types

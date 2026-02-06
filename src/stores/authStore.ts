@@ -16,6 +16,8 @@ interface AuthState {
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   clearError: () => void;
   initialize: () => Promise<void>;
 }
@@ -61,9 +63,9 @@ export const useAuthStore = create<AuthState>()(
               isLoading: false,
             });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           set({ 
-            error: error.message || 'Failed to login',
+            error: error instanceof Error ? error.message : 'Failed to login',
             isLoading: false,
             isAuthenticated: false,
           });
@@ -98,9 +100,9 @@ export const useAuthStore = create<AuthState>()(
               error: null,
             });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           set({ 
-            error: error.message || 'Failed to signup',
+            error: error instanceof Error ? error.message : 'Failed to signup',
             isLoading: false,
           });
           throw error;
@@ -121,9 +123,9 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           set({ 
-            error: error.message || 'Failed to logout',
+            error: error instanceof Error ? error.message : 'Failed to logout',
             isLoading: false,
           });
         }
@@ -161,7 +163,7 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: false,
             });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Failed to refresh session:', error);
           set({
             user: null,
@@ -191,9 +193,49 @@ export const useAuthStore = create<AuthState>()(
             user: data,
             isLoading: false,
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           set({ 
-            error: error.message || 'Failed to update profile',
+            error: error instanceof Error ? error.message : 'Failed to update profile',
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      resetPassword: async (email: string) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`,
+          });
+
+          if (error) throw error;
+
+          set({ isLoading: false });
+        } catch (error: unknown) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to send reset password email',
+            isLoading: false,
+          });
+          throw error;
+        }
+      },
+
+      updatePassword: async (newPassword: string) => {
+        set({ isLoading: true, error: null });
+
+        try {
+          const { error } = await supabase.auth.updateUser({
+            password: newPassword,
+          });
+
+          if (error) throw error;
+
+          set({ isLoading: false });
+        } catch (error: unknown) {
+          set({ 
+            error: error instanceof Error ? error.message : 'Failed to update password',
             isLoading: false,
           });
           throw error;
