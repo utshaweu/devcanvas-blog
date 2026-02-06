@@ -1,0 +1,116 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+
+const forgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+
+export const ForgotPasswordPage: React.FC = () => {
+  const { resetPassword } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
+
+  const onSubmit = async (data: ForgotPasswordFormData) => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      await resetPassword(data.email);
+      setSuccess(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send reset email. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-3xl font-bold text-center">Reset Password</CardTitle>
+          <CardDescription className="text-center">
+            Enter your email address and we'll send you a link to reset your password
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {success ? (
+            <div className="space-y-4">
+              <div className="p-4 rounded-md bg-green-50 border border-green-200">
+                <p className="text-sm text-green-800">
+                  Password reset email sent! Please check your inbox and follow the instructions to reset your password.
+                </p>
+              </div>
+              <div className="text-center">
+                <Link to="/login" className="text-accent hover:text-accent-hover font-medium text-sm">
+                  Back to Login
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  {...register('email')}
+                  disabled={isLoading}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Sending reset link...
+                  </>
+                ) : (
+                  'Send Reset Link'
+                )}
+              </Button>
+
+              <div className="text-center text-sm text-muted-foreground">
+                Remember your password?{' '}
+                <Link to="/login" className="text-accent hover:text-accent-hover font-medium">
+                  Log in
+                </Link>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

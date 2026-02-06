@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,9 +19,13 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Get success message from location state (e.g., after password reset)
+  const successMessage = (location.state as { message?: string })?.message;
 
   const {
     register,
@@ -38,8 +42,8 @@ export const LoginPage: React.FC = () => {
     try {
       await login(data);
       navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Failed to login. Please try again.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to login. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +60,12 @@ export const LoginPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {successMessage && (
+              <div className="p-3 rounded-md bg-green-50 border border-green-200 text-green-800 text-sm">
+                {successMessage}
+              </div>
+            )}
+
             {error && (
               <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
                 {error}
@@ -77,7 +87,15 @@ export const LoginPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-accent hover:text-accent-hover"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
