@@ -9,7 +9,7 @@ export function useToast() {
     type: ToastType,
     title: string,
     description?: string,
-    duration = 5000
+    duration = 5000,
   ) => {
     const id = generateId();
     const newToast: Toast = {
