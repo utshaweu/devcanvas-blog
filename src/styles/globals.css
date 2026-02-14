@@ -4,6 +4,82 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme variables (light by default) */
+:root {
+  --color-background: #F8FAFC;
+  --color-foreground: #0F172A;
+
+  --color-primary: #F8FAFC;
+  --color-primary-foreground: #0F172A;
+
+  --color-secondary: #0F172A;
+  --color-secondary-foreground: #F8FAFC;
+
+  --color-accent: #3B82F6;
+  --color-accent-foreground: #F8FAFC;
+  --color-accent-hover: #2563EB;
+
+  --color-border: #E2E8F0;
+
+  --color-muted: #E2E8F0;
+  --color-muted-foreground: #64748B;
+
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #0F172A;
+
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #F8FAFC;
+
+  --color-success: #10B981;
+  --color-success-foreground: #F8FAFC;
+
+  --color-warning: #F59E0B;
+  --color-warning-foreground: #F8FAFC;
+
+  --color-ring: #3B82F6;
+}
+
+/* Dark theme overrides */
+.dark {
+  --color-background: #0B1220; /* soft very-dark navy */
+  --color-foreground: #E6EEF8; /* soft off-white for text */
+
+  --color-primary: #0B1220;
+  --color-primary-foreground: #E6EEF8;
+
+  --color-secondary: #E6EEF8;
+  --color-secondary-foreground: #0B1220;
+
+  --color-accent: #3B82F6; /* balanced blue */
+  --color-accent-foreground: #FFFFFF;
+  --color-accent-hover: #2563EB;
+
+  --color-border: #263244; /* slightly muted border */
+
+  --color-muted: #374151; /* muted surfaces */
+  --color-muted-foreground: #9CA3AF;
+
+  --color-card: #0F172A; /* card background */
+  --color-card-foreground: #E6EEF8;
+
+  --color-popover: #0F172A;
+  --color-popover-foreground: #E6EEF8;
+
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #F8FAFC;
+
+  --color-success: #10B981;
+  --color-success-foreground: #0B1220;
+
+  --color-warning: #F59E0B;
+  --color-warning-foreground: #0B1220;
+
+  --color-ring: #60A5FA;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -114,7 +190,7 @@
 }
 
 .toast-close {
-  @apply absolute right-2 top-2 rounded-md p-1 text-foreground/60 hover:text-foreground focus:outline-none;
+  @apply absolute right-2 top-2 rounded-md p-1 text-foreground opacity-60 hover:text-foreground focus:outline-none;
 }
 
 /* Progress bar at the top of the toast (full toast width) */

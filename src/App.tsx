@@ -14,6 +14,7 @@ import { LoadingOverlay } from '@/components/common/LoadingSpinner';
 import { GlobalToastProvider } from '@/contexts/ToastContext';
 import { ToastProvider } from '@/components/ui/toast';
 import { ToastContainer } from '@/components/common/ToastContainer';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 // Protected Route Component
 interface ProtectedRouteProps {
@@ -51,8 +52,9 @@ const GuestRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
 function App() {
   return (
-    <ToastProvider>
-      <GlobalToastProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <GlobalToastProvider>
         <BrowserRouter>
           <div className="min-h-screen bg-background text-foreground">
             <Header />
@@ -115,8 +117,9 @@ function App() {
             <ToastContainer />
           </div>
         </BrowserRouter>
-      </GlobalToastProvider>
-    </ToastProvider>
+        </GlobalToastProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 
