@@ -52,7 +52,7 @@
   }
 
   .card-custom {
-    @apply bg-card rounded-lg border border-border p-6 shadow-sm hover:shadow-md transition-shadow;
+    @apply bg-card rounded-lg border border-border pmdsm-6 shadow-sm hover:shadow-md transition-shadow;
   }
 
   .btn-primary {
@@ -76,6 +76,75 @@
   .animate-in {
     animation: slide-in 0.4s ease-out;
   }
+}
+
+/* Toast custom styles */
+.toast-viewport {
+  @apply fixed z-[100] right-4 bottom-6 flex flex-col gap-3 p-0 pointer-events-none items-end;
+  width: auto;
+  max-width: none;
+}
+
+.toast-root {
+  @apply pointer-events-auto rounded-lg shadow-lg p-3 pr-6 relative overflow-hidden;
+  display: inline-flex;
+  align-items: flex-start;
+  transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 200ms ease;
+  transform: translateY(8px);
+  opacity: 0;
+  width: 300px !important;
+  max-width: 300px !important;
+}
+
+.toast-root[data-state="open"] {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast-root[data-state="closed"] {
+  transform: translateY(8px);
+  opacity: 0;
+}
+
+.toast-title {
+  @apply block text-sm font-semibold;
+}
+.toast-description {
+  @apply block text-sm mt-1 text-muted-foreground;
+}
+
+.toast-close {
+  @apply absolute right-2 top-2 rounded-md p-1 text-foreground/60 hover:text-foreground focus:outline-none;
+}
+
+/* Progress bar at the top of the toast (full toast width) */
+.toast-progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 4px;
+  width: 100%;
+  background: currentColor;
+  transform-origin: left;
+  animation: toast-progress var(--toast-duration, 5000ms) linear forwards;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  z-index: 10;
+}
+
+.toast-root:hover .toast-progress {
+  animation-play-state: paused;
+}
+
+@keyframes toast-progress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/* small polish */
+.toast-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.08);
 }
 
 /* Tiptap Editor Styles */

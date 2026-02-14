@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
+import { useGlobalToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,8 +22,8 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
   // Get success message from location state (e.g., after password reset)
   const successMessage = (location.state as { message?: string })?.message;
@@ -35,15 +36,21 @@ export const LoginPage: React.FC = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  // Show success message as toast if present
+  useEffect(() => {
+    if (successMessage) {
+      toastSuccess('Success', successMessage);
+    }
+  }, [successMessage, toastSuccess]);
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
-    setError(null);
-
     try {
       await login(data);
+      toastSuccess('Login successful!', 'Welcome back!');
       navigate('/dashboard');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to login. Please try again.');
+      toastError('Login failed', err instanceof Error ? err.message : 'Failed to login. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -60,18 +67,6 @@ export const LoginPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {successMessage && (
-              <div className="p-3 rounded-md bg-green-50 border border-green-200 text-green-800 text-sm">
-                {successMessage}
-              </div>
-            )}
-
-            {error && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                {error}
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

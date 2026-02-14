@@ -11,6 +11,9 @@ import { BlogPostPage } from '@/features/blog/BlogPostPage';
 import { CreatePostPage } from '@/features/blog/CreatePostPage';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingOverlay } from '@/components/common/LoadingSpinner';
+import { GlobalToastProvider } from '@/contexts/ToastContext';
+import { ToastProvider } from '@/components/ui/toast';
+import { ToastContainer } from '@/components/common/ToastContainer';
 
 // Protected Route Component
 interface ProtectedRouteProps {
@@ -48,67 +51,72 @@ const GuestRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-background text-foreground">
-        <Header />
-        <main className="flex-1">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<BlogListPage />} />
-            <Route path="/blog" element={<BlogListPage />} />
-            <Route path="/blog/:slug" element={<BlogPostPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
+    <ToastProvider>
+      <GlobalToastProvider>
+        <BrowserRouter>
+          <div className="min-h-screen bg-background text-foreground">
+            <Header />
+            <main className="flex-1">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<BlogListPage />} />
+                <Route path="/blog" element={<BlogListPage />} />
+                <Route path="/blog/:slug" element={<BlogPostPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-            {/* Guest Only Routes */}
-            <Route
-              path="/login"
-              element={
-                <GuestRoute>
-                  <LoginPage />
-                </GuestRoute>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <GuestRoute>
-                  <SignupPage />
-                </GuestRoute>
-              }
-            />
-            <Route
-              path="/forgot-password"
-              element={
-                <GuestRoute>
-                  <ForgotPasswordPage />
-                </GuestRoute>
-              }
-            />
+                {/* Guest Only Routes */}
+                <Route
+                  path="/login"
+                  element={
+                    <GuestRoute>
+                      <LoginPage />
+                    </GuestRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <GuestRoute>
+                      <SignupPage />
+                    </GuestRoute>
+                  }
+                />
+                <Route
+                  path="/forgot-password"
+                  element={
+                    <GuestRoute>
+                      <ForgotPasswordPage />
+                    </GuestRoute>
+                  }
+                />
 
-            {/* Protected Routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/create"
-              element={
-                <ProtectedRoute>
-                  <CreatePostPage />
-                </ProtectedRoute>
-              }
-            />
+                {/* Protected Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/create"
+                  element={
+                    <ProtectedRoute>
+                      <CreatePostPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* 404 Route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+                {/* 404 Route */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+            <ToastContainer />
+          </div>
+        </BrowserRouter>
+      </GlobalToastProvider>
+    </ToastProvider>
   );
 }
 
