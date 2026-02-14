@@ -87,6 +87,32 @@ devcanvas-blog/
 
 ## 🚦 Getting Started
 
+## 🌓 Theme / Dark Mode
+
+This project supports Light, Dark, and System themes.
+
+- Toggle: use the theme button in the header to cycle between `Light` → `Dark` → `System`.
+- System: when `System` is selected the app follows your operating system color scheme (prefers-color-scheme). If you change your OS theme while `System` is active the UI will update automatically.
+- Persistence: the selected theme is stored in `localStorage` under the key `devcanvas-theme` so your choice is remembered across visits.
+
+Troubleshooting:
+
+- If the UI does not match your OS when `System` is selected, try reloading the page and verify the value in the browser console:
+
+```js
+localStorage.getItem('devcanvas-theme')
+```
+
+- To force a specific theme from the console:
+
+```js
+localStorage.setItem('devcanvas-theme', 'dark') // or 'light' or 'system'
+location.reload()
+```
+
+The theme implementation uses CSS custom properties (variables) so Tailwind-generated classes reference those variables and switch styles by toggling the `.dark` class on the document root.
+
+
 ### Prerequisites
 
 - Node.js 18+ or higher

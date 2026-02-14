@@ -190,3 +190,12 @@ export interface SearchResult {
   posts: BlogPost[];
   total: number;
 }
+
+export type Theme = 'light' | 'dark' | 'system';
+
+export interface ThemeContextType {
+  theme: Theme;
+  effectiveTheme: 'light' | 'dark';
+  setTheme: (t: Theme) => void;
+  toggleTheme: () => void;
+}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { PenSquare, User, LogOut, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +49,7 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -21,46 +21,46 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#F8FAFC', // Off-white/Gray background
-          foreground: '#0F172A', // Deep Navy text
+          DEFAULT: 'var(--color-primary)',
+          foreground: 'var(--color-primary-foreground)',
         },
         secondary: {
-          DEFAULT: '#0F172A', // Deep Navy
-          foreground: '#F8FAFC',
+          DEFAULT: 'var(--color-secondary)',
+          foreground: 'var(--color-secondary-foreground)',
         },
         accent: {
-          DEFAULT: '#3B82F6', // Electric Blue
-          foreground: '#F8FAFC',
-          hover: '#2563EB',
+          DEFAULT: 'var(--color-accent)',
+          foreground: 'var(--color-accent-foreground)',
+          hover: 'var(--color-accent-hover)',
         },
-        border: '#E2E8F0', // Soft Gray
+        border: 'var(--color-border)',
         muted: {
-          DEFAULT: '#E2E8F0',
-          foreground: '#64748B',
+          DEFAULT: 'var(--color-muted)',
+          foreground: 'var(--color-muted-foreground)',
         },
-        background: '#F8FAFC',
-        foreground: '#0F172A',
+        background: 'var(--color-background)',
+        foreground: 'var(--color-foreground)',
         card: {
-          DEFAULT: '#FFFFFF',
-          foreground: '#0F172A',
+          DEFAULT: 'var(--color-card)',
+          foreground: 'var(--color-card-foreground)',
         },
         popover: {
-          DEFAULT: '#FFFFFF',
-          foreground: '#0F172A',
+          DEFAULT: 'var(--color-popover)',
+          foreground: 'var(--color-popover-foreground)',
         },
         destructive: {
-          DEFAULT: '#EF4444',
-          foreground: '#F8FAFC',
+          DEFAULT: 'var(--color-destructive)',
+          foreground: 'var(--color-destructive-foreground)',
         },
         success: {
-          DEFAULT: '#10B981',
-          foreground: '#F8FAFC',
+          DEFAULT: 'var(--color-success)',
+          foreground: 'var(--color-success-foreground)',
         },
         warning: {
-          DEFAULT: '#F59E0B',
-          foreground: '#F8FAFC',
+          DEFAULT: 'var(--color-warning)',
+          foreground: 'var(--color-warning-foreground)',
         },
-        ring: '#3B82F6',
+        ring: 'var(--color-ring)',
       },
       borderRadius: {
         lg: "0.5rem",
