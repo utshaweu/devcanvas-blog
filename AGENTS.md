@@ -44,6 +44,13 @@ The repository is compatible with several AI models to assist developers:
 - **Form State:** React Hook Form 7.x
 - **Server State:** Supabase real-time subscriptions
 
+### Internationalization
+- **Language Context:** Provides `en`/`bn` and persists choice.
+- **TranslationKey enum:** All UI strings are referenced via enum values for type safety.
+- **useTranslation hook:** Returns `t(key)` and current language.
+- **Extract script:** `npm run extract:i18n` scans components for used keys and reports missing/unused entries.
+- Add new keys by updating `TranslationKey` and dictionaries in `src/i18n.ts`.
+
 ### Form & Validation
 - **Forms:** React Hook Form with Controller for custom components
 - **Validation:** Zod 3.x for schema validation
@@ -458,6 +465,12 @@ CREATE POLICY "Users can delete own posts" ON posts
 ---
 
 ## 🛠️ Common Tasks Guide
+
+### Working with Translations
+1. Add a key to `TranslationKey` enum in `src/i18n.ts`.
+2. Provide English and Bengali values in the `translations` object.
+3. Use `const { t } = useTranslation();` and call `t(TranslationKey.YOUR_KEY)` in components.
+4. Run `npm run extract:i18n` to audit missing/unused keys.
 
 ### Adding a New Page
 

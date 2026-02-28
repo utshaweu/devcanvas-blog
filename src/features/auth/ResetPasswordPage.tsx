@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,6 +25,7 @@ type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 export const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const { updatePassword } = useAuth();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isValidToken, setIsValidToken] = useState(true);
@@ -55,7 +58,7 @@ export const ResetPasswordPage: React.FC = () => {
       // Show success message briefly before redirecting
       setTimeout(() => {
         navigate('/login', { 
-          state: { message: 'Password updated successfully! Please log in with your new password.' }
+          state: { message: t(TranslationKey.PASSWORD_UPDATED_SUCCESS) }
         });
       }, 1500);
     } catch (err: unknown) {
@@ -69,24 +72,23 @@ export const ResetPasswordPage: React.FC = () => {
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-3xl font-bold text-center">Invalid Link</CardTitle>
+            <CardTitle className="text-3xl font-bold text-center">{t(TranslationKey.INVALID_LINK_TITLE)}</CardTitle>
             <CardDescription className="text-center">
-              This password reset link is invalid or has expired
+              {t(TranslationKey.INVALID_LINK_BODY)}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="p-4 rounded-md bg-destructive/10 border border-destructive/20">
                 <p className="text-sm text-destructive">
-                  The password reset link you clicked is either invalid or has expired. 
-                  Please request a new password reset link.
+                  {t(TranslationKey.INVALID_LINK_BODY)}
                 </p>
               </div>
               <Button 
                 onClick={() => navigate('/forgot-password')} 
                 className="w-full"
               >
-                Request New Link
+                {t(TranslationKey.REQUEST_NEW_LINK)}
               </Button>
             </div>
           </CardContent>
@@ -99,9 +101,9 @@ export const ResetPasswordPage: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center">Reset Password</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">{t(TranslationKey.RESET_PASSWORD)}</CardTitle>
           <CardDescription className="text-center">
-            Enter your new password below
+            {t(TranslationKey.ENTER_NEW_PASSWORD)}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -113,7 +115,7 @@ export const ResetPasswordPage: React.FC = () => {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
+              <Label htmlFor="password">{t(TranslationKey.NEW_PASSWORD)}</Label>
               <Input
                 id="password"
                 type="password"
@@ -127,7 +129,7 @@ export const ResetPasswordPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword">{t(TranslationKey.CONFIRM_NEW_PASSWORD)}</Label>
               <Input
                 id="confirmPassword"
                 type="password"

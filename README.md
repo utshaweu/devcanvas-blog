@@ -12,6 +12,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Form Validation**: Robust validation with React Hook Form and Zod
 - **Analytics Dashboard**: Track views, likes, and engagement
 - **Responsive Design**: Mobile-first, works on all devices
+- **Multilingual**: English and Bangla support with runtime switching
 - **Testing Ready**: Jest and React Testing Library configured
 
 ## 🛠️ Tech Stack
@@ -112,6 +113,22 @@ location.reload()
 
 The theme implementation uses CSS custom properties (variables) so Tailwind-generated classes reference those variables and switch styles by toggling the `.dark` class on the document root.
 
+
+### Prerequisites
+
+### Internationalization
+
+The app includes a simple i18n framework. Keys are defined in an `enum` (`src/i18n.ts`) and referenced via a `useTranslation` hook. To ensure keys stay in sync, a CLI helper extracts used keys from components:
+
+```bash
+npm run extract:i18n
+```
+
+The output reports missing or unused translation entries so you can clean up or add new strings.
+
+A language selector appears in the header next to theme toggle and stores the choice in `localStorage` under `devcanvas-language`.
+
+---
 
 ### Prerequisites
 

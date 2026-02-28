@@ -15,6 +15,8 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { generateSlug } from '@/utils/helpers';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 
 const postSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
@@ -32,6 +34,7 @@ export const CreatePostPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { createPost, categories, tags, fetchCategories, fetchTags } = useBlogStore();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +59,7 @@ export const CreatePostPage: React.FC = () => {
 
   const onSubmit = async (data: PostFormData) => {
     if (!user) {
-      setError('You must be logged in to create a post');
+      setError(t(TranslationKey.MUST_BE_LOGGED_IN));
       return;
     }
 
@@ -84,7 +87,7 @@ export const CreatePostPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">Create New Post</CardTitle>
+            <CardTitle className="text-3xl">{t(TranslationKey.CREATE_NEW_POST)}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -95,11 +98,11 @@ export const CreatePostPage: React.FC = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
+                <Label htmlFor="title">{t(TranslationKey.TITLE)}</Label>
                 <Input
                   id="title"
                   type="text"
-                  placeholder="Enter post title"
+                  placeholder={t(TranslationKey.ENTER_TITLE_PLACEHOLDER)}
                   {...register('title')}
                   disabled={isLoading}
                 />
@@ -109,11 +112,11 @@ export const CreatePostPage: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="excerpt">Excerpt</Label>
+                <Label htmlFor="excerpt">{t(TranslationKey.EXCERPT)}</Label>
                 <Input
                   id="excerpt"
                   type="text"
-                  placeholder="Brief description of your post"
+                  placeholder={t(TranslationKey.EXCERPT_PLACEHOLDER)}
                   {...register('excerpt')}
                   disabled={isLoading}
                 />
@@ -123,11 +126,11 @@ export const CreatePostPage: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="featured_image">Featured Image URL</Label>
+                <Label htmlFor="featured_image">{t(TranslationKey.FEATURED_IMAGE_URL)}</Label>
                 <Input
                   id="featured_image"
                   type="url"
-                  placeholder="https://example.com/image.jpg"
+                  placeholder={t(TranslationKey.FEATURED_IMAGE_PLACEHOLDER)}
                   {...register('featured_image')}
                   disabled={isLoading}
                 />
@@ -142,11 +145,11 @@ export const CreatePostPage: React.FC = () => {
                   control={control}
                   render={({ field }) => (
                     <Select
-                      label="Category *"
+                      label={t(TranslationKey.CATEGORY)}
                       options={categories.map(cat => ({ value: cat.id, label: cat.name }))}
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="Select a category"
+                      placeholder={t(TranslationKey.SELECT_CATEGORY)}
                       error={errors.category_id?.message}
                       disabled={isLoading}
                     />
@@ -160,11 +163,11 @@ export const CreatePostPage: React.FC = () => {
                   control={control}
                   render={({ field }) => (
                     <MultiSelect
-                      label="Tags *"
+                      label={t(TranslationKey.TAGS)}
                       options={tags.map(tag => ({ value: tag.id, label: tag.name }))}
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="Select at least one tag"
+                      placeholder={t(TranslationKey.SELECT_TAGS)}
                       error={errors.tags?.message}
                       disabled={isLoading}
                     />
@@ -173,7 +176,7 @@ export const CreatePostPage: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Content *</Label>
+                <Label>{t(TranslationKey.CONTENT)}</Label>
                 <Controller
                   name="content"
                   control={control}
@@ -205,10 +208,10 @@ export const CreatePostPage: React.FC = () => {
                   {isLoading ? (
                     <>
                       <LoadingSpinner size="sm" className="mr-2" />
-                      Saving...
+                      {t(TranslationKey.SAVE_AS_DRAFT)}
                     </>
                   ) : (
-                    'Save as Draft'
+                    t(TranslationKey.SAVE_AS_DRAFT)
                   )}
                 </Button>
 
@@ -227,10 +230,10 @@ export const CreatePostPage: React.FC = () => {
                   {isLoading ? (
                     <>
                       <LoadingSpinner size="sm" className="mr-2" />
-                      Publishing...
+                      {t(TranslationKey.PUBLISHING)}
                     </>
                   ) : (
-                    'Publish'
+                    t(TranslationKey.PUBLISH)
                   )}
                 </Button>
 
@@ -240,7 +243,7 @@ export const CreatePostPage: React.FC = () => {
                   onClick={() => navigate('/dashboard')}
                   disabled={isLoading}
                 >
-                  Cancel
+                  {t(TranslationKey.CANCEL)}
                 </Button>
               </div>
             </form>

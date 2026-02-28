@@ -15,6 +15,7 @@ import { GlobalToastProvider } from '@/contexts/ToastContext';
 import { ToastProvider } from '@/components/ui/toast';
 import { ToastContainer } from '@/components/common/ToastContainer';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 // Protected Route Component
 interface ProtectedRouteProps {
@@ -53,9 +54,10 @@ const GuestRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 function App() {
   return (
     <ThemeProvider>
-      <ToastProvider>
-        <GlobalToastProvider>
-        <BrowserRouter>
+      <LanguageProvider>
+        <ToastProvider>
+          <GlobalToastProvider>
+          <BrowserRouter>
           <div className="min-h-screen bg-background text-foreground">
             <Header />
             <main className="flex-1">
@@ -119,6 +121,7 @@ function App() {
         </BrowserRouter>
         </GlobalToastProvider>
       </ToastProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

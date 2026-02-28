@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -21,6 +23,7 @@ export const ForgotPasswordPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const { t } = useTranslation();
 
   const {
     register,
@@ -49,9 +52,9 @@ export const ForgotPasswordPage: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center">Reset Password</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">{t(TranslationKey.RESET_PASSWORD)}</CardTitle>
           <CardDescription className="text-center">
-            Enter your email address and we'll send you a link to reset your password
+            {t(TranslationKey.ENTER_EMAIL_RESET)}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,7 +80,7 @@ export const ForgotPasswordPage: React.FC = () => {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t(TranslationKey.EMAIL_ADDRESS)}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -94,17 +97,17 @@ export const ForgotPasswordPage: React.FC = () => {
                 {isLoading ? (
                   <>
                     <LoadingSpinner size="sm" className="mr-2" />
-                    Sending reset link...
+                    {t(TranslationKey.SENDING_RESET_LINK)}
                   </>
                 ) : (
-                  'Send Reset Link'
+                  t(TranslationKey.SEND_RESET_LINK)
                 )}
               </Button>
 
               <div className="text-center text-sm text-muted-foreground">
-                Remember your password?{' '}
+                {t(TranslationKey.REMEMBER_PASSWORD)}{' '}
                 <Link to="/login" className="text-accent hover:text-accent-hover font-medium">
-                  Log in
+                  {t(TranslationKey.LOGIN)}
                 </Link>
               </div>
             </form>
