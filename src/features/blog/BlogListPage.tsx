@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { formatDate, truncate } from '@/utils/helpers';
@@ -8,6 +10,7 @@ import { Eye, Heart } from 'lucide-react';
 
 export const BlogListPage: React.FC = () => {
   const { posts, isLoading, fetchPosts } = useBlogStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchPosts();
@@ -25,9 +28,9 @@ export const BlogListPage: React.FC = () => {
     <div className="container-custom py-12">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold">Welcome to DevCanvas</h1>
+          <h1 className="text-4xl md:text-5xl font-bold">{t(TranslationKey.HOME_WELCOME_TITLE)}</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover stories, thinking, and expertise from writers on any topic.
+            {t(TranslationKey.HOME_WELCOME_SUBTITLE)}
           </p>
         </div>
 
@@ -35,7 +38,7 @@ export const BlogListPage: React.FC = () => {
           {posts.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No posts available yet.</p>
+                <p className="text-muted-foreground">{t(TranslationKey.NO_POSTS_AVAILABLE)}</p>
               </CardContent>
             </Card>
           ) : (

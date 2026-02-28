@@ -4,6 +4,9 @@ import { PenSquare, User, LogOut, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +18,8 @@ import {
 
 export const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const { language, setLanguage } = useLanguage();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -33,15 +38,15 @@ export const Header: React.FC = () => {
 
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/blog" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-              Blog
+              {t(TranslationKey.BLOG)}
             </Link>
             {isAuthenticated && (
               <>
                 <Link to="/dashboard" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-                  Dashboard
+                  {t(TranslationKey.DASHBOARD)}
                 </Link>
                 <Link to="/create" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-                  Create Post
+                  {t(TranslationKey.CREATE_POST)}
                 </Link>
               </>
             )}
@@ -50,6 +55,18 @@ export const Header: React.FC = () => {
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
+          {/* language selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                {language.toUpperCase()}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-32">
+              <DropdownMenuItem onClick={() => setLanguage('en')}>EN</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('bn')}>BN</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -71,26 +88,26 @@ export const Header: React.FC = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                   <BarChart3 className="mr-2 h-4 w-4" />
-                  <span>Dashboard</span>
+                  <span>{t(TranslationKey.DASHBOARD)}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
+                  <span>{t(TranslationKey.PROFILE)}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  <span>{t(TranslationKey.LOG_OUT)}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" onClick={() => navigate('/login')}>
-                Log in
+                {t(TranslationKey.LOG_IN_BUTTON)}
               </Button>
               <Button onClick={() => navigate('/signup')}>
-                Sign up
+                {t(TranslationKey.SIGN_UP_BUTTON)}
               </Button>
             </div>
           )}

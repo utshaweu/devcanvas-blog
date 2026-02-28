@@ -199,3 +199,11 @@ export interface ThemeContextType {
   setTheme: (t: Theme) => void;
   toggleTheme: () => void;
 }
+
+// language support
+export type Language = 'en' | 'bn';
+
+export interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+}

@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 
 const signupSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -28,6 +30,7 @@ export const SignupPage: React.FC = () => {
   const { signup } = useAuth();
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
 
   const {
     register,
@@ -41,7 +44,7 @@ export const SignupPage: React.FC = () => {
     setIsLoading(true);
     try {
       await signup(data);
-      toastSuccess('Account created successfully!', 'Redirecting to login...');
+      toastSuccess(t(TranslationKey.CREATE_ACCOUNT), 'Redirecting to login...');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
@@ -56,16 +59,16 @@ export const SignupPage: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-3xl font-bold text-center">Create an account</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">{t(TranslationKey.CREATE_ACCOUNT)}</CardTitle>
           <CardDescription className="text-center">
-            Enter your information to get started
+            {t(TranslationKey.ENTER_INFO)}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Form errors */}
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t(TranslationKey.NAME)}</Label>
               <Input
                 id="name"
                 type="text"
@@ -79,7 +82,7 @@ export const SignupPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t(TranslationKey.EMAIL)}</Label>
               <Input
                 id="email"
                 type="email"
@@ -93,7 +96,7 @@ export const SignupPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t(TranslationKey.PASSWORD)}</Label>
               <Input
                 id="password"
                 type="password"
@@ -107,7 +110,7 @@ export const SignupPage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t(TranslationKey.CONFIRM_PASSWORD)}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -124,17 +127,17 @@ export const SignupPage: React.FC = () => {
               {isLoading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
-                  Creating account...
+                  {t(TranslationKey.CREATING_ACCOUNT)}
                 </>
               ) : (
-                'Sign up'
+                t(TranslationKey.SIGN_UP)
               )}
             </Button>
 
             <div className="text-center text-sm text-muted-foreground">
-              Already have an account?{' '}
+              {t(TranslationKey.ALREADY_HAVE_ACCOUNT)}{' '}
               <Link to="/login" className="text-accent hover:text-accent-hover font-medium">
-                Log in
+                {t(TranslationKey.LOGIN)}
               </Link>
             </div>
           </form>

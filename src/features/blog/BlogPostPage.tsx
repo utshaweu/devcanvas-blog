@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { formatDate } from '@/utils/helpers';
 import { Eye, Heart, ArrowLeft } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 
 export const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { currentPost, isLoading, fetchPostBySlug, incrementViews, toggleLike } = useBlogStore();
 
   useEffect(() => {
@@ -35,10 +38,10 @@ export const BlogPostPage: React.FC = () => {
     return (
       <div className="container-custom py-12">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold">Post not found</h1>
+          <h1 className="text-3xl font-bold">{t(TranslationKey.POST_NOT_FOUND)}</h1>
           <Button onClick={() => navigate('/blog')}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to blog
+            {t(TranslationKey.BACK_TO_BLOG)}
           </Button>
         </div>
       </div>
@@ -50,7 +53,7 @@ export const BlogPostPage: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <Button variant="ghost" onClick={() => navigate('/blog')} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to blog
+          {t(TranslationKey.BACK_TO_BLOG)}
         </Button>
 
         <header className="space-y-4">
@@ -71,7 +74,7 @@ export const BlogPostPage: React.FC = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Eye className="h-4 w-4" />
-              {currentPost.views} views
+              {currentPost.views} {t(TranslationKey.VIEWS)}
             </span>
             <Button
               variant="ghost"
