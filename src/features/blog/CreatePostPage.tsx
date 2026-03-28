@@ -14,9 +14,9 @@ import { RichTextEditor } from '@/components/common/RichTextEditor';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
-import { generateSlug } from '@/utils/helpers';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
+import { useGlobalToast } from '@/contexts/ToastContext';
 
 const postSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
@@ -35,13 +35,14 @@ export const CreatePostPage: React.FC = () => {
   const { user } = useAuth();
   const { createPost, categories, tags, fetchCategories, fetchTags } = useBlogStore();
   const { t } = useTranslation();
+  const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
@@ -59,12 +60,11 @@ export const CreatePostPage: React.FC = () => {
 
   const onSubmit = async (data: PostFormData) => {
     if (!user) {
-      setError(t(TranslationKey.MUST_BE_LOGGED_IN));
+      toastError(t(TranslationKey.AUTH_REQUIRED_TITLE), t(TranslationKey.MUST_BE_LOGGED_IN));
       return;
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const postData: CreatePostData = {
@@ -73,10 +73,16 @@ export const CreatePostPage: React.FC = () => {
       };
       
       const post = await createPost(postData);
+
+      toastSuccess(t(TranslationKey.POST_CREATED_TITLE), t(TranslationKey.POST_CREATED_MESSAGE));
       
-      navigate(`/blog/${generateSlug(post.title)}`);
+      navigate(`/blog/${post.slug}`);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create post. Please try again.');
+      console.log(err)
+      toastError(
+        t(TranslationKey.CREATE_POST_FAILED_TITLE),
+        err instanceof Error ? err.message : t(TranslationKey.CREATE_POST_FAILED_MESSAGE)
+      );
     } finally {
       setIsLoading(false);
     }
@@ -91,12 +97,6 @@ export const CreatePostPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                  {error}
-                </div>
-              )}
-
               <div className="space-y-2">
                 <Label htmlFor="title">{t(TranslationKey.TITLE)}</Label>
                 <Input
@@ -198,11 +198,7 @@ export const CreatePostPage: React.FC = () => {
                   type="submit" 
                   disabled={isLoading}
                   onClick={() => {
-                    const form = document.querySelector('form');
-                    if (form) {
-                      const publishInput = form.querySelector('input[name="published"]') as HTMLInputElement;
-                      if (publishInput) publishInput.value = 'false';
-                    }
+                    setValue('published', false, { shouldDirty: true, shouldValidate: true });
                   }}
                 >
                   {isLoading ? (
@@ -220,11 +216,7 @@ export const CreatePostPage: React.FC = () => {
                   variant="default"
                   disabled={isLoading}
                   onClick={() => {
-                    const form = document.querySelector('form');
-                    if (form) {
-                      const publishInput = form.querySelector('input[name="published"]') as HTMLInputElement;
-                      if (publishInput) publishInput.value = 'true';
-                    }
+                    setValue('published', true, { shouldDirty: true, shouldValidate: true });
                   }}
                 >
                   {isLoading ? (

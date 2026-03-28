@@ -53,6 +53,30 @@ export function generateSlug(text: string): string {
 }
 
 /**
+ * Generate a unique slug by checking database for existing slugs
+ * If a slug already exists, appends a timestamp to ensure uniqueness
+ */
+export async function generateUniqueSlug(
+  text: string,
+  checkSlugFn: (slug: string) => Promise<boolean>
+): Promise<string> {
+  const baseSlug = generateSlug(text);
+  
+  // Check if the base slug already exists
+  const existsSlug = await checkSlugFn(baseSlug);
+  
+  if (!existsSlug) {
+    return baseSlug;
+  }
+  
+  // If it exists, append timestamp to make it unique
+  const timestamp = Date.now().toString(36); // Convert to base36 for shorter string
+  const uniqueSlug = `${baseSlug}-${timestamp}`;
+  
+  return uniqueSlug;
+}
+
+/**
  * Truncate text with ellipsis
  */
 export function truncate(text: string, length: number): string {
@@ -72,7 +96,7 @@ export function calculateReadingTime(content: string): number {
 /**
  * Debounce function
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -99,7 +123,7 @@ export function generateId(): string {
 /**
  * Check if value is empty
  */
-export function isEmpty(value: any): boolean {
+export function isEmpty(value: unknown): boolean {
   if (value == null) return true;
   if (typeof value === 'string') return value.trim().length === 0;
   if (Array.isArray(value)) return value.length === 0;
