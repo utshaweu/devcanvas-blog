@@ -5,7 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate, truncate } from '@/utils/helpers';
+import { formatDate } from '@/utils/helpers';
 import { Eye, Heart } from 'lucide-react';
 
 export const BlogListPage: React.FC = () => {
@@ -34,9 +34,9 @@ export const BlogListPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.length === 0 ? (
-            <Card>
+            <Card className="col-span-1 md:col-span-2 lg:col-span-3">
               <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">{t(TranslationKey.NO_POSTS_AVAILABLE)}</p>
               </CardContent>
@@ -44,44 +44,41 @@ export const BlogListPage: React.FC = () => {
           ) : (
             posts.map((post) => (
               <Link key={post.id} to={`/blog/${post.slug}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
                   <CardHeader>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-2">
-                        <CardTitle className="text-2xl hover:text-accent transition-colors">
-                          {post.title}
-                        </CardTitle>
-                        {post.excerpt && (
-                          <CardDescription className="text-base">
-                            {truncate(post.excerpt, 150)}
-                          </CardDescription>
-                        )}
-                      </div>
+                    <div className="space-y-2">
                       {post.featured_image && (
                         <img
                           src={post.featured_image}
                           alt={post.title}
-                          className="w-32 h-32 object-cover rounded-lg"
+                          className="w-full h-48 object-cover rounded-lg mb-2"
                         />
+                      )}
+                      <CardTitle className="text-xl hover:text-accent transition-colors line-clamp-2">
+                        {post.title}
+                      </CardTitle>
+                      {post.excerpt && (
+                        <CardDescription className="text-sm line-clamp-2">
+                          {post.excerpt}
+                        </CardDescription>
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <CardContent className="flex-1 flex flex-col justify-between">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>{post.author?.name}</span>
                       <span>•</span>
                       <span>{formatDate(post.published_at || post.created_at)}</span>
-                      <span>•</span>
-                      <div className="flex items-center gap-4">
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
-                          {post.views}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="h-4 w-4" />
-                          {post.likes}
-                        </span>
-                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-4">
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {post.views}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Heart className="h-3 w-3" />
+                        {post.likes}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>

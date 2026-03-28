@@ -74,6 +74,11 @@ export enum TranslationKey {
   NEW_PASSWORD = 'newPassword',
   CONFIRM_NEW_PASSWORD = 'confirmNewPassword',
   PASSWORD_UPDATED_SUCCESS = 'passwordUpdatedSuccess',
+  AUTH_REQUIRED_TITLE = 'authRequiredTitle',
+  POST_CREATED_TITLE = 'postCreatedTitle',
+  POST_CREATED_MESSAGE = 'postCreatedMessage',
+  CREATE_POST_FAILED_TITLE = 'createPostFailedTitle',
+  CREATE_POST_FAILED_MESSAGE = 'createPostFailedMessage',
 }
 
 export type LanguageKey = TranslationKey;
@@ -153,6 +158,11 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.POST_NOT_FOUND]: 'Post not found',
     [TranslationKey.BACK_TO_BLOG]: 'Back to blog',
     [TranslationKey.VIEWS]: 'views',
+    [TranslationKey.AUTH_REQUIRED_TITLE]: 'Authentication required',
+    [TranslationKey.POST_CREATED_TITLE]: 'Post created',
+    [TranslationKey.POST_CREATED_MESSAGE]: 'Your post was created successfully.',
+    [TranslationKey.CREATE_POST_FAILED_TITLE]: 'Create post failed',
+    [TranslationKey.CREATE_POST_FAILED_MESSAGE]: 'Failed to create post. Please try again.',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -228,6 +238,11 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.BACK_TO_BLOG]: 'ব্লগে ফিরে যান',
     [TranslationKey.VIEWS]: 'ভিউ',
     [TranslationKey.PROFILE]: 'প্রোফাইল',
+    [TranslationKey.AUTH_REQUIRED_TITLE]: 'লগইন প্রয়োজন',
+    [TranslationKey.POST_CREATED_TITLE]: 'পোস্ট তৈরি হয়েছে',
+    [TranslationKey.POST_CREATED_MESSAGE]: 'আপনার পোস্ট সফলভাবে তৈরি হয়েছে।',
+    [TranslationKey.CREATE_POST_FAILED_TITLE]: 'পোস্ট তৈরি ব্যর্থ',
+    [TranslationKey.CREATE_POST_FAILED_MESSAGE]: 'পোস্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।',
   },
 };
 

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 import type { BlogPost, CreatePostData, UpdatePostData, Category, Tag } from '@/types';
+import { generateUniqueSlug } from '@/utils/helpers';
 
 interface BlogState {
   posts: BlogPost[];
@@ -202,11 +203,33 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
+      const { tags: tagIds, ...postFields } = postData;
+
+      // Check if slug already exists in database
+      const checkSlugExists = async (slug: string): Promise<boolean> => {
+        const { data, error } = await supabase
+          .from('posts')
+          .select('id')
+          .eq('slug', slug)
+          .single();
+        
+        // If data is returned or there's no error, slug exists
+        // If error is "not found", slug doesn't exist
+        return !!data && !error;
+      };
+
+      // Generate unique slug
+      const uniqueSlug = await generateUniqueSlug(
+        postData.title,
+        checkSlugExists
+      );
+
       const { data, error } = await supabase
         .from('posts')
         .insert({
-          ...postData,
-          slug: postData.title.toLowerCase().replace(/\s+/g, '-'),
+          ...postFields,
+          slug: uniqueSlug,
+          published_at: postData.published ? new Date().toISOString() : null,
         })
         .select()
         .single();
@@ -214,13 +237,14 @@ export const useBlogStore = create<BlogState>((set, get) => ({
       if (error) throw error;
 
       // Handle tags if provided
-      if (postData.tags && postData.tags.length > 0) {
-        const tagInserts = postData.tags.map(tagId => ({
+      if (tagIds && tagIds.length > 0) {
+        const tagInserts = tagIds.map(tagId => ({
           post_id: data.id,
           tag_id: tagId,
         }));
 
-        await supabase.from('post_tags').insert(tagInserts);
+        const { error: postTagsError } = await supabase.from('post_tags').insert(tagInserts);
+        if (postTagsError) throw postTagsError;
       }
 
       set({ isLoading: false });
@@ -238,7 +262,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const { id, ...updates } = postData;
+      const { id, tags: tagIds, ...updates } = postData;
       
       const { error } = await supabase
         .from('posts')
@@ -248,15 +272,16 @@ export const useBlogStore = create<BlogState>((set, get) => ({
       if (error) throw error;
 
       // Update tags if provided
-      if (postData.tags) {
+      if (tagIds) {
         await supabase.from('post_tags').delete().eq('post_id', id);
         
-        const tagInserts = postData.tags.map(tagId => ({
+        const tagInserts = tagIds.map(tagId => ({
           post_id: id,
           tag_id: tagId,
         }));
 
-        await supabase.from('post_tags').insert(tagInserts);
+        const { error: postTagsError } = await supabase.from('post_tags').insert(tagInserts);
+        if (postTagsError) throw postTagsError;
       }
 
       // Refresh current post if it's the one being updated

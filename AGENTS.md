@@ -402,6 +402,19 @@ CREATE TABLE posts (
 );
 ```
 
+#### comments
+```sql
+CREATE TABLE comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+  author_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
 #### categories
 ```sql
 CREATE TABLE categories (
@@ -437,9 +450,21 @@ CREATE TABLE post_tags (
 ### Row Level Security (RLS) Policies
 
 ```sql
+-- Enable Row Level Security
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
+
 -- Users can read all profiles
 CREATE POLICY "Users can read all profiles" ON users
   FOR SELECT USING (true);
+
+-- Users can insert their own record
+CREATE POLICY "Users can insert their own record" ON users
+  FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 
 -- Users can update own profile
 CREATE POLICY "Users can update own profile" ON users
@@ -460,6 +485,47 @@ CREATE POLICY "Users can update own posts" ON posts
 -- Users can delete own posts
 CREATE POLICY "Users can delete own posts" ON posts
   FOR DELETE USING (author_id = auth.uid());
+
+-- Anyone can read comments on published posts or own comments
+CREATE POLICY "Anyone can read comments on published posts or own comments"
+  ON comments
+  FOR SELECT
+  USING (
+    (SELECT published FROM posts WHERE posts.id = comments.post_id) = true
+    OR author_id = auth.uid()
+  );
+
+-- Users can create own comments
+CREATE POLICY "Users can create own comments"
+  ON comments
+  FOR INSERT
+  WITH CHECK (author_id = auth.uid());
+
+-- Users can update own comments
+CREATE POLICY "Users can update own comments"
+  ON comments
+  FOR UPDATE
+  USING (author_id = auth.uid());
+
+-- Users can delete own comments
+CREATE POLICY "Users can delete own comments"
+  ON comments
+  FOR DELETE
+  USING (author_id = auth.uid());
+
+-- Anyone can read categories
+CREATE POLICY "Anyone can read categories" ON categories FOR SELECT USING (true);
+
+-- Anyone can read tags
+CREATE POLICY "Anyone can read tags" ON tags FOR SELECT USING (true);
+
+-- Anyone can read post_tags
+CREATE POLICY "Anyone can read post_tags" ON post_tags FOR SELECT USING (true);
+
+-- Users can manage tags for own posts
+CREATE POLICY "Users can manage tags for own posts" ON post_tags
+  FOR ALL
+  USING ((SELECT author_id FROM posts WHERE posts.id = post_tags.post_id) = auth.uid());
 ```
 
 ---
