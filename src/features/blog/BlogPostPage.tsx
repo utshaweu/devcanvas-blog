@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate } from '@/utils/helpers';
+import { formatDate, formatRelativeTime } from '@/utils/helpers';
 import { Eye, Heart, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
@@ -39,7 +39,7 @@ export const BlogPostPage: React.FC = () => {
       <div className="container-custom py-12">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold">{t(TranslationKey.POST_NOT_FOUND)}</h1>
-          <Button onClick={() => navigate('/blog')}>
+          <Button onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t(TranslationKey.BACK_TO_BLOG)}
           </Button>
@@ -51,7 +51,7 @@ export const BlogPostPage: React.FC = () => {
   return (
     <article className="container-custom py-12">
       <div className="max-w-4xl mx-auto space-y-8">
-        <Button variant="ghost" onClick={() => navigate('/blog')} className="mb-4">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t(TranslationKey.BACK_TO_BLOG)}
         </Button>
@@ -66,7 +66,7 @@ export const BlogPostPage: React.FC = () => {
               </div>
               <div>
                 <p className="font-medium text-foreground">{currentPost.author?.name}</p>
-                <p className="text-sm">{formatDate(currentPost.published_at || currentPost.created_at)}</p>
+                <p className="text-sm">{formatRelativeTime(currentPost.published_at || currentPost.created_at)} • {formatDate(currentPost.published_at || currentPost.created_at)}</p>
               </div>
             </div>
           </div>

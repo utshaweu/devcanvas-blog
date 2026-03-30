@@ -5,7 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate } from '@/utils/helpers';
+import { formatDate, formatRelativeTime } from '@/utils/helpers';
 import { Eye, Heart } from 'lucide-react';
 
 export const BlogListPage: React.FC = () => {
@@ -26,7 +26,7 @@ export const BlogListPage: React.FC = () => {
 
   return (
     <div className="container-custom py-12">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold">{t(TranslationKey.HOME_WELCOME_TITLE)}</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -68,7 +68,7 @@ export const BlogListPage: React.FC = () => {
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       <span>{post.author?.name}</span>
                       <span>•</span>
-                      <span>{formatDate(post.published_at || post.created_at)}</span>
+                      <span>{formatRelativeTime(post.published_at || post.created_at)} • {formatDate(post.published_at || post.created_at)}</span>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-4">
                       <span className="flex items-center gap-1">
