@@ -9,6 +9,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { BlogListPage } from '@/features/blog/BlogListPage';
 import { BlogPostPage } from '@/features/blog/BlogPostPage';
 import { CreatePostPage } from '@/features/blog/CreatePostPage';
+import { EditPostPage } from '@/features/blog/EditPostPage';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingOverlay } from '@/components/common/LoadingSpinner';
 import { GlobalToastProvider } from '@/contexts/ToastContext';
@@ -108,6 +109,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <CreatePostPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/edit/:id"
+                  element={
+                    <ProtectedRoute>
+                      <EditPostPage />
                     </ProtectedRoute>
                   }
                 />

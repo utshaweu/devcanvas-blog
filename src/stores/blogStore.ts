@@ -19,6 +19,7 @@ interface BlogState {
 
   // Actions
   fetchPosts: (page?: number, limit?: number) => Promise<void>;
+  fetchUserPosts: (userId: string, page?: number, limit?: number) => Promise<void>;
   fetchPostById: (id: string) => Promise<void>;
   fetchPostBySlug: (slug: string) => Promise<void>;
   fetchCategories: () => Promise<void>;
@@ -89,6 +90,55 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     } catch (error: unknown) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch posts',
+        isLoading: false,
+      });
+    }
+  },
+
+  fetchUserPosts: async (userId: string, page = 1, limit = 10) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      const { data, error, count } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          author:users(*),
+          category:categories(*),
+          tags:post_tags(tag:tags(*))
+        `, { count: 'exact' })
+        .eq('author_id', userId)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+
+      const posts = (data?.map((post: unknown) => {
+        const postData = post as Record<string, unknown>;
+        return {
+          ...postData,
+          tags: Array.isArray(postData.tags) 
+            ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
+            : [],
+        };
+      }) || []) as BlogPost[];
+
+      set({
+        posts,
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit),
+        },
+        isLoading: false,
+      });
+    } catch (error: unknown) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch user posts',
         isLoading: false,
       });
     }
