@@ -42,7 +42,7 @@ export const DashboardPage: React.FC = () => {
     setDeletingId(post.id);
     try {
       await deletePost(post.id);
-      toastSuccess(t(TranslationKey.POST_DELETED_SUCCESS));
+      toastSuccess(t(TranslationKey.POST_DELETED_SUCCESS), t(TranslationKey.POST_DELETED_MESSAGE));
       // Refresh the list
       if (user?.id) {
         fetchUserPosts(user.id);
@@ -50,7 +50,7 @@ export const DashboardPage: React.FC = () => {
     } catch (error) {
       toastError(
         t(TranslationKey.POST_DELETE_FAILED),
-        error instanceof Error ? error.message : 'Unknown error'
+        error instanceof Error ? error.message : t(TranslationKey.UNKNOWN_ERROR)
       );
     } finally {
       setDeletingId(null);
@@ -58,8 +58,7 @@ export const DashboardPage: React.FC = () => {
   };
 
   const handleEdit = (post: BlogPost) => {
-    // Navigate to create page with post ID for editing
-    navigate(`/create?edit=${post.id}`);
+    navigate(`/edit/${post.id}`);
   };
 
   return (
