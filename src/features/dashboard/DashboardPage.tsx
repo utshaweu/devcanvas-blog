@@ -9,7 +9,7 @@ import { PenSquare, FileText, Eye, Heart, Edit, Trash2 } from 'lucide-react';
 import { useBlogStore } from '@/stores/blogStore';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate, formatRelativeTime } from '@/utils/helpers';
+import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import type { BlogPost } from '@/types';
 
 export const DashboardPage: React.FC = () => {
@@ -154,13 +154,11 @@ export const DashboardPage: React.FC = () => {
                     <Card className="hover:shadow-lg transition-shadow h-full flex flex-col cursor-pointer">
                       <CardHeader>
                         <div className="space-y-2">
-                          {post.featured_image && (
-                            <img
-                              src={post.featured_image}
-                              alt={post.title}
-                              className="w-full h-48 object-cover rounded-lg mb-2"
-                            />
-                          )}
+                          <img
+                            src={post.featured_image || DEFAULT_FEATURED_IMAGE}
+                            alt={post.title}
+                            className="w-full h-48 object-cover rounded-lg mb-2"
+                          />
                           <div className="flex items-center justify-between">
                             <CardTitle className="text-xl line-clamp-2 flex-1 hover:text-accent transition-colors">
                               {post.title}

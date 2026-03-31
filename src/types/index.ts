@@ -1,3 +1,5 @@
+import { PostFormData } from "@/features/blog/PostForm";
+
 // User and Authentication Types
 export interface User {
   id: string;
@@ -206,4 +208,17 @@ export type Language = 'en' | 'bn';
 export interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
+}
+
+export interface PostFormProps {
+  onSubmit: (data: PostFormData) => Promise<void>;
+  isLoading: boolean;
+  defaultValues?: Partial<PostFormData>;
+  onCancel: () => void;
+  submitButtonText: {
+    primary: string;
+    secondary?: string;
+    loading: string;
+  };
+  mode: 'create' | 'edit';
 }

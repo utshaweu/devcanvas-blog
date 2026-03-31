@@ -2,6 +2,11 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 /**
+ * Default featured image for blog posts
+ */
+export const DEFAULT_FEATURED_IMAGE = 'https://images.pexels.com/photos/19825351/pexels-photo-19825351.jpeg';
+
+/**
  * Merges Tailwind CSS classes with proper precedence
  */
 export function cn(...inputs: ClassValue[]) {
