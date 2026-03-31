@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate, formatRelativeTime } from '@/utils/helpers';
+import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import { Eye, Heart, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
@@ -87,13 +87,11 @@ export const BlogPostPage: React.FC = () => {
             </Button>
           </div>
 
-          {currentPost.featured_image && (
-            <img
-              src={currentPost.featured_image}
-              alt={currentPost.title}
-              className="w-full h-96 object-cover rounded-lg"
-            />
-          )}
+          <img
+            src={currentPost.featured_image || DEFAULT_FEATURED_IMAGE}
+            alt={currentPost.title}
+            className="w-full h-96 object-cover rounded-lg"
+          />
         </header>
 
         <div 

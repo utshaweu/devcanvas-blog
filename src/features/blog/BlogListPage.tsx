@@ -5,7 +5,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate, formatRelativeTime } from '@/utils/helpers';
+import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import { Eye, Heart } from 'lucide-react';
 
 export const BlogListPage: React.FC = () => {
@@ -26,7 +26,7 @@ export const BlogListPage: React.FC = () => {
 
   return (
     <div className="container-custom py-12">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold">{t(TranslationKey.HOME_WELCOME_TITLE)}</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -47,13 +47,11 @@ export const BlogListPage: React.FC = () => {
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
                   <CardHeader>
                     <div className="space-y-2">
-                      {post.featured_image && (
-                        <img
-                          src={post.featured_image}
-                          alt={post.title}
-                          className="w-full h-48 object-cover rounded-lg mb-2"
-                        />
-                      )}
+                      <img
+                        src={post.featured_image || DEFAULT_FEATURED_IMAGE}
+                        alt={post.title}
+                        className="w-full h-48 object-cover rounded-lg mb-2"
+                      />
                       <CardTitle className="text-xl hover:text-accent transition-colors line-clamp-2">
                         {post.title}
                       </CardTitle>
