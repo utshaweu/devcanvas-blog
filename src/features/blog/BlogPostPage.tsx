@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ export const BlogPostPage: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { currentPost, isLoading, fetchPostBySlug, incrementViews, toggleLike } = useBlogStore();
+  const viewCountedRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -21,10 +22,13 @@ export const BlogPostPage: React.FC = () => {
   }, [slug, fetchPostBySlug]);
 
   useEffect(() => {
-    if (currentPost) {
+    // Only increment views once per post ID, and only when post is loaded
+    if (currentPost && currentPost.id !== viewCountedRef.current) {
+      viewCountedRef.current = currentPost.id;
       incrementViews(currentPost.id);
     }
-  }, [currentPost?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPost?.id, incrementViews]);
 
   if (isLoading) {
     return (
@@ -80,9 +84,9 @@ export const BlogPostPage: React.FC = () => {
               variant="ghost"
               size="sm"
               onClick={() => toggleLike(currentPost.id)}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 hover:text-red-500 transition-colors"
             >
-              <Heart className="h-4 w-4" />
+              <Heart className="h-4 w-4 fill-red-500 text-red-500" />
               {currentPost.likes}
             </Button>
           </div>
