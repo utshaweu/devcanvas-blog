@@ -282,6 +282,73 @@ CREATE POLICY "Anyone can read post_tags" ON post_tags FOR SELECT USING (true);
 CREATE POLICY "Users can manage tags for own posts" ON post_tags 
   FOR ALL 
   USING ((SELECT author_id FROM posts WHERE posts.id = post_tags.post_id) = auth.uid());
+
+-- Post Likes Feature Setup
+-- Create post_likes table to track user likes
+CREATE TABLE IF NOT EXISTS public.post_likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(post_id, user_id)
+);
+
+-- Add indexes for faster lookups
+CREATE INDEX IF NOT EXISTS idx_post_likes_post_id ON post_likes(post_id);
+CREATE INDEX IF NOT EXISTS idx_post_likes_user_id ON post_likes(user_id);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for post_likes
+CREATE POLICY "Users can view all likes" ON post_likes FOR SELECT USING (true);
+CREATE POLICY "Users can like posts" ON post_likes FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can unlike their own likes" ON post_likes FOR DELETE USING (auth.uid() = user_id);
+
+-- Create the toggle_post_like RPC function
+CREATE OR REPLACE FUNCTION public.toggle_post_like(p_post_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM post_likes 
+    WHERE post_id = p_post_id 
+    AND user_id = auth.uid()
+  ) THEN
+    -- Unlike: Remove the like and decrement count
+    DELETE FROM post_likes 
+    WHERE post_id = p_post_id 
+    AND user_id = auth.uid();
+    
+    UPDATE posts 
+    SET likes = GREATEST(likes - 1, 0)
+    WHERE id = p_post_id;
+  ELSE
+    -- Like: Add the like and increment count
+    INSERT INTO post_likes (post_id, user_id)
+    VALUES (p_post_id, auth.uid());
+    
+    UPDATE posts 
+    SET likes = likes + 1
+    WHERE id = p_post_id;
+  END IF;
+END;
+$$;
+
+-- Create the increment_post_views RPC function
+CREATE OR REPLACE FUNCTION public.increment_post_views(p_post_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE posts 
+  SET views = views + 1
+  WHERE id = p_post_id;
+END;
+$$;
 ```
 
 5. **Start the development server**

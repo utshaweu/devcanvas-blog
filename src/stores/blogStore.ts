@@ -376,7 +376,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
   incrementViews: async (id: string) => {
     try {
-      const { error } = await supabase.rpc('increment_post_views', { post_id: id });
+      const { error } = await supabase.rpc('increment_post_views', { p_post_id: id });
       if (error) throw error;
     } catch (error: unknown) {
       console.error('Failed to increment views:', error);
@@ -385,7 +385,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
   toggleLike: async (id: string) => {
     try {
-      const { error } = await supabase.rpc('toggle_post_like', { post_id: id });
+      const { error } = await supabase.rpc('toggle_post_like', { p_post_id: id });
       if (error) throw error;
 
       // Refresh current post to get updated like count
