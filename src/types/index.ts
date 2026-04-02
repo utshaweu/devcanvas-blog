@@ -232,3 +232,11 @@ export interface StatCardProps {
   iconClassName?: string;
   valueClassName?: string;
 }
+
+export interface BlogPostCardProps {
+  post: BlogPost;
+  variant?: 'default' | 'dashboard';
+  onEdit?: (post: BlogPost) => void;
+  onDelete?: (post: BlogPost) => void;
+  isDeleting?: boolean;
+}

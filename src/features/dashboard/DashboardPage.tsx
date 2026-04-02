@@ -5,12 +5,12 @@ import { TranslationKey } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate, Link } from 'react-router-dom';
-import { PenSquare, FileText, Eye, Heart, Edit, Trash2 } from 'lucide-react';
+import { PenSquare, FileText, Eye, Heart } from 'lucide-react';
 import { useBlogStore } from '@/stores/blogStore';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { StatCard } from '@/components/common/StatCard';
-import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
+import { BlogPostCard } from '@/components/common/BlogPostCard';
 import type { BlogPost } from '@/types';
 
 export const DashboardPage: React.FC = () => {
@@ -128,86 +128,13 @@ export const DashboardPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {posts.map((post) => (
                   <Link key={post.id} to={`/blog/${post.slug}`}>
-                    <Card className="hover:shadow-lg transition-shadow h-full flex flex-col cursor-pointer">
-                      <CardHeader>
-                        <div className="space-y-2">
-                          <img
-                            src={post.featured_image || DEFAULT_FEATURED_IMAGE}
-                            alt={post.title}
-                            className="w-full h-48 object-cover rounded-lg mb-2"
-                          />
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-xl line-clamp-2 flex-1 hover:text-accent transition-colors">
-                              {post.title}
-                            </CardTitle>
-                          </div>
-                          {post.excerpt && (
-                            <CardDescription className="text-sm line-clamp-2">
-                              {post.excerpt}
-                            </CardDescription>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="flex-1 flex flex-col justify-between">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className={`px-2 py-1 rounded-full ${
-                              post.published 
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-                                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
-                            }`}>
-                              {post.published ? t(TranslationKey.PUBLISHED) : t(TranslationKey.DRAFT)}
-                            </span>
-                            <span className="text-muted-foreground">
-                              {formatRelativeTime(post.published_at || post.created_at)} • {formatDate(post.published_at || post.created_at)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Eye className="h-3 w-3" />
-                              {post.views}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Heart className="h-3 w-3" />
-                              {post.likes}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 mt-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleEdit(post);
-                            }}
-                          >
-                            <Edit className="mr-1 h-3 w-3" />
-                            {t(TranslationKey.EDIT)}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleDelete(post);
-                            }}
-                            disabled={deletingId === post.id}
-                          >
-                            {deletingId === post.id ? (
-                              <LoadingSpinner size="sm" />
-                            ) : (
-                              <>
-                                <Trash2 className="mr-1 h-3 w-3" />
-                                {t(TranslationKey.DELETE)}
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <BlogPostCard
+                      post={post}
+                      variant="dashboard"
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      isDeleting={deletingId === post.id}
+                    />
                   </Link>
                 ))}
               </div>

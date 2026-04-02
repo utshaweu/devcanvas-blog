@@ -87,7 +87,16 @@ export const EditPostPage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-3xl">{t(TranslationKey.EDIT_POST_TITLE)}</CardTitle>
+            <div className="flex items-center gap-3">
+              <CardTitle className="text-3xl">{t(TranslationKey.EDIT_POST_TITLE)}</CardTitle>
+              <span className={`px-2 py-1 rounded-full text-sm ${
+                currentPost.published 
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
+                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+              }`}>
+                {currentPost.published ? t(TranslationKey.PUBLISHED) : t(TranslationKey.DRAFT)}
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
             <PostForm

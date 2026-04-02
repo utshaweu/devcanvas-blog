@@ -178,12 +178,32 @@ export const PostForm: React.FC<PostFormProps> = ({
           </Button>
         )}
 
+        {mode === 'edit' && !defaultValues?.published && (
+          <Button 
+            type="submit"
+            disabled={isLoading}
+            onClick={() => {
+              setValue('published', true, { shouldDirty: true, shouldValidate: true });
+            }}
+          >
+            {isLoading ? (
+              <>
+                <LoadingSpinner size="sm" className="mr-2" />
+                {t(TranslationKey.PUBLISHING)}
+              </>
+            ) : (
+              t(TranslationKey.PUBLISH)
+            )}
+          </Button>
+        )}
+
+
         <Button 
           type="submit" 
           variant="default"
           disabled={isLoading}
           onClick={() => {
-            setValue('published', true, { shouldDirty: true, shouldValidate: true });
+            setValue('published', defaultValues?.published ?? true, { shouldDirty: true, shouldValidate: true });
           }}
         >
           {isLoading ? (
