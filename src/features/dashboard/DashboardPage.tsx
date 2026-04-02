@@ -9,6 +9,7 @@ import { PenSquare, FileText, Eye, Heart, Edit, Trash2 } from 'lucide-react';
 import { useBlogStore } from '@/stores/blogStore';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { StatCard } from '@/components/common/StatCard';
 import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import type { BlogPost } from '@/types';
 
@@ -76,57 +77,33 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t(TranslationKey.STATS_TOTAL_POSTS)}</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalPosts}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.publishedPosts} published, {stats.draftPosts} drafts
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title={t(TranslationKey.STATS_TOTAL_POSTS)}
+            value={stats.totalPosts}
+            description={`${stats.publishedPosts} published, ${stats.draftPosts} drafts`}
+            icon={FileText}
+          />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t(TranslationKey.STATS_PUBLISHED)}</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.publishedPosts}</div>
-              <p className="text-xs text-muted-foreground">
-                {t(TranslationKey.STATS_LIVE_ON_BLOG)}
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title={t(TranslationKey.STATS_PUBLISHED)}
+            value={stats.publishedPosts}
+            description={t(TranslationKey.STATS_LIVE_ON_BLOG)}
+            icon={FileText}
+          />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t(TranslationKey.STATS_TOTAL_VIEWS)}</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalViews}</div>
-              <p className="text-xs text-muted-foreground">
-                {t(TranslationKey.STATS_ACROSS_ALL_POSTS)}
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title={t(TranslationKey.STATS_TOTAL_VIEWS)}
+            value={stats.totalViews}
+            description={t(TranslationKey.STATS_ACROSS_ALL_POSTS)}
+            icon={Eye}
+          />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t(TranslationKey.STATS_TOTAL_LIKES)}</CardTitle>
-              <Heart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalLikes}</div>
-              <p className="text-xs text-muted-foreground">
-                {t(TranslationKey.STATS_FROM_YOUR_READERS)}
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title={t(TranslationKey.STATS_TOTAL_LIKES)}
+            value={stats.totalLikes}
+            description={t(TranslationKey.STATS_FROM_YOUR_READERS)}
+            icon={Heart}
+          />
         </div>
 
         <Card>

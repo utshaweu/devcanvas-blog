@@ -1,4 +1,5 @@
 import { PostFormData } from "@/features/blog/PostForm";
+import { LucideIcon } from "lucide-react";
 
 // User and Authentication Types
 export interface User {
@@ -221,4 +222,13 @@ export interface PostFormProps {
     loading: string;
   };
   mode: 'create' | 'edit';
+}
+
+export interface StatCardProps {
+  title: string;
+  value: string | number;
+  description?: string;
+  icon?: LucideIcon;
+  iconClassName?: string;
+  valueClassName?: string;
 }
