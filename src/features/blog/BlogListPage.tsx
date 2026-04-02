@@ -3,10 +3,9 @@ import { Link } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
-import { Eye, Heart } from 'lucide-react';
+import { BlogPostCard } from '@/components/common/BlogPostCard';
 
 export const BlogListPage: React.FC = () => {
   const { posts, isLoading, fetchPosts } = useBlogStore();
@@ -44,42 +43,10 @@ export const BlogListPage: React.FC = () => {
           ) : (
             posts.map((post) => (
               <Link key={post.id} to={`/blog/${post.slug}`}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-                  <CardHeader>
-                    <div className="space-y-2">
-                      <img
-                        src={post.featured_image || DEFAULT_FEATURED_IMAGE}
-                        alt={post.title}
-                        className="w-full h-48 object-cover rounded-lg mb-2"
-                      />
-                      <CardTitle className="text-xl hover:text-accent transition-colors line-clamp-2">
-                        {post.title}
-                      </CardTitle>
-                      {post.excerpt && (
-                        <CardDescription className="text-sm line-clamp-2">
-                          {post.excerpt}
-                        </CardDescription>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col justify-between">
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span>{post.author?.name}</span>
-                      <span>•</span>
-                      <span>{formatRelativeTime(post.published_at || post.created_at)} • {formatDate(post.published_at || post.created_at)}</span>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-4">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {post.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className="h-3 w-3" />
-                        {post.likes}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                <BlogPostCard
+                  post={post}
+                  variant="default"
+                />
               </Link>
             ))
           )}
