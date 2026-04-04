@@ -35,9 +35,13 @@ export const CreatePostPage: React.FC = () => {
 
       toastSuccess(t(TranslationKey.POST_CREATED_TITLE), t(TranslationKey.POST_CREATED_MESSAGE));
       
-      navigate(`/blog/${post.slug}`);
+      // Navigate based on publish status
+      if (data.published) {
+        navigate(`/blog/${post.slug}`);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: unknown) {
-      console.log(err)
       toastError(
         t(TranslationKey.CREATE_POST_FAILED_TITLE),
         err instanceof Error ? err.message : t(TranslationKey.CREATE_POST_FAILED_MESSAGE)

@@ -386,6 +386,24 @@ The project follows a feature-based architecture where each feature is self-cont
 - **UI State**: Toast notifications, modals, loading states
 - **Form State**: Local form state (React Hook Form)
 
+### Toast Notification System
+
+The application uses a global toast notification system for user feedback:
+
+```typescript
+import { useGlobalToast } from '@/contexts/ToastContext';
+
+const { success, error, warning, info } = useGlobalToast();
+
+// Show success message
+success('Success!', 'Operation completed successfully');
+
+// Show error message
+error('Error!', 'Something went wrong');
+```
+
+**Best Practice**: Use toast notifications instead of inline error states for better UX.
+
 ### Component Patterns
 
 1. **UI Components** (`components/ui/`): Primitive, reusable components

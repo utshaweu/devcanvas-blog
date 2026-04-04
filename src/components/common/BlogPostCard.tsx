@@ -18,15 +18,42 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({
   const { t } = useTranslation();
   const isDashboard = variant === 'dashboard';
 
+  const visibleTags = post.tags?.slice(0, 3) ?? [];
+  const remainingTags = Math.max((post.tags?.length ?? 0) - visibleTags.length, 0);
+
   return (
-    <Card className="hover:shadow-lg transition-shadow h-full flex flex-col cursor-pointer">
+    <Card className="group h-full cursor-pointer flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <CardHeader>
         <div className="space-y-2">
-          <img
-            src={post.featured_image || DEFAULT_FEATURED_IMAGE}
-            alt={post.title}
-            className="w-full h-48 object-cover rounded-lg mb-2"
-          />
+          <div className="relative mb-2">
+            <img
+              src={post.featured_image || DEFAULT_FEATURED_IMAGE}
+              alt={post.title}
+              className="h-48 w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+            {post.category?.name && (
+              <span className="absolute top-3 left-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-md backdrop-blur-sm">
+                {post.category.name}
+              </span>
+            )}
+            {visibleTags.length > 0 && (
+              <div className="pointer-events-none absolute bottom-3 right-3 flex max-w-[80%] flex-wrap justify-end gap-1 opacity-100 translate-y-0 transition-all duration-300 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0">
+                {visibleTags.map((tag) => (
+                  <span
+                    key={tag.id}
+                    className="rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm"
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+                {remainingTags > 0 && (
+                  <span className="rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                    +{remainingTags}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl line-clamp-2 flex-1 hover:text-accent transition-colors">
               {post.title}

@@ -33,7 +33,7 @@ export const Header: React.FC = () => {
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2 font-bold text-xl text-secondary hover:text-accent transition-colors">
             <PenSquare className="h-6 w-6 text-accent" />
-            <span>DevCanvas</span>
+            <span className="hidden md:inline">DevCanvas</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
