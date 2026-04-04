@@ -32,20 +32,30 @@ export const DashboardPage: React.FC = () => {
     totalLikes: 0,
   });
 
+  // Helper function to calculate stats from posts
+  const calculateStats = (posts: BlogPost[]) => {
+    return {
+      totalPosts: posts.length,
+      publishedPosts: posts.filter(p => p.published).length,
+      draftPosts: posts.filter(p => !p.published).length,
+      totalViews: posts.reduce((sum, p) => sum + p.views, 0),
+      totalLikes: posts.reduce((sum, p) => sum + p.likes, 0),
+    };
+  };
+
+  // Helper function to refresh stats
+  const refreshStats = async () => {
+    if (user?.id) {
+      const allPosts = await fetchUserPostsStats(user.id);
+      setAllPostsStats(calculateStats(allPosts));
+    }
+  };
+
   // Fetch all posts for stats (only once)
   useEffect(() => {
-    if (user?.id) {
-      fetchUserPostsStats(user.id).then((allPosts) => {
-        setAllPostsStats({
-          totalPosts: allPosts.length,
-          publishedPosts: allPosts.filter(p => p.published).length,
-          draftPosts: allPosts.filter(p => !p.published).length,
-          totalViews: allPosts.reduce((sum, p) => sum + p.views, 0),
-          totalLikes: allPosts.reduce((sum, p) => sum + p.likes, 0),
-        });
-      });
-    }
-  }, [user?.id, fetchUserPostsStats]);
+    refreshStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Fetch filtered posts when filter changes
   useEffect(() => {
@@ -64,16 +74,8 @@ export const DashboardPage: React.FC = () => {
       await deletePost(post.id);
       toastSuccess(t(TranslationKey.POST_DELETED_SUCCESS), t(TranslationKey.POST_DELETED_MESSAGE));
       // Refresh both stats and filtered list
+      await refreshStats();
       if (user?.id) {
-        fetchUserPostsStats(user.id).then((allPosts) => {
-          setAllPostsStats({
-            totalPosts: allPosts.length,
-            publishedPosts: allPosts.filter(p => p.published).length,
-            draftPosts: allPosts.filter(p => !p.published).length,
-            totalViews: allPosts.reduce((sum, p) => sum + p.views, 0),
-            totalLikes: allPosts.reduce((sum, p) => sum + p.likes, 0),
-          });
-        });
         fetchUserPosts(user.id, filter);
       }
     } catch (error) {
@@ -90,15 +92,32 @@ export const DashboardPage: React.FC = () => {
     navigate(`/edit/${post.id}`);
   };
 
+  // Helper function for filter button classes
+  const getFilterButtonClass = (filterType: FilterType) => {
+    return cn(
+      "transition-all",
+      filter === filterType
+        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:from-green-600 hover:to-emerald-700'
+        : 'text-muted-foreground hover:text-foreground'
+    );
+  };
+
+  // Helper function to get empty state message
+  const getEmptyStateMessage = () => {
+    if (filter === 'all') return t(TranslationKey.NO_POSTS_YET);
+    if (filter === 'published') return t(TranslationKey.NO_PUBLISHED_POSTS);
+    return t(TranslationKey.NO_DRAFT_POSTS);
+  };
+
   return (
     <div className="container-custom py-12">
       <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-4xl font-bold">{t(TranslationKey.DASHBOARD)}</h1>
-            <p className="text-muted-foreground mt-2">{t(TranslationKey.WELCOME_BACK)}, {user?.name}!</p>
+            <h1 className="text-3xl font-bold sm:text-4xl">{t(TranslationKey.DASHBOARD)}</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">{t(TranslationKey.WELCOME_BACK)}, {user?.name}!</p>
           </div>
-          <Button onClick={() => navigate('/create')}>
+          <Button onClick={() => navigate('/create')} className="w-full sm:w-auto">
             <PenSquare className="mr-2 h-4 w-4" />
             {t(TranslationKey.CREATE_POST)}
           </Button>
@@ -136,24 +155,19 @@ export const DashboardPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle>{t(TranslationKey.MY_POSTS)}</CardTitle>
                 <CardDescription>{t(TranslationKey.MY_POSTS_DESCRIPTION)}</CardDescription>
               </div>
               
               {/* Filter Tabs */}
-              <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg">
+              <div className="flex w-full items-center gap-2 overflow-x-auto rounded-lg bg-muted/50 p-1 sm:w-auto">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setFilter('all')}
-                  className={cn(
-                    "transition-all",
-                    filter === 'all'
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:from-green-600 hover:to-emerald-700'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
+                  className={getFilterButtonClass('all')}
                 >
                   {t(TranslationKey.ALL)} ({allPostsStats.totalPosts})
                 </Button>
@@ -161,12 +175,7 @@ export const DashboardPage: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setFilter('published')}
-                  className={cn(
-                    "transition-all",
-                    filter === 'published'
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:from-green-600 hover:to-emerald-700'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
+                  className={getFilterButtonClass('published')}
                 >
                   {t(TranslationKey.PUBLISHED)} ({allPostsStats.publishedPosts})
                 </Button>
@@ -174,12 +183,7 @@ export const DashboardPage: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setFilter('draft')}
-                  className={cn(
-                    "transition-all",
-                    filter === 'draft'
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:from-green-600 hover:to-emerald-700'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
+                  className={getFilterButtonClass('draft')}
                 >
                   {t(TranslationKey.DRAFT)} ({allPostsStats.draftPosts})
                 </Button>
@@ -193,11 +197,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             ) : posts.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                <p>
-                  {filter === 'all' && t(TranslationKey.NO_POSTS_YET)}
-                  {filter === 'published' && t(TranslationKey.NO_PUBLISHED_POSTS)}
-                  {filter === 'draft' && t(TranslationKey.NO_DRAFT_POSTS)}
-                </p>
+                <p>{getEmptyStateMessage()}</p>
                 <Button className="mt-4" onClick={() => navigate('/create')}>
                   <PenSquare className="mr-2 h-4 w-4" />
                   {t(TranslationKey.CREATE_YOUR_FIRST_POST)}
