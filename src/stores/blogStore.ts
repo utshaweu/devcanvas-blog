@@ -19,7 +19,8 @@ interface BlogState {
 
   // Actions
   fetchPosts: (page?: number, limit?: number) => Promise<void>;
-  fetchUserPosts: (userId: string, page?: number, limit?: number) => Promise<void>;
+  fetchUserPosts: (userId: string, publishedFilter?: 'all' | 'published' | 'draft', page?: number, limit?: number) => Promise<void>;
+  fetchUserPostsStats: (userId: string) => Promise<BlogPost[]>;
   fetchPostById: (id: string) => Promise<void>;
   fetchPostBySlug: (slug: string) => Promise<void>;
   fetchCategories: () => Promise<void>;
@@ -95,14 +96,14 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     }
   },
 
-  fetchUserPosts: async (userId: string, page = 1, limit = 10) => {
+  fetchUserPosts: async (userId: string, publishedFilter: 'all' | 'published' | 'draft' = 'all', page = 1, limit = 10) => {
     set({ isLoading: true, error: null });
 
     try {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
 
-      const { data, error, count } = await supabase
+      let query = supabase
         .from('posts')
         .select(`
           *,
@@ -110,7 +111,17 @@ export const useBlogStore = create<BlogState>((set, get) => ({
           category:categories(*),
           tags:post_tags(tag:tags(*))
         `, { count: 'exact' })
-        .eq('author_id', userId)
+        .eq('author_id', userId);
+
+      // Apply published filter
+      if (publishedFilter === 'published') {
+        query = query.eq('published', true);
+      } else if (publishedFilter === 'draft') {
+        query = query.eq('published', false);
+      }
+      // If 'all', no additional filter is needed
+
+      const { data, error, count } = await query
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -141,6 +152,38 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to fetch user posts',
         isLoading: false,
       });
+    }
+  },
+
+  fetchUserPostsStats: async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          author:users(*),
+          category:categories(*),
+          tags:post_tags(tag:tags(*))
+        `)
+        .eq('author_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const posts = (data?.map((post: unknown) => {
+        const postData = post as Record<string, unknown>;
+        return {
+          ...postData,
+          tags: Array.isArray(postData.tags) 
+            ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
+            : [],
+        };
+      }) || []) as BlogPost[];
+
+      return posts;
+    } catch (error: unknown) {
+      console.error('Failed to fetch user posts stats:', error);
+      return [];
     }
   },
 

@@ -111,6 +111,9 @@ export enum TranslationKey {
   PASSWORD_UPDATE_FAILED_MESSAGE = 'passwordUpdateFailedMessage',
   LOGIN_REQUIRED_TO_LIKE = 'loginRequiredToLike',
   LOGIN_REQUIRED_TO_LIKE_MESSAGE = 'loginRequiredToLikeMessage',
+  NO_PUBLISHED_POSTS = 'noPublishedPosts',
+  NO_DRAFT_POSTS = 'noDraftPosts',
+  ALL = 'all',
 }
 
 export type LanguageKey = TranslationKey;
@@ -227,6 +230,9 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.PASSWORD_UPDATE_FAILED_MESSAGE]: 'Failed to update password. Please try again.',
     [TranslationKey.LOGIN_REQUIRED_TO_LIKE]: 'Login Required',
     [TranslationKey.LOGIN_REQUIRED_TO_LIKE_MESSAGE]: 'Please log in to like this post.',
+    [TranslationKey.NO_PUBLISHED_POSTS]: 'No published posts yet.',
+    [TranslationKey.NO_DRAFT_POSTS]: 'No draft posts yet.',
+    [TranslationKey.ALL]: 'All',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -339,6 +345,9 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.PASSWORD_UPDATE_FAILED_MESSAGE]: 'পাসওয়ার্ড আপডেট করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
     [TranslationKey.LOGIN_REQUIRED_TO_LIKE]: 'লগইন প্রয়োজন',
     [TranslationKey.LOGIN_REQUIRED_TO_LIKE_MESSAGE]: 'এই পোস্টটি লাইক করতে লগইন করুন।',
+    [TranslationKey.NO_PUBLISHED_POSTS]: 'এখনো কোন প্রকাশিত পোস্ট নেই।',
+    [TranslationKey.NO_DRAFT_POSTS]: 'এখনো কোন খসড়া পোস্ট নেই।',
+    [TranslationKey.ALL]: 'সকল',
   },
 };
 
