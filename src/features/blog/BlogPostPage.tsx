@@ -7,13 +7,28 @@ import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/
 import { Eye, Heart, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
+import { useAuth } from '@/hooks/useAuth';
+import { useGlobalToast } from '@/contexts/ToastContext';
 
 export const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
+  const { warning: toastWarning } = useGlobalToast();
   const { currentPost, isLoading, fetchPostBySlug, incrementViews, toggleLike } = useBlogStore();
   const viewCountedRef = useRef<string | null>(null);
+
+  const handleLikeClick = () => {
+    if (!isAuthenticated) {
+      toastWarning(
+        t(TranslationKey.LOGIN_REQUIRED_TO_LIKE),
+        t(TranslationKey.LOGIN_REQUIRED_TO_LIKE_MESSAGE)
+      );
+      return;
+    }
+    toggleLike(currentPost!.id);
+  };
 
   useEffect(() => {
     if (slug) {
@@ -83,7 +98,7 @@ export const BlogPostPage: React.FC = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => toggleLike(currentPost.id)}
+              onClick={handleLikeClick}
               className="flex items-center gap-1 hover:text-red-500 transition-colors"
             >
               <Heart className="h-4 w-4 fill-red-500 text-red-500" />

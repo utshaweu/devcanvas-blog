@@ -336,6 +336,30 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 ### 6. Error Handling Pattern
 
+**Modern Approach: Use Global Toast Notifications**
+
+```typescript
+import { useGlobalToast } from '@/contexts/ToastContext';
+
+// In components
+const { success: toastSuccess, error: toastError } = useGlobalToast();
+const [isLoading, setIsLoading] = useState(false);
+
+// Success case
+try {
+  await operation();
+  toastSuccess(
+    t(TranslationKey.SUCCESS_TITLE),
+    t(TranslationKey.SUCCESS_MESSAGE)
+  );
+} catch (err: unknown) {
+  const errorMessage = err instanceof Error ? err.message : 'Operation failed';
+  toastError(t(TranslationKey.ERROR_TITLE), errorMessage);
+}
+```
+
+**Legacy Approach: Inline Error Display (avoid for new code)**
+
 ```typescript
 // In stores
 try {
@@ -346,7 +370,7 @@ try {
   throw error; // Re-throw for component to handle
 }
 
-// In components
+// In components (legacy - avoid this pattern)
 const [error, setError] = useState<string | null>(null);
 
 try {
@@ -355,12 +379,27 @@ try {
   setError(err.message);
 }
 
-// Display error
+// Display error inline (legacy)
 {error && (
   <div className="p-3 rounded-md bg-destructive/10 text-destructive">
     {error}
   </div>
 )}
+```
+
+**Toast Notification Types:**
+- `success(title, description?)` - Success messages
+- `error(title, description?)` - Error messages
+- `warning(title, description?)` - Warning messages
+- `info(title, description?)` - Info messages
+
+**Best Practices:**
+- Always use `useGlobalToast()` for user feedback instead of inline error states
+- Remove `const [error, setError] = useState<string | null>(null)` from components
+- Use `TranslationKey` enum for all user-facing messages
+- Handle errors gracefully with appropriate user feedback
+- Keep loading states separate from error/success feedback
+
 ```
 
 ---

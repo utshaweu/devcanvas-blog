@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useGlobalToast } from '@/contexts/ToastContext';
 
 const resetPasswordSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -27,8 +28,8 @@ export const ResetPasswordPage: React.FC = () => {
   const { updatePassword } = useAuth();
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isValidToken, setIsValidToken] = useState(true);
+  const { success: toastSuccess, error: toastError } = useGlobalToast();
 
   const {
     register,
@@ -51,18 +52,20 @@ export const ResetPasswordPage: React.FC = () => {
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     setIsLoading(true);
-    setError(null);
 
     try {
       await updatePassword(data.password);
-      // Show success message briefly before redirecting
+      toastSuccess(
+        t(TranslationKey.PASSWORD_UPDATED_SUCCESS),
+        t(TranslationKey.PASSWORD_UPDATED_SUCCESS)
+      );
+      // Redirect to login after a brief delay
       setTimeout(() => {
-        navigate('/login', { 
-          state: { message: t(TranslationKey.PASSWORD_UPDATED_SUCCESS) }
-        });
+        navigate('/login');
       }, 1500);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to update password. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : t(TranslationKey.PASSWORD_UPDATE_FAILED_MESSAGE);
+      toastError(t(TranslationKey.PASSWORD_UPDATE_FAILED_TITLE), errorMessage);
       setIsLoading(false);
     }
   };
@@ -108,12 +111,6 @@ export const ResetPasswordPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
-                {error}
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="password">{t(TranslationKey.NEW_PASSWORD)}</Label>
               <Input
@@ -146,10 +143,10 @@ export const ResetPasswordPage: React.FC = () => {
               {isLoading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
-                  Updating password...
+                  {t(TranslationKey.UPDATING_PASSWORD)}
                 </>
               ) : (
-                'Update Password'
+                t(TranslationKey.UPDATE_PASSWORD)
               )}
             </Button>
           </form>
