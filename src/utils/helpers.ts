@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import slugifyLib from 'slugify';
 
 /**
  * Default featured image for blog posts
@@ -47,14 +48,27 @@ export function formatRelativeTime(date: string | Date): string {
 
 /**
  * Generate slug from string
+ * Supports Bengali (Bangla), Arabic, and other Unicode characters via transliteration
  */
 export function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  // Use slugify library which handles Unicode properly
+  const slug = slugifyLib(text, {
+    lower: true,           // Convert to lowercase
+    strict: true,          // Strip special characters
+    trim: true,            // Trim leading/trailing replacement chars
+    locale: 'en',          // Use English locale for transliteration
+    replacement: '-',      // Replace spaces with -
+  });
+  
+  // If slugify returns empty (all non-Latin chars that couldn't be transliterated),
+  // generate a unique slug with timestamp
+  if (!slug || slug.length === 0) {
+    const timestamp = Date.now().toString(36);
+    const randomPart = Math.random().toString(36).substring(2, 7);
+    return `post-${timestamp}-${randomPart}`;
+  }
+  
+  return slug;
 }
 
 /**

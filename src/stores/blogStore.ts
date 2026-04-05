@@ -18,8 +18,8 @@ interface BlogState {
   };
 
   // Actions
-  fetchPosts: (page?: number, limit?: number) => Promise<void>;
-  fetchUserPosts: (userId: string, publishedFilter?: 'all' | 'published' | 'draft', page?: number, limit?: number) => Promise<void>;
+  fetchPosts: (page?: number, limit?: number, append?: boolean) => Promise<void>;
+  fetchUserPosts: (userId: string, publishedFilter?: 'all' | 'published' | 'draft', page?: number, limit?: number, append?: boolean) => Promise<void>;
   fetchUserPostsStats: (userId: string) => Promise<BlogPost[]>;
   fetchPostById: (id: string) => Promise<void>;
   fetchPostBySlug: (slug: string) => Promise<void>;
@@ -30,6 +30,9 @@ interface BlogState {
   deletePost: (id: string) => Promise<void>;
   incrementViews: (id: string) => Promise<void>;
   toggleLike: (id: string) => Promise<void>;
+  loadMorePosts: () => Promise<void>;
+  loadMoreUserPosts: (userId: string, publishedFilter?: 'all' | 'published' | 'draft') => Promise<void>;
+  resetPagination: () => void;
   clearError: () => void;
 }
 
@@ -42,12 +45,12 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   error: null,
   pagination: {
     page: 1,
-    limit: 10,
+    limit: 9,
     total: 0,
     totalPages: 0,
   },
 
-  fetchPosts: async (page = 1, limit = 10) => {
+  fetchPosts: async (page = 1, limit = 9, append = false) => {
     set({ isLoading: true, error: null });
 
     try {
@@ -78,8 +81,8 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         };
       }) || []) as BlogPost[];
 
-      set({
-        posts,
+      set(state => ({
+        posts: append ? [...state.posts, ...posts] : posts,
         pagination: {
           page,
           limit,
@@ -87,7 +90,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
           totalPages: Math.ceil((count || 0) / limit),
         },
         isLoading: false,
-      });
+      }));
     } catch (error: unknown) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch posts',
@@ -96,7 +99,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     }
   },
 
-  fetchUserPosts: async (userId: string, publishedFilter: 'all' | 'published' | 'draft' = 'all', page = 1, limit = 10) => {
+  fetchUserPosts: async (userId: string, publishedFilter: 'all' | 'published' | 'draft' = 'all', page = 1, limit = 9, append = false) => {
     set({ isLoading: true, error: null });
 
     try {
@@ -137,8 +140,8 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         };
       }) || []) as BlogPost[];
 
-      set({
-        posts,
+      set(state => ({
+        posts: append ? [...state.posts, ...posts] : posts,
         pagination: {
           page,
           limit,
@@ -146,7 +149,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
           totalPages: Math.ceil((count || 0) / limit),
         },
         isLoading: false,
-      });
+      }));
     } catch (error: unknown) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch user posts',
@@ -439,6 +442,36 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     } catch (error: unknown) {
       console.error('Failed to toggle like:', error);
     }
+  },
+
+  loadMorePosts: async () => {
+    const { pagination } = get();
+    const nextPage = pagination.page + 1;
+    
+    if (nextPage <= pagination.totalPages) {
+      await get().fetchPosts(nextPage, pagination.limit, true);
+    }
+  },
+
+  loadMoreUserPosts: async (userId: string, publishedFilter: 'all' | 'published' | 'draft' = 'all') => {
+    const { pagination } = get();
+    const nextPage = pagination.page + 1;
+    
+    if (nextPage <= pagination.totalPages) {
+      await get().fetchUserPosts(userId, publishedFilter, nextPage, pagination.limit, true);
+    }
+  },
+
+  resetPagination: () => {
+    set({
+      posts: [],
+      pagination: {
+        page: 1,
+        limit: 9,
+        total: 0,
+        totalPages: 0,
+      },
+    });
   },
 
   clearError: () => set({ error: null }),

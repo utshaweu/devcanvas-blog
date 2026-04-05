@@ -13,6 +13,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Analytics Dashboard**: Track views, likes, and engagement
 - **Responsive Design**: Mobile-first, works on all devices
 - **Multilingual**: English and Bangla support with runtime switching
+- **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
 - **Testing Ready**: Jest and React Testing Library configured
 
 ## 🛠️ Tech Stack
@@ -410,6 +411,43 @@ error('Error!', 'Something went wrong');
 2. **Common Components** (`components/common/`): Composed, reusable business components
 3. **Feature Components** (`features/*/`): Feature-specific components
 4. **Layout Components** (`components/layout/`): Page layout components
+
+### Pagination Pattern
+
+The blog uses a "Load More" pagination strategy (similar to Facebook, Medium, Twitter):
+
+- **Page Size**: 9 posts per page (optimized for 3-column grid)
+- **Strategy**: Append mode - new posts are added to existing list
+- **Components**: 
+  - `LoadMoreButton` - Reusable button with loading/count states
+  - Shows "Showing X of Y posts" counter
+  - Automatically hides when all posts loaded
+- **State Management**: 
+  - `fetchPosts(page, limit, append)` - Fetch with optional append
+  - `loadMorePosts()` - Convenience method to load next page
+  - `resetPagination()` - Reset to page 1
+- **Used In**: BlogListPage, DashboardPage (with filters)
+
+Example usage:
+```typescript
+const { posts, pagination, loadMorePosts, resetPagination } = useBlogStore();
+
+// Initial load
+useEffect(() => {
+  resetPagination();
+  fetchPosts();
+}, []);
+
+// Load more
+const hasMore = pagination.page < pagination.totalPages;
+<LoadMoreButton 
+  isLoading={isLoading} 
+  hasMore={hasMore}
+  onLoadMore={loadMorePosts}
+  currentCount={posts.length}
+  totalCount={pagination.total}
+/>
+```
 
 ## 🔐 Authentication Flow
 
