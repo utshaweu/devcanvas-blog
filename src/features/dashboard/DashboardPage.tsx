@@ -11,6 +11,7 @@ import { useGlobalToast } from '@/contexts/ToastContext';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { StatCard } from '@/components/common/StatCard';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
+import { LoadMoreButton } from '@/components/common/LoadMoreButton';
 import { cn } from '@/utils/helpers';
 import type { BlogPost } from '@/types';
 
@@ -20,7 +21,7 @@ export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { posts, isLoading, fetchUserPosts, fetchUserPostsStats, deletePost } = useBlogStore();
+  const { posts, isLoading, pagination, fetchUserPosts, fetchUserPostsStats, deletePost, loadMoreUserPosts, resetPagination } = useBlogStore();
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>('all');
@@ -60,9 +61,10 @@ export const DashboardPage: React.FC = () => {
   // Fetch filtered posts when filter changes
   useEffect(() => {
     if (user?.id) {
+      resetPagination();
       fetchUserPosts(user.id, filter);
     }
-  }, [user?.id, filter, fetchUserPosts]);
+  }, [user?.id, filter, fetchUserPosts, resetPagination]);
 
   const handleDelete = async (post: BlogPost) => {
     if (!window.confirm(t(TranslationKey.DELETE_POST_CONFIRM))) {
@@ -76,6 +78,7 @@ export const DashboardPage: React.FC = () => {
       // Refresh both stats and filtered list
       await refreshStats();
       if (user?.id) {
+        resetPagination();
         fetchUserPosts(user.id, filter);
       }
     } catch (error) {
@@ -90,6 +93,12 @@ export const DashboardPage: React.FC = () => {
 
   const handleEdit = (post: BlogPost) => {
     navigate(`/edit/${post.id}`);
+  };
+
+  const handleLoadMore = () => {
+    if (user?.id) {
+      loadMoreUserPosts(user.id, filter);
+    }
   };
 
   // Helper function for filter button classes
@@ -191,7 +200,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
+            {isLoading && posts.length === 0 ? (
               <div className="flex justify-center py-12">
                 <LoadingSpinner size="lg" />
               </div>
@@ -204,19 +213,29 @@ export const DashboardPage: React.FC = () => {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {posts.map((post) => (
-                  <Link key={post.id} to={`/blog/${post.slug}`}>
-                    <BlogPostCard
-                      post={post}
-                      variant="dashboard"
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      isDeleting={deletingId === post.id}
-                    />
-                  </Link>
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {posts.map((post) => (
+                    <Link key={post.id} to={`/blog/${post.slug}`}>
+                      <BlogPostCard
+                        post={post}
+                        variant="dashboard"
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        isDeleting={deletingId === post.id}
+                      />
+                    </Link>
+                  ))}
+                </div>
+                
+                <LoadMoreButton
+                  isLoading={isLoading && posts.length > 0}
+                  hasMore={pagination.page < pagination.totalPages}
+                  onLoadMore={handleLoadMore}
+                  currentCount={posts.length}
+                  totalCount={pagination.total}
+                />
+              </>
             )}
           </CardContent>
         </Card>

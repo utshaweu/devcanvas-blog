@@ -402,6 +402,109 @@ try {
 
 ```
 
+### 7. Pagination Pattern (Load More Button)
+
+**Overview:**  
+The blog uses a "Load More" pagination strategy similar to Facebook, Medium, and Twitter for seamless content browsing.
+
+**Configuration:**
+- **Page Size:** 9 posts per page (optimized for 3-column grid)
+- **Strategy:** Append mode - new posts are added to existing list
+- **Component:** `LoadMoreButton` in `src/components/common/LoadMoreButton.tsx`
+
+**Store Methods:**
+```typescript
+// blogStore.ts
+interface BlogState {
+  posts: BlogPost[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  
+  // Fetch with optional append
+  fetchPosts: (page?: number, limit?: number, append?: boolean) => Promise<void>;
+  fetchUserPosts: (userId: string, filter?: 'all' | 'published' | 'draft', page?: number, limit?: number, append?: boolean) => Promise<void>;
+  
+  // Convenience methods
+  loadMorePosts: () => Promise<void>;
+  loadMoreUserPosts: (userId: string, filter?: 'all' | 'published' | 'draft') => Promise<void>;
+  resetPagination: () => void;
+}
+```
+
+**Component Usage:**
+```typescript
+import { LoadMoreButton } from '@/components/common/LoadMoreButton';
+import { useBlogStore } from '@/stores/blogStore';
+
+const MyPage: React.FC = () => {
+  const { posts, pagination, isLoading, fetchPosts, loadMorePosts, resetPagination } = useBlogStore();
+
+  useEffect(() => {
+    // Reset and fetch first page on mount
+    resetPagination();
+    fetchPosts();
+    
+    // Cleanup: reset pagination on unmount
+    return () => resetPagination();
+  }, []);
+
+  const handleLoadMore = () => {
+    loadMorePosts();
+  };
+
+  const initialLoading = isLoading && posts.length === 0;
+  const loadingMore = isLoading && posts.length > 0;
+  const hasMore = pagination.page < pagination.totalPages;
+
+  return (
+    <div>
+      {/* Show posts */}
+      {posts.map(post => <PostCard key={post.id} post={post} />)}
+      
+      {/* Load More button */}
+      {posts.length > 0 && (
+        <LoadMoreButton
+          isLoading={loadingMore}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          currentCount={posts.length}
+          totalCount={pagination.total}
+        />
+      )}
+    </div>
+  );
+};
+```
+
+**LoadMoreButton Props:**
+```typescript
+interface LoadMoreButtonProps {
+  isLoading: boolean;       // Show loading spinner
+  hasMore: boolean;         // Has more pages to load
+  onLoadMore: () => void;   // Callback when clicked
+  currentCount: number;     // Current posts shown
+  totalCount: number;       // Total posts available
+  className?: string;       // Optional CSS class
+}
+```
+
+**Features:**
+- Shows "Showing X of Y posts" counter
+- Displays loading state with spinner
+- Auto-hides when all posts are loaded
+- Shows "No more posts to load" message when done
+- Fully internationalized (i18n keys: `LOAD_MORE`, `LOADING_MORE`, `NO_MORE_POSTS`, `SHOWING_POSTS_COUNT`)
+
+**Best Practices:**
+- Always call `resetPagination()` before initial fetch
+- Reset on filter changes (e.g., in DashboardPage when switching between All/Published/Draft)
+- Clean up on unmount to prevent state leaks
+- Use `append: true` for load more, `append: false` for initial/filter changes
+
 ---
 
 ## 🗄️ Database Schema

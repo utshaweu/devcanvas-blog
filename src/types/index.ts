@@ -240,3 +240,31 @@ export interface BlogPostCardProps {
   onDelete?: (post: BlogPost) => void;
   isDeleting?: boolean;
 }
+
+export interface RichTextEditorProps {
+  content: string;
+  onChange: (content: string) => void;
+  placeholder?: string;
+  className?: string;
+  editable?: boolean;
+}
+
+export type BadgeVariant = 'category' | 'tag' | 'status' | 'default';
+export type BadgeSize = 'xs' | 'sm' | 'md';
+
+export interface BadgeProps {
+  children: React.ReactNode;
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  className?: string;
+  published?: boolean; // For status variant
+}
+
+export interface LoadMoreButtonProps {
+  isLoading: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
+  currentCount: number;
+  totalCount: number;
+  className?: string;
+}

@@ -6,16 +6,32 @@ import { TranslationKey } from '@/i18n';
 import { Card, CardContent } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
+import { LoadMoreButton } from '@/components/common/LoadMoreButton';
 
 export const BlogListPage: React.FC = () => {
-  const { posts, isLoading, fetchPosts } = useBlogStore();
+  const { posts, isLoading, pagination, fetchPosts, loadMorePosts, resetPagination } = useBlogStore();
   const { t } = useTranslation();
 
   useEffect(() => {
+    // Reset and fetch first page on mount
+    resetPagination();
     fetchPosts();
-  }, [fetchPosts]);
+    
+    // Cleanup: reset pagination on unmount
+    return () => {
+      resetPagination();
+    };
+  }, [fetchPosts, resetPagination]);
 
-  if (isLoading) {
+  const handleLoadMore = () => {
+    loadMorePosts();
+  };
+
+  const initialLoading = isLoading && posts.length === 0;
+  const loadingMore = isLoading && posts.length > 0;
+  const hasMore = pagination.page < pagination.totalPages;
+
+  if (initialLoading) {
     return (
       <div className="container-custom py-12 flex justify-center">
         <LoadingSpinner size="lg" />
@@ -51,6 +67,16 @@ export const BlogListPage: React.FC = () => {
             ))
           )}
         </div>
+
+        {posts.length > 0 && (
+          <LoadMoreButton
+            isLoading={loadingMore}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+            currentCount={posts.length}
+            totalCount={pagination.total}
+          />
+        )}
       </div>
     </div>
   );

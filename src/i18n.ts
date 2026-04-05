@@ -114,6 +114,10 @@ export enum TranslationKey {
   NO_PUBLISHED_POSTS = 'noPublishedPosts',
   NO_DRAFT_POSTS = 'noDraftPosts',
   ALL = 'all',
+  LOAD_MORE = 'loadMore',
+  LOADING_MORE = 'loadingMore',
+  NO_MORE_POSTS = 'noMorePosts',
+  SHOWING_POSTS_COUNT = 'showingPostsCount',
 }
 
 export type LanguageKey = TranslationKey;
@@ -233,6 +237,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.NO_PUBLISHED_POSTS]: 'No published posts yet.',
     [TranslationKey.NO_DRAFT_POSTS]: 'No draft posts yet.',
     [TranslationKey.ALL]: 'All',
+    [TranslationKey.LOAD_MORE]: 'Load More',
+    [TranslationKey.LOADING_MORE]: 'Loading More...',
+    [TranslationKey.NO_MORE_POSTS]: 'No more posts to load',
+    [TranslationKey.SHOWING_POSTS_COUNT]: 'Showing {current} of {total} posts',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -348,6 +356,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.NO_PUBLISHED_POSTS]: 'এখনো কোন প্রকাশিত পোস্ট নেই।',
     [TranslationKey.NO_DRAFT_POSTS]: 'এখনো কোন খসড়া পোস্ট নেই।',
     [TranslationKey.ALL]: 'সকল',
+    [TranslationKey.LOAD_MORE]: 'আরও লোড করুন',
+    [TranslationKey.LOADING_MORE]: 'আরও লোড হচ্ছে...',
+    [TranslationKey.NO_MORE_POSTS]: 'আর কোন পোস্ট নেই',
+    [TranslationKey.SHOWING_POSTS_COUNT]: '{total} টির মধ্যে {current} টি পোস্ট দেখানো হচ্ছে',
   },
 };
 

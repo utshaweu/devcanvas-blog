@@ -10,6 +10,7 @@ import {
   Italic, 
   Strikethrough, 
   Code, 
+  FileCode,
   Heading1, 
   Heading2, 
   List, 
@@ -22,14 +23,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { Button } from '@/components/ui/button';
-
-interface RichTextEditorProps {
-  content: string;
-  onChange: (content: string) => void;
-  placeholder?: string;
-  className?: string;
-  editable?: boolean;
-}
+import { RichTextEditorProps } from '@/types';
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
@@ -99,6 +93,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={editor.isActive('bold') ? 'bg-muted' : ''}
+            title='Bold'
           >
             <Bold className="h-4 w-4" />
           </Button>
@@ -108,6 +103,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleItalic().run()}
             className={editor.isActive('italic') ? 'bg-muted' : ''}
+            title='Italic'
           >
             <Italic className="h-4 w-4" />
           </Button>
@@ -117,6 +113,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleStrike().run()}
             className={editor.isActive('strike') ? 'bg-muted' : ''}
+            title='Strikethrough'
           >
             <Strikethrough className="h-4 w-4" />
           </Button>
@@ -126,8 +123,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleCode().run()}
             className={editor.isActive('code') ? 'bg-muted' : ''}
+            title="Inline Code"
           >
             <Code className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            className={editor.isActive('codeBlock') ? 'bg-muted' : ''}
+            title="Code Block"
+          >
+            <FileCode className="h-4 w-4" />
           </Button>
 
           <div className="w-px h-6 bg-border mx-1" />
@@ -138,6 +146,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
             className={editor.isActive('heading', { level: 1 }) ? 'bg-muted' : ''}
+            title='Heading 1'
           >
             <Heading1 className="h-4 w-4" />
           </Button>
@@ -147,6 +156,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
             className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
+            title='Heading 2'
           >
             <Heading2 className="h-4 w-4" />
           </Button>
@@ -159,6 +169,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             className={editor.isActive('bulletList') ? 'bg-muted' : ''}
+            title='Bullet List'
           >
             <List className="h-4 w-4" />
           </Button>
@@ -168,6 +179,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             className={editor.isActive('orderedList') ? 'bg-muted' : ''}
+            title='Ordered List'
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
@@ -177,6 +189,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             className={editor.isActive('blockquote') ? 'bg-muted' : ''}
+            title='Block Quote'
           >
             <Quote className="h-4 w-4" />
           </Button>
@@ -188,6 +201,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             size="sm"
             variant="ghost"
             onClick={addLink}
+            title='Add Link'
           >
             <LinkIcon className="h-4 w-4" />
           </Button>
@@ -196,6 +210,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             size="sm"
             variant="ghost"
             onClick={addImage}
+            title='Add Image'
           >
             <ImageIcon className="h-4 w-4" />
           </Button>
@@ -208,6 +223,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
+            title='Undo'
           >
             <Undo className="h-4 w-4" />
           </Button>
@@ -217,6 +233,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
+            title='Redo'
           >
             <Redo className="h-4 w-4" />
           </Button>
