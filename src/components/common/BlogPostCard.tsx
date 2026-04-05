@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Eye, Heart, Edit, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
+import { Badge } from './Badge';
 import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
@@ -32,24 +33,21 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({
               className="h-48 w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />
             {post.category?.name && (
-              <span className="absolute top-3 left-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-md backdrop-blur-sm">
+              <Badge variant="category" className="absolute top-3 left-3">
                 {post.category.name}
-              </span>
+              </Badge>
             )}
             {visibleTags.length > 0 && (
               <div className="pointer-events-none absolute bottom-3 right-3 flex max-w-[80%] flex-wrap justify-end gap-1 opacity-100 translate-y-0 transition-all duration-300 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0">
                 {visibleTags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    className="rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm"
-                  >
+                  <Badge key={tag.id} variant="tag" size="xs">
                     {tag.name}
-                  </span>
+                  </Badge>
                 ))}
                 {remainingTags > 0 && (
-                  <span className="rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-sm">
+                  <Badge variant="tag" size="xs">
                     +{remainingTags}
-                  </span>
+                  </Badge>
                 )}
               </div>
             )}
@@ -71,13 +69,9 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({
           {/* Status Badge and Date - Dashboard only */}
           {isDashboard && (
             <div className="flex items-center gap-2 text-xs">
-              <span className={`px-2 py-1 rounded-full ${
-                post.published 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' 
-                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
-              }`}>
+              <Badge variant="status" published={post.published}>
                 {post.published ? t(TranslationKey.PUBLISHED) : t(TranslationKey.DRAFT)}
-              </span>
+              </Badge>
               <span className="text-muted-foreground">
                 {formatRelativeTime(post.published_at || post.created_at)} • {formatDate(post.published_at || post.created_at)}
               </span>

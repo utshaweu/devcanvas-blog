@@ -240,3 +240,14 @@ export interface BlogPostCardProps {
   onDelete?: (post: BlogPost) => void;
   isDeleting?: boolean;
 }
+
+export type BadgeVariant = 'category' | 'tag' | 'status' | 'default';
+export type BadgeSize = 'xs' | 'sm' | 'md';
+
+export interface BadgeProps {
+  children: React.ReactNode;
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  className?: string;
+  published?: boolean; // For status variant
+}
