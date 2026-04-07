@@ -23,6 +23,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [removing, setRemoving] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(value || null);
@@ -52,6 +53,28 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     try {
       setUploading(true);
       setProgress(0);
+
+      // Delete old file from storage before uploading new one
+      if (value && value.includes(bucket)) {
+        try {
+          const urlParts = value.split(`/${bucket}/`);
+          if (urlParts.length > 1) {
+            const oldFilePath = urlParts[1];
+            
+            const { error: deleteError } = await supabase.storage
+              .from(bucket)
+              .remove([oldFilePath]);
+            
+            // Continue with upload even if delete fails
+            // This prevents blocking user experience
+            if (deleteError) {
+              // Silent fail - old file becomes orphaned (rare edge case)
+            }
+          }
+        } catch (err) {
+          // Silent fail - continue with upload
+        }
+      }
 
       // Create a preview URL for images
       if (file.type.startsWith('image/')) {
@@ -109,7 +132,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       }, 2000);
 
     } catch (err) {
-      console.error('Upload error:', err);
       setError(err instanceof Error ? err.message : t(TranslationKey.UPLOAD_FAILED));
       setPreviewUrl(value || null);
     } finally {
@@ -121,11 +143,40 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
+    setRemoving(true);
+    
+    // If there's a current file in storage, delete it
+    if (value && value.includes(bucket)) {
+      try {
+        // Extract file path from URL
+        // URL format: https://.../storage/v1/object/public/bucket/path/to/file.jpg
+        const urlParts = value.split(`/${bucket}/`);
+        if (urlParts.length > 1) {
+          const filePath = urlParts[1];
+          
+          // Delete from Supabase Storage
+          const { error: deleteError } = await supabase.storage
+            .from(bucket)
+            .remove([filePath]);
+          
+          if (deleteError) {
+            setError(t(TranslationKey.UPLOAD_FAILED));
+            // Continue with removal even if delete fails
+          }
+        }
+      } catch (err) {
+        setError(t(TranslationKey.UPLOAD_FAILED));
+        // Continue with local removal even if storage deletion fails
+      }
+    }
+    
+    // Clear local state
     setPreviewUrl(null);
     setProgress(0);
     setError(null);
     setUploadSuccess(false);
+    setRemoving(false);
     onRemove?.();
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -182,7 +233,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   e.stopPropagation();
                   handleClick();
                 }}
-                disabled={disabled || uploading}
+                disabled={disabled || uploading || removing}
                 className="shadow-lg"
               >
                 <Upload className="w-4 h-4 mr-1" />
@@ -196,10 +247,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   e.stopPropagation();
                   handleRemove();
                 }}
-                disabled={disabled || uploading}
+                disabled={disabled || uploading || removing}
                 className="shadow-lg"
               >
-                <X className="w-4 h-4 mr-1" />
+                {removing ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                ) : (
+                  <X className="w-4 h-4 mr-1" />
+                )}
                 {t(TranslationKey.REMOVE_IMAGE)}
               </Button>
             </div>

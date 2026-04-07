@@ -88,7 +88,7 @@ export const ProfilePage: React.FC = () => {
                   <img
                     src={user.avatar_url}
                     alt={user.name}
-                    className="w-24 h-24 rounded-full object-initial border-4 border-accent shadow-lg"
+                    className="w-24 h-24 rounded-full object-scale-down border-4 border-accent shadow-lg"
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center border-4 border-accent shadow-lg">
