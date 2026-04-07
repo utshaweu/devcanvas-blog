@@ -268,3 +268,17 @@ export interface LoadMoreButtonProps {
   totalCount: number;
   className?: string;
 }
+
+export interface FileUploadProps {
+  value?: string; // URL of the currently uploaded file
+  onChange?: (url: string) => void; // Callback when a new file is uploaded
+  onRemove?: () => void; // Callback when the file is removed
+  accept?: string; // Accepted file types (e.g. "image/*")
+  maxSize?: number; // Max file size in MB
+  bucket?: string; // Supabase storage bucket name
+  path?: string; // Optional path prefix for uploaded files
+  disabled?: boolean; // Disabled state
+  className?: string; // Additional CSS classes
+  label?: string; // Label for the upload area
+  showPreview?: boolean; // Whether to show image preview after upload
+}

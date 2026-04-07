@@ -6,6 +6,8 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 
 - **Authentication & Authorization**: Secure user authentication with Supabase
 - **Rich Text Editor**: Powerful content creation with Tiptap
+- **File Upload System**: Beautiful file upload with progress tracking for avatars
+- **Supabase Storage**: Integrated cloud storage for user avatars and images
 - **Modern UI**: Beautiful interface using Shadcn/ui components
 - **State Management**: Efficient state handling with Zustand
 - **Type Safety**: Full TypeScript support throughout
@@ -34,7 +36,10 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 ### Backend & Database
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
-- **Storage**: Supabase Storage (for images)
+- **Storage**: Supabase Storage (for avatars and images)
+  - File upload with progress tracking
+  - Image preview and management
+  - 500KB limit for avatars, 500KB for featured images
 
 ### Testing
 - **Unit Tests**: Jest 29.x
@@ -53,12 +58,17 @@ devcanvas-blog/
 ├── src/
 │   ├── components/          # Reusable components
 │   │   ├── ui/             # Shadcn/ui components
+│   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── file-upload.tsx  # File upload with progress
+│   │   │   └── ...
 │   │   ├── common/         # Common reusable components
 │   │   └── layout/         # Layout components (Header, Footer)
 │   ├── features/           # Feature-based modules (micro-frontends)
 │   │   ├── auth/          # Authentication features
 │   │   ├── blog/          # Blog post features
 │   │   ├── dashboard/     # Dashboard features
+│   │   ├── profile/       # User profile with avatar upload
 │   │   └── analytics/     # Analytics features
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Third-party library configurations
@@ -352,7 +362,25 @@ END;
 $$;
 ```
 
-5. **Start the development server**
+5. **Set up Supabase Storage** (for avatar uploads)
+
+See [STORAGE_SETUP.md](./STORAGE_SETUP.md) for detailed instructions.
+
+Quick setup via SQL:
+```sql
+-- Create avatars bucket
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES 
+  ('avatars', 'avatars', true, 512000, ARRAY['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp']),
+  ('featured-images', 'featured-images', true, 512000, ARRAY['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp', 'image/svg+xml'])
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage policies (see STORAGE_SETUP.md for complete policies)
+CREATE POLICY "Allow public to read avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+CREATE POLICY "Allow users to upload their own avatar" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.uid()::text = (storage.foldername(name))[1]);
+```
+
+6. **Start the development server**
 ```bash
 npm run dev
 ```
@@ -368,6 +396,7 @@ The application will be available at `http://localhost:3012`
 - `npm run test` - Run tests
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:coverage` - Generate test coverage report
+- `npm run extract:i18n` - Extract and verify translation keys
 
 ## 🏗️ Architecture
 
@@ -408,9 +437,38 @@ error('Error!', 'Something went wrong');
 ### Component Patterns
 
 1. **UI Components** (`components/ui/`): Primitive, reusable components
+   - `file-upload.tsx` - File upload with progress bar and preview
+   - `button.tsx`, `input.tsx`, `card.tsx` - Base UI elements
 2. **Common Components** (`components/common/`): Composed, reusable business components
 3. **Feature Components** (`features/*/`): Feature-specific components
 4. **Layout Components** (`components/layout/`): Page layout components
+
+### File Upload System
+
+The app includes a beautiful file upload component with:
+
+- **Real-time progress tracking** (0-100%)
+- **Image preview** with Change/Remove buttons
+- **Drag & drop ready** UI
+- **File validation** (size & type)
+- **Error handling** with user-friendly messages
+- **Bilingual support** (EN/BN)
+- **Supabase Storage integration**
+
+Usage example:
+```tsx
+import { FileUpload } from '@/components/ui/file-upload';
+
+<FileUpload
+  value={avatarUrl}
+  onChange={(url) => setAvatarUrl(url)}
+  bucket="avatars"
+  maxSize={0.5}  // 500KB
+  accept="image/*"
+/>
+```
+
+See [FILE_UPLOAD_IMPLEMENTATION.md](./FILE_UPLOAD_IMPLEMENTATION.md) for complete documentation.
 
 ### Pagination Pattern
 
@@ -526,6 +584,7 @@ VITE_APP_URL=https://your-domain.com
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vitejs.dev/)
 - [Supabase](https://supabase.com/docs)
+  - [Supabase Storage](https://supabase.com/docs/guides/storage) - File uploads
 - [React Hook Form](https://react-hook-form.com/)
 - [Zod](https://zod.dev/)
 - [Zustand](https://docs.pmnd.rs/zustand/)
@@ -533,6 +592,13 @@ VITE_APP_URL=https://your-domain.com
 - [Shadcn/ui](https://ui.shadcn.com/)
 - [Tiptap](https://tiptap.dev/)
 - [React Router](https://reactrouter.com/)
+
+## 📖 Additional Documentation
+
+- [STORAGE_SETUP.md](./STORAGE_SETUP.md) - Supabase Storage setup guide
+- [AGENTS.md](./AGENTS.md) - AI development guide
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - Architecture details
+- [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) - Project structure overview
 
 ## 🤝 Contributing
 
