@@ -50,6 +50,7 @@ The repository is compatible with several AI models to assist developers:
 - **useTranslation hook:** Returns `t(key)` and current language.
 - **Extract script:** `npm run extract:i18n` scans components for used keys and reports missing/unused entries.
 - Add new keys by updating `TranslationKey` and dictionaries in `src/i18n.ts`.
+- **Translation keys for FileUpload:** UPLOAD_AVATAR, UPLOADING, UPLOAD_SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, INVALID_FILE_TYPE, CHANGE_IMAGE, REMOVE_IMAGE
 
 ### Form & Validation
 - **Forms:** React Hook Form with Controller for custom components
@@ -67,6 +68,9 @@ The repository is compatible with several AI models to assist developers:
 - **Database:** PostgreSQL with Row Level Security (RLS)
 - **Authentication:** Supabase Auth with JWT tokens
 - **Storage:** Supabase Storage for images
+  - **Avatars bucket:** 500KB limit (user profile pictures)
+  - **Featured-images bucket:** 500KB limit (blog post images)
+  - **File upload component:** Built-in with progress tracking
 
 ### Testing
 - **Unit Tests:** Jest 29.x
@@ -300,6 +304,50 @@ const {
     </Select>
   )}
 />
+```
+
+### 5. File Upload Pattern
+
+```typescript
+// Using the FileUpload component
+import { FileUpload } from '@/components/ui/file-upload';
+import { Controller } from 'react-hook-form';
+
+// In ProfilePage or any form
+<Controller
+  name="avatar_url"
+  control={control}
+  render={({ field }) => (
+    <FileUpload
+      value={field.value}
+      onChange={field.onChange}
+      onRemove={() => field.onChange('')}
+      bucket="avatars"        // Supabase bucket
+      path={user?.id}         // User folder
+      accept="image/*"        // File types
+      maxSize={0.5}          // 500KB limit
+      disabled={isLoading}
+      label={t(TranslationKey.UPLOAD_AVATAR)}
+      showPreview={true}
+    />
+  )}
+/>
+```
+
+**Key Features:**
+- Real-time upload progress (0-100%)
+- Image preview with Change/Remove buttons
+- File size and type validation
+- Bilingual error messages
+- Direct Supabase Storage integration
+- Automatic unique filename generation
+
+**Storage Setup Required:**
+See `STORAGE_SETUP.md` for creating Supabase storage buckets and policies.
+
+**Available Buckets:**
+- `avatars`: User profile pictures (500KB max)
+- `featured-images`: Blog post images (500KB max)
 
 // 4. Handle submission
 const onSubmit = async (data: FormData) => {
@@ -1229,6 +1277,74 @@ When working on this project as an AI assistant:
 4. Test in isolation
 5. Provide clear explanation
 6. Suggest preventive measures
+
+---
+
+## 🗂️ File Upload & Storage
+
+### FileUpload Component (`src/components/ui/file-upload.tsx`)
+
+A production-ready file upload component with:
+- Real-time progress tracking (0-100%)
+- Image preview with Change/Remove buttons
+- File validation (size & type)
+- Bilingual error messages
+- Direct Supabase Storage integration
+
+**Usage Example:**
+```tsx
+import { FileUpload } from '@/components/ui/file-upload';
+
+<FileUpload
+  value={avatarUrl}
+  onChange={(url) => setAvatarUrl(url)}
+  bucket="avatars"
+  maxSize={0.5}  // 500KB
+  accept="image/*"
+/>
+```
+
+### Supabase Storage Setup
+
+**Required Buckets:**
+1. **avatars**: User profile pictures (500KB max)
+2. **featured-images**: Blog post images (10MB max)
+
+**Setup Instructions:**
+See `STORAGE_SETUP.md` for complete setup guide including:
+- SQL scripts to create buckets
+- Row Level Security policies
+- Storage access configuration
+
+**Security:**
+- Users can only upload to their own folder
+- Public read access for all images
+- File size limits enforced at bucket level
+- MIME type restrictions prevent non-image uploads
+
+**File Organization:**
+```
+avatars/
+  └── {user_id}/
+      └── {random_id}-{timestamp}.{ext}
+
+featured-images/
+  └── {random_id}-{timestamp}.{ext}
+```
+
+### Translation Keys for FileUpload
+
+When using FileUpload, these translation keys are available:
+- `UPLOAD_AVATAR` - Upload button label
+- `UPLOADING` - Upload in progress
+- `UPLOAD_SUCCESS` - Upload complete
+- `UPLOAD_FAILED` - Upload error
+- `FILE_TOO_LARGE` - File size error
+- `INVALID_FILE_TYPE` - File type error
+- `CHANGE_IMAGE` - Change button
+- `REMOVE_IMAGE` - Remove button
+
+All keys have both English and Bengali translations.
 
 ---
 

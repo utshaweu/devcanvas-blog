@@ -71,9 +71,17 @@ export const Header: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-medium">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
+                  {user?.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.name || 'User'}
+                      className="h-8 w-8 rounded-full object-contain border-2 border-accent"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-medium">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">

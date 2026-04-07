@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,9 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { FileUpload } from '@/components/ui/file-upload';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
-import { User, Mail, FileText, Loader2 } from 'lucide-react';
+import { User, Mail, FileText, Loader2, ImageIcon } from 'lucide-react';
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters'),
@@ -32,6 +33,7 @@ export const ProfilePage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isDirty },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -86,7 +88,7 @@ export const ProfilePage: React.FC = () => {
                   <img
                     src={user.avatar_url}
                     alt={user.name}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-accent shadow-lg"
+                    className="w-24 h-24 rounded-full object-initial border-4 border-accent shadow-lg"
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center border-4 border-accent shadow-lg">
@@ -159,24 +161,35 @@ export const ProfilePage: React.FC = () => {
                 </p>
               </div>
 
-              {/* Avatar URL Field */}
+              {/* Avatar Upload Field - File upload with progress */}
               <div className="space-y-2">
-                <Label htmlFor="avatar_url" className="text-sm font-medium">
-                  {t(TranslationKey.AVATAR_URL)}
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-accent" />
+                  {t(TranslationKey.UPLOAD_AVATAR)}
                 </Label>
-                <Input
-                  id="avatar_url"
-                  type="url"
-                  placeholder={t(TranslationKey.AVATAR_URL_PLACEHOLDER)}
-                  {...register('avatar_url')}
-                  disabled={isLoading}
-                  className="h-11 transition-all duration-200 focus:ring-2 focus:ring-accent/20"
+                <Controller
+                  name="avatar_url"
+                  control={control}
+                  render={({ field }) => (
+                    <FileUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      onRemove={() => field.onChange('')}
+                      bucket="avatars"
+                      path={user?.id}
+                      accept="image/*"
+                      maxSize={0.1}
+                      disabled={isLoading}
+                      label={t(TranslationKey.UPLOAD_AVATAR)}
+                      showPreview={true}
+                    />
+                  )}
                 />
                 {errors.avatar_url && (
                   <p className="text-sm text-destructive">{errors.avatar_url.message}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  {t(TranslationKey.AVATAR_URL_HINT)}
+                  {t(TranslationKey.UPLOAD_AVATAR_HINT)}
                 </p>
               </div>
 
