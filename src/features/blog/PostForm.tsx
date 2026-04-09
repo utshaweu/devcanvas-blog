@@ -6,12 +6,14 @@ import { useBlogStore } from '@/stores/blogStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FileUpload } from '@/components/ui/file-upload';
 import { RichTextEditor } from '@/components/common/RichTextEditor';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Select } from '@/components/ui/select';
 import { MultiSelect } from '@/components/ui/multi-select';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
+import { useAuth } from '@/hooks/useAuth';
 import { PostFormProps } from '@/types';
 
 // validation schema
@@ -19,7 +21,7 @@ const postSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   content: z.string().min(50, 'Content must be at least 50 characters'),
   excerpt: z.string().optional(),
-  featured_image: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  featured_image: z.string().optional().or(z.literal('')),
   category_id: z.string().min(1, 'Category is required'),
   tags: z.array(z.string()).min(1, 'At least one tag is required'),
   published: z.boolean(),
@@ -35,6 +37,7 @@ export const PostForm: React.FC<PostFormProps> = ({
   submitButtonText,
   mode,
 }) => {
+  const { user } = useAuth();
   const { categories, tags, fetchCategories, fetchTags } = useBlogStore();
   const { t } = useTranslation();
 
@@ -91,13 +94,24 @@ export const PostForm: React.FC<PostFormProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="featured_image">{t(TranslationKey.FEATURED_IMAGE_URL)}</Label>
-        <Input
-          id="featured_image"
-          type="url"
-          placeholder={t(TranslationKey.FEATURED_IMAGE_PLACEHOLDER)}
-          {...register('featured_image')}
-          disabled={isLoading}
+        <Label className="text-sm font-medium">{t(TranslationKey.FEATURED_IMAGE)}</Label>
+        <Controller
+          name="featured_image"
+          control={control}
+          render={({ field }) => (
+            <FileUpload
+              value={field.value}
+              onChange={field.onChange}
+              onRemove={() => field.onChange('')}
+              bucket="featured-images"
+              path={user?.id}
+              accept="image/*"
+              maxSize={0.1}
+              disabled={isLoading}
+              label={t(TranslationKey.FEATURED_IMAGE)}
+              showPreview={true}
+            />
+          )}
         />
         {errors.featured_image && (
           <p className="text-sm text-destructive">{errors.featured_image.message}</p>
@@ -166,6 +180,7 @@ export const PostForm: React.FC<PostFormProps> = ({
             onClick={() => {
               setValue('published', false, { shouldDirty: true, shouldValidate: true });
             }}
+            variant="custom"
           >
             {isLoading ? (
               <>
@@ -218,7 +233,7 @@ export const PostForm: React.FC<PostFormProps> = ({
 
         <Button 
           type="button" 
-          variant="outline"
+          variant="destructive"
           onClick={onCancel}
           disabled={isLoading}
         >

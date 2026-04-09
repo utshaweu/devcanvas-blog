@@ -282,3 +282,33 @@ export interface FileUploadProps {
   label?: string; // Label for the upload area
   showPreview?: boolean; // Whether to show image preview after upload
 }
+
+export interface MultiSelectOption {
+  value: string;
+  label: string;
+}
+
+export interface MultiSelectProps {
+  options: MultiSelectOption[];
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder?: string;
+  error?: string;
+  label?: string;
+  disabled?: boolean;
+  className?: string;
+}
+
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+  options: SelectOption[];
+  placeholder?: string;
+  error?: string;
+  label?: string;
+  onChange?: (value: string) => void;
+  allowClear?: boolean;
+}

@@ -1,20 +1,7 @@
 import * as React from 'react';
 import { ChevronDown, X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
-
-export interface SelectOption {
-  value: string;
-  label: string;
-}
-
-export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
-  options: SelectOption[];
-  placeholder?: string;
-  error?: string;
-  label?: string;
-  onChange?: (value: string) => void;
-  allowClear?: boolean;
-}
+import { SelectProps } from '@/types';
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, options, placeholder = 'Select an option', error, label, onChange, allowClear = true, value, ...props }, ref) => {
