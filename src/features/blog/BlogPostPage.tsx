@@ -9,6 +9,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
+import { CommentsSection } from '../comments/CommentsSection';
 
 export const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -114,9 +115,11 @@ export const BlogPostPage: React.FC = () => {
         </header>
 
         <div 
-          className="prose prose-slate max-w-none"
+          className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-li:text-foreground/90 prose-hr:border-border max-w-none"
           dangerouslySetInnerHTML={{ __html: currentPost.content }}
         />
+
+        <CommentsSection postId={currentPost.id} />
       </div>
     </article>
   );

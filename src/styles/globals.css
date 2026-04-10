@@ -270,6 +270,7 @@
   @apply bg-transparent border-0 p-0 shadow-none;
   color: #1e293b;
   background: none !important;
+  box-shadow: none !important;
 }
 
 /* Dark mode code block */
@@ -283,6 +284,14 @@
 .dark .ProseMirror pre code,
 .dark .prose pre code {
   color: #e2e8f0;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.dark .prose hr,
+.dark .ProseMirror hr {
+  border-color: #334155;
 }
 
 /* Custom Scrollbar */
