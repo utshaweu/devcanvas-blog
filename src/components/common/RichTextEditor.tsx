@@ -1,21 +1,27 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
+import TextStyle from '@tiptap/extension-text-style';
+import Color from '@tiptap/extension-color';
 import { 
   Bold, 
   Italic, 
   Strikethrough, 
+  Palette,
   Code, 
   FileCode,
   Heading1, 
   Heading2, 
+  Heading3,
+  Heading4,
   List, 
   ListOrdered,
   Quote,
+  Check,
   Undo,
   Redo,
   Link as LinkIcon,
@@ -32,9 +38,18 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   className,
   editable = true,
 }) => {
+  const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3, 4],
+        },
+      }),
+      TextStyle,
+      Color,
       Placeholder.configure({
         placeholder,
       }),
@@ -81,6 +96,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
+  };
+
+  const textColors = [
+    { name: 'Red', value: '#ef4444' },
+    { name: 'Orange', value: '#f59e0b' },
+    { name: 'Green', value: '#22c55e' },
+    { name: 'Blue', value: '#3b82f6' },
+    { name: 'Purple', value: '#8b5cf6' },
+    { name: 'Pink', value: '#ec4899' },
+  ];
+
+  const applyTextColor = (color: string) => {
+    editor.chain().focus().setColor(color).run();
+    setSelectedColor(color);
   };
 
   return (
@@ -160,6 +189,26 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           >
             <Heading2 className="h-4 w-4" />
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            className={editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}
+            title='Heading 3'
+          >
+            <Heading3 className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+            className={editor.isActive('heading', { level: 4 }) ? 'bg-muted' : ''}
+            title='Heading 4'
+          >
+            <Heading4 className="h-4 w-4" />
+          </Button>
 
           <div className="w-px h-6 bg-border mx-1" />
 
@@ -214,6 +263,57 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           >
             <ImageIcon className="h-4 w-4" />
           </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => setShowColorPicker((previous) => !previous)}
+            title="Text Color"
+          >
+            <Palette className="h-4 w-4" />
+          </Button>
+          {showColorPicker && (
+            <div className="flex items-center gap-1">
+              {textColors.map((colorItem) => (
+                <button
+                  key={colorItem.value}
+                  type="button"
+                  onClick={() => applyTextColor(colorItem.value)}
+                  className={cn(
+                    'relative h-5 w-5 rounded-full border border-border transition-transform hover:scale-110',
+                    selectedColor === colorItem.value ? 'ring-2 ring-ring ring-offset-1 ring-offset-background' : ''
+                  )}
+                  style={{ backgroundColor: colorItem.value }}
+                  title={colorItem.name}
+                >
+                  {selectedColor === colorItem.value && (
+                    <Check className="absolute inset-0 m-auto h-3 w-3 text-white" />
+                  )}
+                </button>
+              ))}
+              <input
+                type="color"
+                value={selectedColor || '#3b82f6'}
+                onChange={(event) => applyTextColor(event.target.value)}
+                className="h-6 w-8 cursor-pointer rounded border border-border bg-background p-0"
+                title="Custom Color"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  editor.chain().focus().unsetColor().run();
+                  setSelectedColor(null);
+                  setShowColorPicker(false);
+                }}
+                className="h-6 px-2 text-xs"
+                title="Clear Color"
+              >
+                Clear
+              </Button>
+            </div>
+          )}
 
           <div className="w-px h-6 bg-border mx-1" />
 
@@ -242,7 +342,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       
       <EditorContent 
         editor={editor} 
-        className="prose prose-slate max-w-none p-4 min-h-[300px] focus:outline-none"
+        className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none p-4 min-h-[300px] focus:outline-none"
       />
     </div>
   );

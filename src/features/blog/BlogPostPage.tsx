@@ -115,7 +115,7 @@ export const BlogPostPage: React.FC = () => {
         </header>
 
         <div 
-          className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-li:text-foreground/90 prose-hr:border-border max-w-none"
+          className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none"
           dangerouslySetInnerHTML={{ __html: currentPost.content }}
         />
 
