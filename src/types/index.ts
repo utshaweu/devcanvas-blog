@@ -1,5 +1,6 @@
 import { PostFormData } from "@/features/blog/PostForm";
 import { LucideIcon } from "lucide-react";
+import type { CommentItem as CommentItemType } from '@/stores/commentStore';
 
 // User and Authentication Types
 export interface User {
@@ -311,4 +312,42 @@ export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectE
   label?: string;
   onChange?: (value: string) => void;
   allowClear?: boolean;
+}
+
+export interface CommentsSectionProps {
+  postId: string;
+  className?: string;
+}
+
+export interface CommentComposerProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+  placeholder: string;
+  submitLabel: string;
+  cancelLabel?: string;
+  onCancel?: () => void;
+  className?: string;
+}
+
+export interface CommentItemProps {
+  comment: CommentItemType;
+  currentUserId?: string;
+  isAuthenticated: boolean;
+  isSubmitting: boolean;
+  loginRequiredLabel: string;
+  replyLabel: string;
+  editLabel: string;
+  deleteLabel: string;
+  deleteConfirmMessage: string;
+  saveLabel: string;
+  cancelLabel: string;
+  replyPlaceholder: string;
+  editPlaceholder: string;
+  onRequireLogin: () => void;
+  onReply: (parentId: string, content: string) => Promise<void>;
+  onEdit: (commentId: string, content: string) => Promise<void>;
+  onDelete: (commentId: string) => Promise<void>;
+  className?: string;
 }

@@ -468,8 +468,6 @@ import { FileUpload } from '@/components/ui/file-upload';
 />
 ```
 
-See [FILE_UPLOAD_IMPLEMENTATION.md](./FILE_UPLOAD_IMPLEMENTATION.md) for complete documentation.
-
 ### Pagination Pattern
 
 The blog uses a "Load More" pagination strategy (similar to Facebook, Medium, Twitter):
@@ -597,8 +595,6 @@ VITE_APP_URL=https://your-domain.com
 
 - [STORAGE_SETUP.md](./STORAGE_SETUP.md) - Supabase Storage setup guide
 - [AGENTS.md](./AGENTS.md) - AI development guide
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Architecture details
-- [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) - Project structure overview
 
 ## 🤝 Contributing
 

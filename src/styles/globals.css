@@ -225,16 +225,39 @@
 
 /* Tiptap Editor Styles */
 .ProseMirror {
-  @apply min-h-[200px] outline-none prose prose-slate max-w-none;
+  @apply min-h-[200px] outline-none prose prose-slate dark:prose-invert max-w-none text-foreground;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   @apply text-muted-foreground float-left h-0 pointer-events-none;
+  opacity: 0.7;
 }
 
 .ProseMirror:focus {
   @apply outline-none;
+}
+
+/* Reduce heading top spacing inside editor */
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4 {
+  margin-top: 0.75em !important;
+  margin-bottom: 0.4em !important;
+}
+
+.ProseMirror > h1:first-child,
+.ProseMirror > h2:first-child,
+.ProseMirror > h3:first-child,
+.ProseMirror > h4:first-child {
+  margin-top: 0 !important;
+}
+
+/* Keep bold text color from inline text color marks */
+.ProseMirror strong,
+.prose strong {
+  color: inherit !important;
 }
 
 /* Inline Code Styles with Gradient Background */
@@ -270,6 +293,7 @@
   @apply bg-transparent border-0 p-0 shadow-none;
   color: #1e293b;
   background: none !important;
+  box-shadow: none !important;
 }
 
 /* Dark mode code block */
@@ -283,6 +307,20 @@
 .dark .ProseMirror pre code,
 .dark .prose pre code {
   color: #e2e8f0;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.dark .prose hr,
+.dark .ProseMirror hr {
+  border-color: #334155;
+}
+
+.dark .ProseMirror blockquote,
+.dark .prose blockquote {
+  color: #cbd5e1;
+  border-left-color: #475569;
 }
 
 /* Custom Scrollbar */
