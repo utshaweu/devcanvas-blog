@@ -62,6 +62,10 @@ The repository is compatible with several AI models to assist developers:
 - **Primitives:** Radix UI for accessibility
 - **Icons:** Lucide React
 - **Rich Text:** Tiptap 2.x with StarterKit
+- **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
+  - Used by UpdatePasswordDialog for secure password changes
+  - Supports animations and smooth transitions
+  - Fully accessible with Radix UI
 
 ### Backend & Database
 - **Backend:** Supabase (PostgreSQL + Auth + Storage)
@@ -306,60 +310,218 @@ const {
 />
 ```
 
-### 5. File Upload Pattern
+### 5. Input Component Pattern
 
 ```typescript
-// Using the FileUpload component
-import { FileUpload } from '@/components/ui/file-upload';
-import { Controller } from 'react-hook-form';
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 
-// In ProfilePage or any form
-<Controller
-  name="avatar_url"
-  control={control}
-  render={({ field }) => (
-    <FileUpload
-      value={field.value}
-      onChange={field.onChange}
-      onRemove={() => field.onChange('')}
-      bucket="avatars"        // Supabase bucket
-      path={user?.id}         // User folder
-      accept="image/*"        // File types
-      maxSize={0.5}          // 500KB limit
-      disabled={isLoading}
-      label={t(TranslationKey.UPLOAD_AVATAR)}
-      showPreview={true}
-    />
-  )}
+const { register, formState: { errors } } = useForm();
+const { t } = useTranslation();
+
+// With label and error (recommended for form fields)
+<Input
+  id="email"
+  type="email"
+  label={t(TranslationKey.EMAIL)}
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// For multiple inputs in PostForm
+<Input
+  id="title"
+  type="text"
+  label={t(TranslationKey.TITLE)}
+  placeholder={t(TranslationKey.ENTER_TITLE_PLACEHOLDER)}
+  error={errors.title?.message}
+  {...register('title')}
+  disabled={isLoading}
+/>
+
+// With custom styling (ProfilePage pattern)
+<Input
+  id="name"
+  type="text"
+  label={t(TranslationKey.NAME)}
+  placeholder={t(TranslationKey.ENTER_NAME_PLACEHOLDER)}
+  error={errors.name?.message}
+  {...register('name')}
+  disabled={isLoading}
+  className="h-11 transition-all duration-200"
+  labelClassName="flex items-center gap-2"
+/>
+
+// Backward compatible - without label/error
+<Input
+  id="search"
+  type="text"
+  placeholder="Search..."
+  {...register('search')}
 />
 ```
 
 **Key Features:**
-- Real-time upload progress (0-100%)
-- Image preview with Change/Remove buttons
-- File size and type validation
-- Bilingual error messages
-- Direct Supabase Storage integration
-- Automatic unique filename generation
+- Optional `label` prop - renders Label automatically
+- Optional `error` prop - displays error message with validation feedback
+- Customizable via className, labelClassName, containerClassName
+- React Hook Form compatible - spreads register props
+- Disabled state support
+- Backward compatible - works without label/error props
+- Accessibility features (htmlFor, aria labels)
 
-**Storage Setup Required:**
-See `STORAGE_SETUP.md` for creating Supabase storage buckets and policies.
+**Used in:**
+- LoginPage - Email field
+- SignupPage - Name & Email fields
+- ForgotPasswordPage - Email field
+- PostForm - Title & Excerpt fields
+- ProfilePage - Name & Email fields
 
-**Available Buckets:**
-- `avatars`: User profile pictures (500KB max)
-- `featured-images`: Blog post images (500KB max)
+### 6. PasswordInput Component Pattern
 
-// 4. Handle submission
-const onSubmit = async (data: FormData) => {
-  try {
-    await submitData(data);
-  } catch (error) {
-    // Handle error
-  }
+```typescript
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+const LoginForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors } } = useForm();
+  
+  return (
+    <PasswordInput
+      id="password"
+      label="Password"
+      placeholder="••••••••"
+      visible={showPassword}
+      onVisibilityChange={setShowPassword}
+      disabled={isLoading}
+      error={errors.password?.message}
+      {...register('password')}
+    />
+  );
 };
 ```
 
-### 5. Protected Routes Pattern
+**For multiple password fields (signup, password reset):**
+```typescript
+const [showPasswords, setShowPasswords] = useState({
+  password: false,
+  confirm: false,
+});
+
+<PasswordInput
+  id="password"
+  label="Password"
+  visible={showPasswords.password}
+  onVisibilityChange={(visible) =>
+    setShowPasswords(prev => ({ ...prev, password: visible }))
+  }
+  disabled={isLoading}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+
+<PasswordInput
+  id="confirmPassword"
+  label="Confirm Password"
+  visible={showPasswords.confirm}
+  onVisibilityChange={(visible) =>
+    setShowPasswords(prev => ({ ...prev, confirm: visible }))
+  }
+  disabled={isLoading}
+  error={errors.confirmPassword?.message}
+  {...register('confirmPassword')}
+/>
+```
+
+**Key Features:**
+- Password visibility toggle (Eye/EyeOff icons)
+- React Hook Form compatible - spreads register props
+- Error message display with validation feedback
+- Disabled state support for loading
+- Customizable via containerClassName, labelClassName, inputClassName
+- Accessibility features (aria-labels, semantic HTML)
+- Bilingual support (EN/BN)
+
+**Used throughout the app in:**
+- LoginPage - Password field
+- SignupPage - Password & Confirm Password fields
+- ResetPasswordPage - Password & Confirm Password fields
+- UpdatePasswordDialog - Current, New, & Confirm Password fields
+
+### 7. RichTextEditor Component Pattern
+
+```typescript
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  content: z.string().min(50, 'Content must be at least 50 characters'),
+});
+
+type FormData = z.infer<typeof schema>;
+
+const { control, formState: { errors } } = useForm<FormData>({
+  resolver: zodResolver(schema),
+});
+
+// With label and error
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing your post..."
+    />
+  )}
+/>
+
+// Minimal usage (backward compatible)
+<RichTextEditor
+  content={contentValue}
+  onChange={setContentValue}
+/>
+
+// Read-only mode for displaying posts
+<RichTextEditor
+  content={post.content}
+  onChange={() => {}}
+  editable={false}
+  placeholder="Post content"
+/>
+```
+
+**Key Features:**
+- Optional `label` prop - renders label above editor
+- Optional `error` prop - displays error message below editor
+- Rich formatting toolbar (Bold, Italic, Strikethrough, Headings, Lists, Quotes, Code)
+- Color picker with preset colors
+- Link & image insertion via URL
+- Undo/Redo functionality
+- Customizable via className, containerClassName, labelClassName
+- Controller/React Hook Form compatible
+- Read-only mode via `editable` prop
+- Minimum 300px height for comfortable writing
+- Prose styling with dark mode support
+
+**Used in:**
+- PostForm - Blog post creation (with label/error)
+- PostDetailPage - View-only mode (editable={false})
+
+### 8. Protected Routes Pattern
+
 
 ```typescript
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -382,7 +544,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 />
 ```
 
-### 6. Error Handling Pattern
+### 9. Error Handling Pattern
 
 **Modern Approach: Use Global Toast Notifications**
 
@@ -450,7 +612,75 @@ try {
 
 ```
 
-### 7. Pagination Pattern (Load More Button)
+### 9. Dialog Form Reset Pattern
+
+When closing a dialog/modal with a form, reset validation errors and field values:
+
+```typescript
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+const formSchema = z.object({
+  password: z.string().min(6),
+  confirmPassword: z.string().min(6),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const PasswordDialog: React.FC<DialogProps> = ({ open, onOpenChange }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors }, reset, handleSubmit } = useForm({
+    resolver: zodResolver(formSchema),
+  });
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      // Reset other local state (password visibility, etc.)
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  const onSubmit = async (data: any) => {
+    // Handle form submission
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Update Password</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+**Key Points:**
+- Add `useEffect` hook that listens to the `open` prop
+- When `open` is false (modal closing), call `reset()` to clear form state and all validation errors
+- Also reset any local UI state (password visibility, selected colors, etc.)
+- Include `reset` in dependency array
+
+**Used in:**
+- UpdatePasswordDialog - Clears all password fields and Zod validation errors
+- Any form-based dialog or modal component
+
+### 10. Pagination Pattern (Load More Button)
 
 **Overview:**  
 The blog uses a "Load More" pagination strategy similar to Facebook, Medium, and Twitter for seamless content browsing.
@@ -889,6 +1119,67 @@ export const useNewStore = create<NewState>((set) => ({
   },
 }));
 ```
+
+### Password Update Feature
+
+The application includes a password update feature accessible from the user avatar dropdown in the header:
+
+**Location:** `src/features/auth/UpdatePasswordDialog.tsx`
+
+**Features:**
+- Secure password change dialog with modal
+- Requires current password verification
+- Validates new password (6+ characters)
+- Confirms password match
+- Prevents reusing current password
+- Password visibility toggles (Eye icon)
+- Error validation messages
+- Loading states during submission
+- Toast notifications for feedback
+- Bilingual support (EN/BN)
+
+**Usage in Header:**
+```typescript
+import { UpdatePasswordDialog } from '@/features/auth/UpdatePasswordDialog';
+
+const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+
+// In dropdown menu
+<DropdownMenuItem onClick={() => setPasswordDialogOpen(true)}>
+  <Key className="mr-2 h-4 w-4" />
+  <span>{t(TranslationKey.CHANGE_PASSWORD)}</span>
+</DropdownMenuItem>
+
+// In component
+<UpdatePasswordDialog
+  open={passwordDialogOpen}
+  onOpenChange={setPasswordDialogOpen}
+/>
+```
+
+**Translation Keys Used:**
+- `CHANGE_PASSWORD` - Dialog title
+- `CURRENT_PASSWORD` - Current password label
+- `NEW_PASSWORD` - New password label
+- `CONFIRM_NEW_PASSWORD` - Confirm password label
+- `UPDATE_PASSWORD_DESCRIPTION` - Dialog description
+- `PASSWORD_UPDATED_SUCCESS` - Success notification title
+- `PASSWORD_CHANGED_MESSAGE` - Success notification message
+- `UPDATING_PASSWORD` - Loading state
+- `UPDATE_PASSWORD` - Submit button text
+
+**Auth Integration:**
+```typescript
+const { updatePassword } = useAuth();
+await updatePassword(newPassword);
+```
+
+The feature follows project patterns:
+- React Hook Form + Zod validation
+- Global toast notifications
+- TypeScript with proper typing
+- Tailwind CSS styling
+- Radix UI Dialog component
 
 ### Adding a New UI Component
 

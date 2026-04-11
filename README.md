@@ -5,6 +5,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 ## 🚀 Features
 
 - **Authentication & Authorization**: Secure user authentication with Supabase
+- **Password Management**: Secure password update dialog in user profile dropdown
 - **Rich Text Editor**: Powerful content creation with Tiptap
 - **File Upload System**: Beautiful file upload with progress tracking for avatars
 - **Supabase Storage**: Integrated cloud storage for user avatars and images
@@ -59,13 +60,20 @@ devcanvas-blog/
 │   ├── components/          # Reusable components
 │   │   ├── ui/             # Shadcn/ui components
 │   │   │   ├── button.tsx
-│   │   │   ├── input.tsx
-│   │   │   ├── file-upload.tsx  # File upload with progress
+│   │   │   ├── input.tsx                # Form input with label & error props
+│   │   │   ├── dialog.tsx               # Dialog modal component
+│   │   │   ├── password-input.tsx       # Password field with visibility toggle
+│   │   │   ├── file-upload.tsx          # File upload with progress
 │   │   │   └── ...
 │   │   ├── common/         # Common reusable components
 │   │   └── layout/         # Layout components (Header, Footer)
 │   ├── features/           # Feature-based modules (micro-frontends)
 │   │   ├── auth/          # Authentication features
+│   │   │   ├── LoginPage.tsx
+│   │   │   ├── SignupPage.tsx
+│   │   │   ├── ResetPasswordPage.tsx
+│   │   │   ├── ForgotPasswordPage.tsx
+│   │   │   └── UpdatePasswordDialog.tsx  # Password update modal
 │   │   ├── blog/          # Blog post features
 │   │   ├── dashboard/     # Dashboard features
 │   │   ├── profile/       # User profile with avatar upload
@@ -96,6 +104,25 @@ devcanvas-blog/
 - **Font Family**: Inter (Google Fonts)
 - **Features**: Variable font with multiple weights (300-900)
 - **Font Features**: CV02, CV03, CV04, CV11 for improved readability
+
+## 🔐 Password Management
+
+The application includes a secure password update feature integrated in the user profile dropdown:
+
+- **Change Password Dialog**: Accessible from the user avatar dropdown menu in the header
+- **Security Features**:
+  - Current password verification required
+  - New password must be 6+ characters
+  - Confirmation password validation
+  - Password visibility toggles
+  - Prevents using same password as current one
+- **User Experience**:
+  - Beautiful modal dialog with smooth animations
+  - Clear validation error messages
+  - Loading states during submission
+  - Toast notifications for success/error feedback
+- **Bilingual Support**: Available in English and Bengali
+- **Location**: `src/features/auth/UpdatePasswordDialog.tsx`
 
 ## 🚦 Getting Started
 
@@ -437,11 +464,98 @@ error('Error!', 'Something went wrong');
 ### Component Patterns
 
 1. **UI Components** (`components/ui/`): Primitive, reusable components
+   - `input.tsx` - Form input with optional label and error props
+   - `password-input.tsx` - Password field with visibility toggle (Eye/EyeOff icons)
    - `file-upload.tsx` - File upload with progress bar and preview
-   - `button.tsx`, `input.tsx`, `card.tsx` - Base UI elements
+   - `button.tsx`, `card.tsx` - Base UI elements
 2. **Common Components** (`components/common/`): Composed, reusable business components
 3. **Feature Components** (`features/*/`): Feature-specific components
 4. **Layout Components** (`components/layout/`): Page layout components
+
+### Password Input Component
+
+The app includes a reusable `PasswordInput` component for all password fields:
+
+- **Password visibility toggle** with Eye/EyeOff icons
+- **React Hook Form compatible** - spreads register props directly
+- **Error message display** with validation feedback
+- **Disabled state support** for loading states
+- **Customizable styling** via className props
+- **Accessibility features** (aria-labels, semantic HTML)
+- **Bilingual support** (EN/BN)
+
+Usage example:
+```tsx
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+const [showPassword, setShowPassword] = useState(false);
+const { register, formState: { errors } } = useForm();
+
+<PasswordInput
+  id="password"
+  label="Password"
+  placeholder="••••••••"
+  visible={showPassword}
+  onVisibilityChange={setShowPassword}
+  disabled={isLoading}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+```
+
+**Used in:**
+- LoginPage - Password field
+- SignupPage - Password & Confirm Password fields
+- ResetPasswordPage - Password & Confirm Password fields
+- UpdatePasswordDialog - Current, New, & Confirm Password fields
+
+### Input Component
+
+The app includes an enhanced `Input` component that supports optional `label` and `error` props:
+
+- **Optional label prop** - Renders a Label component automatically
+- **Optional error prop** - Displays error message with validation feedback
+- **React Hook Form compatible** - spreads register props directly
+- **Disabled state support** for loading states
+- **Customizable styling** via className, labelClassName, containerClassName props
+- **Backward compatible** - Works without label/error props for simple inputs
+- **Bilingual support** (EN/BN) for labels
+
+Usage example:
+```tsx
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+
+const { register, formState: { errors } } = useForm();
+
+// With label and error
+<Input
+  id="email"
+  type="email"
+  label="Email Address"
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// Without label/error (backward compatible)
+<Input
+  id="name"
+  type="text"
+  placeholder="Enter your name"
+  {...register('name')}
+/>
+```
+
+**Used in:**
+- LoginPage - Email field
+- SignupPage - Name & Email fields
+- ForgotPasswordPage - Email field
+- PostForm - Title & Excerpt fields
+- ProfilePage - Name field (with custom styling)
 
 ### File Upload System
 
@@ -504,6 +618,105 @@ const hasMore = pagination.page < pagination.totalPages;
   totalCount={pagination.total}
 />
 ```
+
+### Rich Text Editor Component
+
+The app includes an enhanced `RichTextEditor` component with optional `label` and `error` props:
+
+- **Optional label prop** - Displays label above editor
+- **Optional error prop** - Shows validation error message below editor
+- **Rich formatting toolbar** - Bold, Italic, Strikethrough, Headings (H1-H4), Lists, Quotes, Code blocks
+- **Color picker** - Text color customization with preset colors
+- **Link & image insertion** - Add URLs and images to content
+- **Undo/Redo** - Full edit history navigation
+- **Customizable styling** via className, containerClassName, labelClassName
+- **Min height 300px** - Comfortable writing space
+- **Read-only mode** - Via editable prop
+- **Prose styling** - Beautiful typography with dark mode support
+
+Usage example:
+```tsx
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+
+const { control, formState: { errors } } = useForm();
+
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing your post..."
+    />
+  )}
+/>
+
+// Minimal usage (backward compatible)
+<RichTextEditor
+  content={contentValue}
+  onChange={setContentValue}
+/>
+```
+
+**Used in:**
+- PostForm - Blog post content creation
+- PostDetailPage - View-only mode (editable={false})
+
+### Dialog Form Reset Pattern
+
+When closing a dialog/modal with a form, reset the form validation errors and field values:
+
+```tsx
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const MyDialog: React.FC<DialogProps> = ({ open, onOpenChange }) => {
+  const { register, formState: { errors }, reset } = useForm();
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      // Reset any other local state (e.g., password visibility)
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+**Key Pattern:**
+- Add `useEffect` hook that listens to the `open` prop
+- When `open` is false (modal closing), call `reset()` to clear all form state and validation errors
+- Also reset any local UI state (e.g., password visibility toggles)
+- Include `reset` in dependency array to avoid stale closures
+
+**Used in:**
+- UpdatePasswordDialog - Resets password fields and validation errors on close
+- Any form-based dialog or modal component
 
 ## 🔐 Authentication Flow
 

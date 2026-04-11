@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { RichTextEditorProps } from '@/types';
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -37,9 +38,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = 'Start writing your post...',
   className,
   editable = true,
+  label,
+  error,
+  containerClassName,
+  labelClassName,
 }) => {
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+
 
   const editor = useEditor({
     extensions: [
@@ -113,9 +119,17 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   return (
-    <div className={cn('border border-border rounded-lg overflow-hidden bg-background', className)}>
-      {editable && (
-        <div className="flex flex-wrap gap-1 p-2 border-b border-border bg-muted/50">
+    <div className={cn('space-y-2', containerClassName)}>
+      {label && (
+        <Label className={labelClassName}>{label}</Label>
+      )}
+      <div className={cn(
+        'border border-border rounded-lg overflow-hidden bg-background',
+        error && 'border-destructive bg-destructive/5',
+        className
+      )}>
+        {editable && (
+          <div className="flex flex-wrap gap-1 p-2 border-b border-border bg-muted/50">
           <Button
             type="button"
             size="sm"
@@ -344,6 +358,11 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         editor={editor} 
         className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none p-4 min-h-[300px] focus:outline-none"
       />
+      </div>
+
+      {error && (
+        <p className="mt-1.5 text-sm text-destructive font-medium">{error}</p>
+      )}
     </div>
   );
 };

@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -79,19 +78,15 @@ export const ForgotPasswordPage: React.FC = () => {
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-              <div className="space-y-2">
-                <Label htmlFor="email">{t(TranslationKey.EMAIL_ADDRESS)}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  {...register('email')}
-                  disabled={isLoading}
-                />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email.message}</p>
-                )}
-              </div>
+              <Input
+                id="email"
+                type="email"
+                label={t(TranslationKey.EMAIL_ADDRESS)}
+                placeholder="you@example.com"
+                error={errors.email?.message}
+                {...register('email')}
+                disabled={isLoading}
+              />
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (

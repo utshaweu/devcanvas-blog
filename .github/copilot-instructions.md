@@ -30,6 +30,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Lucide React (icons)
 - Tiptap 2.x (rich text editor)
 - Custom FileUpload component (with progress tracking)
+- Custom PasswordInput component (with visibility toggle)
 
 ### Backend & Storage
 - Supabase (PostgreSQL + Auth + Storage)
@@ -80,7 +81,55 @@ export const Component: React.FC<Props> = ({ title, className }) => {
 - Use `cn()` for class merging
 - Named exports only
 
-### 2. File Upload Pattern
+### 2. Input Component Pattern
+```typescript
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+
+const { register, formState: { errors } } = useForm();
+
+// With optional label and error props
+<Input
+  id="email"
+  type="email"
+  label={t(TranslationKey.EMAIL)}
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// With custom styling (labelClassName, className, containerClassName)
+<Input
+  id="name"
+  type="text"
+  label={t(TranslationKey.NAME)}
+  placeholder={t(TranslationKey.ENTER_NAME_PLACEHOLDER)}
+  error={errors.name?.message}
+  {...register('name')}
+  disabled={isLoading}
+  className="h-11 transition-all duration-200"
+  labelClassName="flex items-center gap-2"
+/>
+
+// Backward compatible - without label/error
+<Input
+  id="search"
+  type="text"
+  placeholder="Search..."
+  {...register('search')}
+/>
+```
+
+**Input Features:**
+- Optional `label` prop - renders Label automatically
+- Optional `error` prop - displays validation error message
+- Customizable styling (className, labelClassName, containerClassName)
+- React Hook Form compatible
+- Disabled state support
+- Backward compatible (works without label/error)
+
+### 3. File Upload Pattern
 ```typescript
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -103,7 +152,7 @@ const [avatarUrl, setAvatarUrl] = useState<string>('');
 - Bilingual labels (EN/BN)
 - Error handling with user feedback
 
-### 3. Toast Notification Pattern
+### 4. Toast Notification Pattern
 ```typescript
 import { useGlobalToast } from '@/contexts/ToastContext';
 
@@ -119,7 +168,7 @@ error('Error!', 'Something went wrong');
 - Toast auto-dismisses after 5 seconds
 - Position: top-right
 
-### 4. Internationalization Pattern
+### 5. Internationalization Pattern
 ```typescript
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
@@ -137,7 +186,7 @@ const { t, language, setLanguage } = useTranslation();
 - Run `npm run extract:i18n` to verify keys
 - Stored in localStorage as `devcanvas-language`
 
-### 5. Theme Pattern
+### 6. Theme Pattern
 ```typescript
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -155,7 +204,91 @@ const { theme, setTheme } = useTheme();
 - CSS variables in globals.css handle colors
 - .dark class toggles on <html>
 
-### 6. Pagination Pattern (Load More)
+### 7. RichTextEditor Pattern
+```typescript
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  content: z.string().min(50, 'Content must be at least 50 characters'),
+});
+
+const { control, formState: { errors } } = useForm({
+  resolver: zodResolver(schema),
+});
+
+// With label and error
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing..."
+    />
+  )}
+/>
+```
+
+**RichTextEditor Features:**
+- Optional label & error props
+- Bold, Italic, Strikethrough, Headings, Lists, Quotes, Code blocks
+- Color picker with preset colors
+- Link & image insertion
+- Undo/Redo functionality
+- Read-only mode support (editable={false})
+- Controller/React Hook Form compatible
+
+### 8. Dialog Form Reset Pattern
+```typescript
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const MyDialog: React.FC<DialogProps> = ({ open, onOpenChange }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors }, reset, handleSubmit } = useForm();
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+**Key Rules:**
+- Call `reset()` when modal closes (`!open`) to clear all validation errors
+- Reset other local state (password visibility, selected colors, etc.)
+- Include `reset` in dependency array to avoid stale closures
+
+### 9. Pagination Pattern (Load More)
 ```typescript
 import { LoadMoreButton } from '@/components/common/LoadMoreButton';
 
@@ -184,7 +317,7 @@ const hasMore = pagination.page < pagination.totalPages;
 - Shows "X of Y posts" counter
 - Auto-hides when all loaded
 
-### 7. Zustand Store Pattern
+### 10. Zustand Store Pattern
 ```typescript
 import { create } from 'zustand';
 
@@ -261,7 +394,7 @@ export const useStore = create<State>((set, get) => ({
 - ALWAYS have clearError
 - Append mode for pagination
 
-### 8. Form Pattern
+### 11. Form Pattern
 ```typescript
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -284,7 +417,60 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
 - Use `z.infer` for types
 - Display error messages
 
-### 9. Like/Unlike Pattern (RPC)
+### 12. Password Input Pattern
+```typescript
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+const LoginForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors } } = useForm();
+  
+  return (
+    <PasswordInput
+      id="password"
+      label={t(TranslationKey.PASSWORD)}
+      placeholder="••••••••"
+      visible={showPassword}
+      onVisibilityChange={setShowPassword}
+      disabled={isLoading}
+      error={errors.password?.message}
+      {...register('password')}
+    />
+  );
+};
+```
+
+**For multiple password fields:**
+```typescript
+const [showPasswords, setShowPasswords] = useState({
+  password: false,
+  confirm: false,
+});
+
+<PasswordInput
+  id="password"
+  label={t(TranslationKey.PASSWORD)}
+  visible={showPasswords.password}
+  onVisibilityChange={(visible) =>
+    setShowPasswords(prev => ({ ...prev, password: visible }))
+  }
+  disabled={isLoading}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+```
+
+**Key Features:**
+- Password visibility toggle (Eye/EyeOff icons)
+- React Hook Form compatible
+- Error message display
+- Disabled state support
+- Customizable via className props
+- Accessibility features (aria-labels)
+
+### 13. Like/Unlike Pattern (RPC)
 ```typescript
 // Toggle like
 const { error } = await supabase.rpc('toggle_post_like', { 
@@ -302,7 +488,7 @@ await fetchPostById(postId);
 - Always refresh post after toggle
 - Handle errors with toast
 
-### 10. Comments Pattern
+### 14. Comments Pattern
 ```typescript
 // Fetch comments
 const { data, error } = await supabase
@@ -330,7 +516,7 @@ const { error } = await supabase
 - Always select author info
 - Order by created_at DESC
 
-### 11. Storage Upload Pattern
+### 13. Storage Upload Pattern
 ```typescript
 // Upload to Supabase Storage
 const uploadFile = async (file: File, bucket: string) => {
@@ -589,17 +775,49 @@ try {
 
 ## Key Features Implementation
 
-### File Upload
+### FileUpload Component
 - Component: `<FileUpload>` from `@/components/ui/file-upload`
+- Optional label prop - displays in upload area
+- Optional error prop - shows external validation errors
 - Buckets: 'avatars' (500KB) or 'featured-images' (500KB)
-- Shows progress, preview, change/remove buttons
-- Bilingual labels
+- Real-time progress, preview, change/remove buttons
+- Bilingual support (EN/BN)
+
+### Input Component
+- Component: `<Input>` from `@/components/ui/input`
+- Optional label prop - renders Label automatically
+- Optional error prop - displays validation error message
+- Customizable styling via className, labelClassName, containerClassName
+- React Hook Form compatible (spreads register props)
+- Backward compatible - works without label/error props
+- Used in: LoginPage, SignupPage, ForgotPasswordPage, PostForm, ProfilePage
+
+### RichTextEditor Component
+- Component: `<RichTextEditor>` from `@/components/common/RichTextEditor`
+- Optional label prop - displays above editor
+- Optional error prop - displays error message below editor
+- Rich formatting toolbar (Bold, Italic, Strikethrough, Headings, Lists, Quotes, Code)
+- Color picker with preset colors
+- Link & image insertion support
+- Undo/Redo functionality
+- Read-only mode support (editable={false})
+- Minimum 300px height with prose styling
+- Used in: PostForm - Content creation
 
 ### Pagination
 - Component: `<LoadMoreButton>` from `@/components/common/LoadMoreButton`
 - Page size: 9 posts
 - Append mode (adds to existing list)
 - Shows "X of Y posts" counter
+
+### Password Input
+- Component: `<PasswordInput>` from `@/components/ui/password-input`
+- Password visibility toggle with Eye/EyeOff icons
+- React Hook Form compatible (spreads register props)
+- Error message display with validation feedback
+- Disabled state support for loading
+- Customizable styling via className props
+- Used in: LoginPage, SignupPage, ResetPasswordPage, UpdatePasswordDialog
 
 ### Toast Notifications
 - Hook: `useGlobalToast()` from `@/contexts/ToastContext`

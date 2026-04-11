@@ -248,6 +248,10 @@ export interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   editable?: boolean;
+  label?: string; // Optional label
+  error?: string; // Optional error message
+  containerClassName?: string; // Optional container styling
+  labelClassName?: string; // Optional label styling
 }
 
 export type BadgeVariant = 'category' | 'tag' | 'status' | 'default';
@@ -279,9 +283,12 @@ export interface FileUploadProps {
   bucket?: string; // Supabase storage bucket name
   path?: string; // Optional path prefix for uploaded files
   disabled?: boolean; // Disabled state
-  className?: string; // Additional CSS classes
+  className?: string; // Additional CSS classes for upload area
   label?: string; // Label for the upload area
   showPreview?: boolean; // Whether to show image preview after upload
+  error?: string; // Validation error message (external errors)
+  containerClassName?: string; // Additional CSS classes for container
+  labelClassName?: string; // Additional CSS classes for label
 }
 
 export interface MultiSelectOption {
@@ -350,4 +357,39 @@ export interface CommentItemProps {
   onEdit: (commentId: string, content: string) => Promise<void>;
   onDelete: (commentId: string) => Promise<void>;
   className?: string;
+}
+
+export interface PasswordInputProps {
+  id: string;
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  error?: string;
+  visible: boolean;
+  onVisibilityChange: (visible: boolean) => void;
+  containerClassName?: string;
+  labelClassName?: string;
+  inputClassName?: string;
+  // react-hook-form compatibility
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  name?: string;
+  ref?: React.Ref<HTMLInputElement>;
+}
+
+export interface InputProps
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  containerClassName?: string;
+  labelClassName?: string;
+}
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  error?: string;
+  containerClassName?: string;
+  labelClassName?: string;
 }

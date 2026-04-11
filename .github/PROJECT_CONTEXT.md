@@ -139,6 +139,51 @@ toggle_post_like(p_post_id UUID)
 
 ## Common Patterns
 
+### Input Component
+```typescript
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+
+const { register, formState: { errors } } = useForm();
+
+// With label and error
+<Input
+  id="email"
+  type="email"
+  label="Email Address"
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// Backward compatible - without label/error
+<Input
+  id="search"
+  type="text"
+  placeholder="Search..."
+  {...register('search')}
+/>
+```
+
+### Password Input
+```typescript
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+
+const [showPassword, setShowPassword] = useState(false);
+
+<PasswordInput
+  id="password"
+  label="Password"
+  placeholder="••••••••"
+  visible={showPassword}
+  onVisibilityChange={setShowPassword}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+```
+
 ### File Upload
 ```typescript
 import { FileUpload } from '@/components/ui/file-upload';
@@ -175,6 +220,62 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 const { theme, setTheme } = useTheme();
 <button onClick={() => setTheme('dark')}>Dark</button>
+```
+
+### RichTextEditor Component
+```typescript
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+
+const { control, formState: { errors } } = useForm();
+
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing..."
+    />
+  )}
+/>
+```
+
+### Dialog Form Reset
+```typescript
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+export const MyDialog = ({ open, onOpenChange }) => {
+  const { register, reset, formState: { errors }, handleSubmit } = useForm();
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      // Reset other local state
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
 ```
 
 ### Load More Pagination
