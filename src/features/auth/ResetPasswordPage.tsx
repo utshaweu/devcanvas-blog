@@ -7,8 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useGlobalToast } from '@/contexts/ToastContext';
@@ -29,6 +28,10 @@ export const ResetPasswordPage: React.FC = () => {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isValidToken, setIsValidToken] = useState(true);
+  const [showPasswords, setShowPasswords] = useState({
+    password: false,
+    confirm: false,
+  });
   const { success: toastSuccess, error: toastError } = useGlobalToast();
 
   const {
@@ -111,33 +114,31 @@ export const ResetPasswordPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">{t(TranslationKey.NEW_PASSWORD)}</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register('password')}
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
+            <PasswordInput
+              id="password"
+              label={t(TranslationKey.NEW_PASSWORD)}
+              placeholder="••••••••"
+              visible={showPasswords.password}
+              onVisibilityChange={(visible) =>
+                setShowPasswords((prev) => ({ ...prev, password: visible }))
+              }
+              disabled={isLoading}
+              error={errors.password?.message}
+              {...register('password')}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">{t(TranslationKey.CONFIRM_NEW_PASSWORD)}</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                {...register('confirmPassword')}
-                disabled={isLoading}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-              )}
-            </div>
+            <PasswordInput
+              id="confirmPassword"
+              label={t(TranslationKey.CONFIRM_NEW_PASSWORD)}
+              placeholder="••••••••"
+              visible={showPasswords.confirm}
+              onVisibilityChange={(visible) =>
+                setShowPasswords((prev) => ({ ...prev, confirm: visible }))
+              }
+              disabled={isLoading}
+              error={errors.confirmPassword?.message}
+              {...register('confirmPassword')}
+            />
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (

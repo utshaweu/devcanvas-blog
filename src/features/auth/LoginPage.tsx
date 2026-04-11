@@ -8,6 +8,7 @@ import { useGlobalToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -26,6 +27,7 @@ export const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
   
   // Get success message from location state (e.g., after password reset)
@@ -94,16 +96,15 @@ export const LoginPage: React.FC = () => {
                   {t(TranslationKey.FORGOT_PASSWORD)}
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="••••••••"
-                {...register('password')}
+                visible={showPassword}
+                onVisibilityChange={setShowPassword}
                 disabled={isLoading}
+                error={errors.password?.message}
+                {...register('password')}
               />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

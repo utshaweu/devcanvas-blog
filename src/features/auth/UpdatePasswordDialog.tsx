@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import {
   Dialog,
@@ -83,13 +82,6 @@ export const UpdatePasswordDialog: React.FC<UpdatePasswordDialogProps> = ({
     }
   };
 
-  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -104,107 +96,44 @@ export const UpdatePasswordDialog: React.FC<UpdatePasswordDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Current Password */}
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword" className="text-sm font-medium">
-              {t(TranslationKey.CURRENT_PASSWORD)}
-            </Label>
-            <div className="relative">
-              <Input
-                id="currentPassword"
-                type={showPasswords.current ? 'text' : 'password'}
-                placeholder="••••••••"
-                {...register('currentPassword')}
-                disabled={isLoading}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => togglePasswordVisibility('current')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                disabled={isLoading}
-              >
-                {showPasswords.current ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {errors.currentPassword && (
-              <p className="text-xs text-destructive">
-                {errors.currentPassword.message}
-              </p>
-            )}
-          </div>
+          <PasswordInput
+            id="currentPassword"
+            label={t(TranslationKey.CURRENT_PASSWORD)}
+            placeholder="••••••••"
+            visible={showPasswords.current}
+            onVisibilityChange={(visible) =>
+              setShowPasswords((prev) => ({ ...prev, current: visible }))
+            }
+            disabled={isLoading}
+            error={errors.currentPassword?.message}
+            {...register('currentPassword')}
+          />
 
-          {/* New Password */}
-          <div className="space-y-2">
-            <Label htmlFor="newPassword" className="text-sm font-medium">
-              {t(TranslationKey.NEW_PASSWORD)}
-            </Label>
-            <div className="relative">
-              <Input
-                id="newPassword"
-                type={showPasswords.new ? 'text' : 'password'}
-                placeholder="••••••••"
-                {...register('newPassword')}
-                disabled={isLoading}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => togglePasswordVisibility('new')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                disabled={isLoading}
-              >
-                {showPasswords.new ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {errors.newPassword && (
-              <p className="text-xs text-destructive">
-                {errors.newPassword.message}
-              </p>
-            )}
-          </div>
+          <PasswordInput
+            id="newPassword"
+            label={t(TranslationKey.NEW_PASSWORD)}
+            placeholder="••••••••"
+            visible={showPasswords.new}
+            onVisibilityChange={(visible) =>
+              setShowPasswords((prev) => ({ ...prev, new: visible }))
+            }
+            disabled={isLoading}
+            error={errors.newPassword?.message}
+            {...register('newPassword')}
+          />
 
-          {/* Confirm Password */}
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-sm font-medium">
-              {t(TranslationKey.CONFIRM_NEW_PASSWORD)}
-            </Label>
-            <div className="relative">
-              <Input
-                id="confirmPassword"
-                type={showPasswords.confirm ? 'text' : 'password'}
-                placeholder="••••••••"
-                {...register('confirmPassword')}
-                disabled={isLoading}
-                className="pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => togglePasswordVisibility('confirm')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                disabled={isLoading}
-              >
-                {showPasswords.confirm ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-xs text-destructive">
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
+          <PasswordInput
+            id="confirmPassword"
+            label={t(TranslationKey.CONFIRM_NEW_PASSWORD)}
+            placeholder="••••••••"
+            visible={showPasswords.confirm}
+            onVisibilityChange={(visible) =>
+              setShowPasswords((prev) => ({ ...prev, confirm: visible }))
+            }
+            disabled={isLoading}
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
+          />
 
           {/* Submit Button */}
           <Button

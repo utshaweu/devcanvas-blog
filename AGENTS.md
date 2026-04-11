@@ -353,17 +353,80 @@ See `STORAGE_SETUP.md` for creating Supabase storage buckets and policies.
 - `avatars`: User profile pictures (500KB max)
 - `featured-images`: Blog post images (500KB max)
 
-// 4. Handle submission
-const onSubmit = async (data: FormData) => {
-  try {
-    await submitData(data);
-  } catch (error) {
-    // Handle error
-  }
+### 5. PasswordInput Component Pattern
+
+```typescript
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+const LoginForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors } } = useForm();
+  
+  return (
+    <PasswordInput
+      id="password"
+      label="Password"
+      placeholder="••••••••"
+      visible={showPassword}
+      onVisibilityChange={setShowPassword}
+      disabled={isLoading}
+      error={errors.password?.message}
+      {...register('password')}
+    />
+  );
 };
 ```
 
-### 5. Protected Routes Pattern
+**For multiple password fields (signup, password reset):**
+```typescript
+const [showPasswords, setShowPasswords] = useState({
+  password: false,
+  confirm: false,
+});
+
+<PasswordInput
+  id="password"
+  label="Password"
+  visible={showPasswords.password}
+  onVisibilityChange={(visible) =>
+    setShowPasswords(prev => ({ ...prev, password: visible }))
+  }
+  disabled={isLoading}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+
+<PasswordInput
+  id="confirmPassword"
+  label="Confirm Password"
+  visible={showPasswords.confirm}
+  onVisibilityChange={(visible) =>
+    setShowPasswords(prev => ({ ...prev, confirm: visible }))
+  }
+  disabled={isLoading}
+  error={errors.confirmPassword?.message}
+  {...register('confirmPassword')}
+/>
+```
+
+**Key Features:**
+- Password visibility toggle (Eye/EyeOff icons)
+- React Hook Form compatible - spreads register props
+- Error message display with validation feedback
+- Disabled state support for loading
+- Customizable via containerClassName, labelClassName, inputClassName
+- Accessibility features (aria-labels, semantic HTML)
+- Bilingual support (EN/BN)
+
+**Used throughout the app in:**
+- LoginPage - Password field
+- SignupPage - Password & Confirm Password fields
+- ResetPasswordPage - Password & Confirm Password fields
+- UpdatePasswordDialog - Current, New, & Confirm Password fields
+
+### 6. Protected Routes Pattern
 
 ```typescript
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -386,7 +449,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 />
 ```
 
-### 6. Error Handling Pattern
+### 7. Error Handling Pattern
 
 **Modern Approach: Use Global Toast Notifications**
 

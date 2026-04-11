@@ -8,6 +8,7 @@ import { useGlobalToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -30,6 +31,10 @@ export const SignupPage: React.FC = () => {
   const { signup } = useAuth();
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    password: false,
+    confirm: false,
+  });
   const { t } = useTranslation();
 
   const {
@@ -97,30 +102,32 @@ export const SignupPage: React.FC = () => {
 
             <div className="space-y-2">
               <Label htmlFor="password">{t(TranslationKey.PASSWORD)}</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 placeholder="••••••••"
-                {...register('password')}
+                visible={showPasswords.password}
+                onVisibilityChange={(visible) =>
+                  setShowPasswords((prev) => ({ ...prev, password: visible }))
+                }
                 disabled={isLoading}
+                error={errors.password?.message}
+                {...register('password')}
               />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">{t(TranslationKey.CONFIRM_PASSWORD)}</Label>
-              <Input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 placeholder="••••••••"
-                {...register('confirmPassword')}
+                visible={showPasswords.confirm}
+                onVisibilityChange={(visible) =>
+                  setShowPasswords((prev) => ({ ...prev, confirm: visible }))
+                }
                 disabled={isLoading}
+                error={errors.confirmPassword?.message}
+                {...register('confirmPassword')}
               />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

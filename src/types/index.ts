@@ -351,3 +351,22 @@ export interface CommentItemProps {
   onDelete: (commentId: string) => Promise<void>;
   className?: string;
 }
+
+export interface PasswordInputProps {
+  id: string;
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  error?: string;
+  visible: boolean;
+  onVisibilityChange: (visible: boolean) => void;
+  containerClassName?: string;
+  labelClassName?: string;
+  inputClassName?: string;
+  // react-hook-form compatibility
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  name?: string;
+  ref?: React.Ref<HTMLInputElement>;
+}

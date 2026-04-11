@@ -139,6 +139,24 @@ toggle_post_like(p_post_id UUID)
 
 ## Common Patterns
 
+### Password Input
+```typescript
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+
+const [showPassword, setShowPassword] = useState(false);
+
+<PasswordInput
+  id="password"
+  label="Password"
+  placeholder="••••••••"
+  visible={showPassword}
+  onVisibilityChange={setShowPassword}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+```
+
 ### File Upload
 ```typescript
 import { FileUpload } from '@/components/ui/file-upload';

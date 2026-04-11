@@ -61,8 +61,9 @@ devcanvas-blog/
 │   │   ├── ui/             # Shadcn/ui components
 │   │   │   ├── button.tsx
 │   │   │   ├── input.tsx
-│   │   │   ├── dialog.tsx       # Dialog modal component
-│   │   │   ├── file-upload.tsx  # File upload with progress
+│   │   │   ├── dialog.tsx            # Dialog modal component
+│   │   │   ├── password-input.tsx    # Password field with visibility toggle
+│   │   │   ├── file-upload.tsx       # File upload with progress
 │   │   │   └── ...
 │   │   ├── common/         # Common reusable components
 │   │   └── layout/         # Layout components (Header, Footer)
@@ -464,10 +465,50 @@ error('Error!', 'Something went wrong');
 
 1. **UI Components** (`components/ui/`): Primitive, reusable components
    - `file-upload.tsx` - File upload with progress bar and preview
+   - `password-input.tsx` - Password field with visibility toggle (Eye/EyeOff icons)
    - `button.tsx`, `input.tsx`, `card.tsx` - Base UI elements
 2. **Common Components** (`components/common/`): Composed, reusable business components
 3. **Feature Components** (`features/*/`): Feature-specific components
 4. **Layout Components** (`components/layout/`): Page layout components
+
+### Password Input Component
+
+The app includes a reusable `PasswordInput` component for all password fields:
+
+- **Password visibility toggle** with Eye/EyeOff icons
+- **React Hook Form compatible** - spreads register props directly
+- **Error message display** with validation feedback
+- **Disabled state support** for loading states
+- **Customizable styling** via className props
+- **Accessibility features** (aria-labels, semantic HTML)
+- **Bilingual support** (EN/BN)
+
+Usage example:
+```tsx
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+const [showPassword, setShowPassword] = useState(false);
+const { register, formState: { errors } } = useForm();
+
+<PasswordInput
+  id="password"
+  label="Password"
+  placeholder="••••••••"
+  visible={showPassword}
+  onVisibilityChange={setShowPassword}
+  disabled={isLoading}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+```
+
+**Used in:**
+- LoginPage - Password field
+- SignupPage - Password & Confirm Password fields
+- ResetPasswordPage - Password & Confirm Password fields
+- UpdatePasswordDialog - Current, New, & Confirm Password fields
 
 ### File Upload System
 

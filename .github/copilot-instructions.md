@@ -30,6 +30,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Lucide React (icons)
 - Tiptap 2.x (rich text editor)
 - Custom FileUpload component (with progress tracking)
+- Custom PasswordInput component (with visibility toggle)
 
 ### Backend & Storage
 - Supabase (PostgreSQL + Auth + Storage)
@@ -284,7 +285,60 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
 - Use `z.infer` for types
 - Display error messages
 
-### 9. Like/Unlike Pattern (RPC)
+### 9. Password Input Pattern
+```typescript
+import { PasswordInput } from '@/components/ui/password-input';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+const LoginForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors } } = useForm();
+  
+  return (
+    <PasswordInput
+      id="password"
+      label={t(TranslationKey.PASSWORD)}
+      placeholder="••••••••"
+      visible={showPassword}
+      onVisibilityChange={setShowPassword}
+      disabled={isLoading}
+      error={errors.password?.message}
+      {...register('password')}
+    />
+  );
+};
+```
+
+**For multiple password fields:**
+```typescript
+const [showPasswords, setShowPasswords] = useState({
+  password: false,
+  confirm: false,
+});
+
+<PasswordInput
+  id="password"
+  label={t(TranslationKey.PASSWORD)}
+  visible={showPasswords.password}
+  onVisibilityChange={(visible) =>
+    setShowPasswords(prev => ({ ...prev, password: visible }))
+  }
+  disabled={isLoading}
+  error={errors.password?.message}
+  {...register('password')}
+/>
+```
+
+**Key Features:**
+- Password visibility toggle (Eye/EyeOff icons)
+- React Hook Form compatible
+- Error message display
+- Disabled state support
+- Customizable via className props
+- Accessibility features (aria-labels)
+
+### 10. Like/Unlike Pattern (RPC)
 ```typescript
 // Toggle like
 const { error } = await supabase.rpc('toggle_post_like', { 
@@ -302,7 +356,7 @@ await fetchPostById(postId);
 - Always refresh post after toggle
 - Handle errors with toast
 
-### 10. Comments Pattern
+### 11. Comments Pattern
 ```typescript
 // Fetch comments
 const { data, error } = await supabase
@@ -330,7 +384,7 @@ const { error } = await supabase
 - Always select author info
 - Order by created_at DESC
 
-### 11. Storage Upload Pattern
+### 12. Storage Upload Pattern
 ```typescript
 // Upload to Supabase Storage
 const uploadFile = async (file: File, bucket: string) => {
@@ -600,6 +654,15 @@ try {
 - Page size: 9 posts
 - Append mode (adds to existing list)
 - Shows "X of Y posts" counter
+
+### Password Input
+- Component: `<PasswordInput>` from `@/components/ui/password-input`
+- Password visibility toggle with Eye/EyeOff icons
+- React Hook Form compatible (spreads register props)
+- Error message display with validation feedback
+- Disabled state support for loading
+- Customizable styling via className props
+- Used in: LoginPage, SignupPage, ResetPasswordPage, UpdatePasswordDialog
 
 ### Toast Notifications
 - Hook: `useGlobalToast()` from `@/contexts/ToastContext`
