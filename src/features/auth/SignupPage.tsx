@@ -72,33 +72,25 @@ export const SignupPage: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Form errors */}
-            <div className="space-y-2">
-              <Label htmlFor="name">{t(TranslationKey.NAME)}</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                {...register('name')}
-                disabled={isLoading}
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
-              )}
-            </div>
+            <Input
+              id="name"
+              type="text"
+              label={t(TranslationKey.NAME)}
+              placeholder="John Doe"
+              error={errors.name?.message}
+              {...register('name')}
+              disabled={isLoading}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="email">{t(TranslationKey.EMAIL)}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register('email')}
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
+            <Input
+              id="email"
+              type="email"
+              label={t(TranslationKey.EMAIL)}
+              placeholder="you@example.com"
+              error={errors.email?.message}
+              {...register('email')}
+              disabled={isLoading}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="password">{t(TranslationKey.PASSWORD)}</Label>

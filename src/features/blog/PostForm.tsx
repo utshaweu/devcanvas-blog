@@ -65,33 +65,25 @@ export const PostForm: React.FC<PostFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="title">{t(TranslationKey.TITLE)}</Label>
-        <Input
-          id="title"
-          type="text"
-          placeholder={t(TranslationKey.ENTER_TITLE_PLACEHOLDER)}
-          {...register('title')}
-          disabled={isLoading}
-        />
-        {errors.title && (
-          <p className="text-sm text-destructive">{errors.title.message}</p>
-        )}
-      </div>
+      <Input
+        id="title"
+        type="text"
+        label={t(TranslationKey.TITLE)}
+        placeholder={t(TranslationKey.ENTER_TITLE_PLACEHOLDER)}
+        error={errors.title?.message}
+        {...register('title')}
+        disabled={isLoading}
+      />
 
-      <div className="space-y-2">
-        <Label htmlFor="excerpt">{t(TranslationKey.EXCERPT)}</Label>
-        <Input
-          id="excerpt"
-          type="text"
-          placeholder={t(TranslationKey.EXCERPT_PLACEHOLDER)}
-          {...register('excerpt')}
-          disabled={isLoading}
-        />
-        {errors.excerpt && (
-          <p className="text-sm text-destructive">{errors.excerpt.message}</p>
-        )}
-      </div>
+      <Input
+        id="excerpt"
+        type="text"
+        label={t(TranslationKey.EXCERPT)}
+        placeholder={t(TranslationKey.EXCERPT_PLACEHOLDER)}
+        error={errors.excerpt?.message}
+        {...register('excerpt')}
+        disabled={isLoading}
+      />
 
       <div className="space-y-2">
         <Label className="text-sm font-medium">{t(TranslationKey.FEATURED_IMAGE)}</Label>

@@ -353,7 +353,78 @@ See `STORAGE_SETUP.md` for creating Supabase storage buckets and policies.
 - `avatars`: User profile pictures (500KB max)
 - `featured-images`: Blog post images (500KB max)
 
-### 5. PasswordInput Component Pattern
+### 5. Input Component Pattern
+
+```typescript
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
+
+const { register, formState: { errors } } = useForm();
+const { t } = useTranslation();
+
+// With label and error (recommended for form fields)
+<Input
+  id="email"
+  type="email"
+  label={t(TranslationKey.EMAIL)}
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// For multiple inputs in PostForm
+<Input
+  id="title"
+  type="text"
+  label={t(TranslationKey.TITLE)}
+  placeholder={t(TranslationKey.ENTER_TITLE_PLACEHOLDER)}
+  error={errors.title?.message}
+  {...register('title')}
+  disabled={isLoading}
+/>
+
+// With custom styling (ProfilePage pattern)
+<Input
+  id="name"
+  type="text"
+  label={t(TranslationKey.NAME)}
+  placeholder={t(TranslationKey.ENTER_NAME_PLACEHOLDER)}
+  error={errors.name?.message}
+  {...register('name')}
+  disabled={isLoading}
+  className="h-11 transition-all duration-200"
+  labelClassName="flex items-center gap-2"
+/>
+
+// Backward compatible - without label/error
+<Input
+  id="search"
+  type="text"
+  placeholder="Search..."
+  {...register('search')}
+/>
+```
+
+**Key Features:**
+- Optional `label` prop - renders Label automatically
+- Optional `error` prop - displays error message with validation feedback
+- Customizable via className, labelClassName, containerClassName
+- React Hook Form compatible - spreads register props
+- Disabled state support
+- Backward compatible - works without label/error props
+- Accessibility features (htmlFor, aria labels)
+
+**Used in:**
+- LoginPage - Email field
+- SignupPage - Name & Email fields
+- ForgotPasswordPage - Email field
+- PostForm - Title & Excerpt fields
+- ProfilePage - Name & Email fields
+
+### 6. PasswordInput Component Pattern
 
 ```typescript
 import { PasswordInput } from '@/components/ui/password-input';
@@ -426,7 +497,7 @@ const [showPasswords, setShowPasswords] = useState({
 - ResetPasswordPage - Password & Confirm Password fields
 - UpdatePasswordDialog - Current, New, & Confirm Password fields
 
-### 6. Protected Routes Pattern
+### 7. Protected Routes Pattern
 
 ```typescript
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -449,7 +520,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 />
 ```
 
-### 7. Error Handling Pattern
+### 8. Error Handling Pattern
 
 **Modern Approach: Use Global Toast Notifications**
 

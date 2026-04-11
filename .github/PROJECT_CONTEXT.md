@@ -139,6 +139,33 @@ toggle_post_like(p_post_id UUID)
 
 ## Common Patterns
 
+### Input Component
+```typescript
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+
+const { register, formState: { errors } } = useForm();
+
+// With label and error
+<Input
+  id="email"
+  type="email"
+  label="Email Address"
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// Backward compatible - without label/error
+<Input
+  id="search"
+  type="text"
+  placeholder="Search..."
+  {...register('search')}
+/>
+```
+
 ### Password Input
 ```typescript
 import { PasswordInput } from '@/components/ui/password-input';

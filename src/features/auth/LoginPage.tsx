@@ -72,19 +72,15 @@ export const LoginPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">{t(TranslationKey.EMAIL)}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register('email')}
-                disabled={isLoading}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
+            <Input
+              id="email"
+              type="email"
+              label={t(TranslationKey.EMAIL)}
+              placeholder="you@example.com"
+              error={errors.email?.message}
+              {...register('email')}
+              disabled={isLoading}
+            />
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">

@@ -81,7 +81,55 @@ export const Component: React.FC<Props> = ({ title, className }) => {
 - Use `cn()` for class merging
 - Named exports only
 
-### 2. File Upload Pattern
+### 2. Input Component Pattern
+```typescript
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+
+const { register, formState: { errors } } = useForm();
+
+// With optional label and error props
+<Input
+  id="email"
+  type="email"
+  label={t(TranslationKey.EMAIL)}
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// With custom styling (labelClassName, className, containerClassName)
+<Input
+  id="name"
+  type="text"
+  label={t(TranslationKey.NAME)}
+  placeholder={t(TranslationKey.ENTER_NAME_PLACEHOLDER)}
+  error={errors.name?.message}
+  {...register('name')}
+  disabled={isLoading}
+  className="h-11 transition-all duration-200"
+  labelClassName="flex items-center gap-2"
+/>
+
+// Backward compatible - without label/error
+<Input
+  id="search"
+  type="text"
+  placeholder="Search..."
+  {...register('search')}
+/>
+```
+
+**Input Features:**
+- Optional `label` prop - renders Label automatically
+- Optional `error` prop - displays validation error message
+- Customizable styling (className, labelClassName, containerClassName)
+- React Hook Form compatible
+- Disabled state support
+- Backward compatible (works without label/error)
+
+### 3. File Upload Pattern
 ```typescript
 import { FileUpload } from '@/components/ui/file-upload';
 
@@ -104,7 +152,7 @@ const [avatarUrl, setAvatarUrl] = useState<string>('');
 - Bilingual labels (EN/BN)
 - Error handling with user feedback
 
-### 3. Toast Notification Pattern
+### 4. Toast Notification Pattern
 ```typescript
 import { useGlobalToast } from '@/contexts/ToastContext';
 
@@ -120,7 +168,7 @@ error('Error!', 'Something went wrong');
 - Toast auto-dismisses after 5 seconds
 - Position: top-right
 
-### 4. Internationalization Pattern
+### 5. Internationalization Pattern
 ```typescript
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
@@ -138,7 +186,7 @@ const { t, language, setLanguage } = useTranslation();
 - Run `npm run extract:i18n` to verify keys
 - Stored in localStorage as `devcanvas-language`
 
-### 5. Theme Pattern
+### 6. Theme Pattern
 ```typescript
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -156,7 +204,7 @@ const { theme, setTheme } = useTheme();
 - CSS variables in globals.css handle colors
 - .dark class toggles on <html>
 
-### 6. Pagination Pattern (Load More)
+### 7. Pagination Pattern (Load More)
 ```typescript
 import { LoadMoreButton } from '@/components/common/LoadMoreButton';
 
@@ -185,7 +233,7 @@ const hasMore = pagination.page < pagination.totalPages;
 - Shows "X of Y posts" counter
 - Auto-hides when all loaded
 
-### 7. Zustand Store Pattern
+### 8. Zustand Store Pattern
 ```typescript
 import { create } from 'zustand';
 
@@ -262,7 +310,7 @@ export const useStore = create<State>((set, get) => ({
 - ALWAYS have clearError
 - Append mode for pagination
 
-### 8. Form Pattern
+### 9. Form Pattern
 ```typescript
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -285,7 +333,7 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
 - Use `z.infer` for types
 - Display error messages
 
-### 9. Password Input Pattern
+### 10. Password Input Pattern
 ```typescript
 import { PasswordInput } from '@/components/ui/password-input';
 import { useState } from 'react';
@@ -338,7 +386,7 @@ const [showPasswords, setShowPasswords] = useState({
 - Customizable via className props
 - Accessibility features (aria-labels)
 
-### 10. Like/Unlike Pattern (RPC)
+### 11. Like/Unlike Pattern (RPC)
 ```typescript
 // Toggle like
 const { error } = await supabase.rpc('toggle_post_like', { 
@@ -356,7 +404,7 @@ await fetchPostById(postId);
 - Always refresh post after toggle
 - Handle errors with toast
 
-### 11. Comments Pattern
+### 12. Comments Pattern
 ```typescript
 // Fetch comments
 const { data, error } = await supabase
@@ -384,7 +432,7 @@ const { error } = await supabase
 - Always select author info
 - Order by created_at DESC
 
-### 12. Storage Upload Pattern
+### 13. Storage Upload Pattern
 ```typescript
 // Upload to Supabase Storage
 const uploadFile = async (file: File, bucket: string) => {
@@ -648,6 +696,15 @@ try {
 - Buckets: 'avatars' (500KB) or 'featured-images' (500KB)
 - Shows progress, preview, change/remove buttons
 - Bilingual labels
+
+### Input Component
+- Component: `<Input>` from `@/components/ui/input`
+- Optional label prop - renders Label automatically
+- Optional error prop - displays validation error message
+- Customizable styling via className, labelClassName, containerClassName
+- React Hook Form compatible (spreads register props)
+- Backward compatible - works without label/error props
+- Used in: LoginPage, SignupPage, ForgotPasswordPage, PostForm, ProfilePage
 
 ### Pagination
 - Component: `<LoadMoreButton>` from `@/components/common/LoadMoreButton`

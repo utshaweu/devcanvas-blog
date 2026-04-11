@@ -60,10 +60,10 @@ devcanvas-blog/
 │   ├── components/          # Reusable components
 │   │   ├── ui/             # Shadcn/ui components
 │   │   │   ├── button.tsx
-│   │   │   ├── input.tsx
-│   │   │   ├── dialog.tsx            # Dialog modal component
-│   │   │   ├── password-input.tsx    # Password field with visibility toggle
-│   │   │   ├── file-upload.tsx       # File upload with progress
+│   │   │   ├── input.tsx                # Form input with label & error props
+│   │   │   ├── dialog.tsx               # Dialog modal component
+│   │   │   ├── password-input.tsx       # Password field with visibility toggle
+│   │   │   ├── file-upload.tsx          # File upload with progress
 │   │   │   └── ...
 │   │   ├── common/         # Common reusable components
 │   │   └── layout/         # Layout components (Header, Footer)
@@ -464,9 +464,10 @@ error('Error!', 'Something went wrong');
 ### Component Patterns
 
 1. **UI Components** (`components/ui/`): Primitive, reusable components
-   - `file-upload.tsx` - File upload with progress bar and preview
+   - `input.tsx` - Form input with optional label and error props
    - `password-input.tsx` - Password field with visibility toggle (Eye/EyeOff icons)
-   - `button.tsx`, `input.tsx`, `card.tsx` - Base UI elements
+   - `file-upload.tsx` - File upload with progress bar and preview
+   - `button.tsx`, `card.tsx` - Base UI elements
 2. **Common Components** (`components/common/`): Composed, reusable business components
 3. **Feature Components** (`features/*/`): Feature-specific components
 4. **Layout Components** (`components/layout/`): Page layout components
@@ -509,6 +510,52 @@ const { register, formState: { errors } } = useForm();
 - SignupPage - Password & Confirm Password fields
 - ResetPasswordPage - Password & Confirm Password fields
 - UpdatePasswordDialog - Current, New, & Confirm Password fields
+
+### Input Component
+
+The app includes an enhanced `Input` component that supports optional `label` and `error` props:
+
+- **Optional label prop** - Renders a Label component automatically
+- **Optional error prop** - Displays error message with validation feedback
+- **React Hook Form compatible** - spreads register props directly
+- **Disabled state support** for loading states
+- **Customizable styling** via className, labelClassName, containerClassName props
+- **Backward compatible** - Works without label/error props for simple inputs
+- **Bilingual support** (EN/BN) for labels
+
+Usage example:
+```tsx
+import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
+
+const { register, formState: { errors } } = useForm();
+
+// With label and error
+<Input
+  id="email"
+  type="email"
+  label="Email Address"
+  placeholder="you@example.com"
+  error={errors.email?.message}
+  {...register('email')}
+  disabled={isLoading}
+/>
+
+// Without label/error (backward compatible)
+<Input
+  id="name"
+  type="text"
+  placeholder="Enter your name"
+  {...register('name')}
+/>
+```
+
+**Used in:**
+- LoginPage - Email field
+- SignupPage - Name & Email fields
+- ForgotPasswordPage - Email field
+- PostForm - Title & Excerpt fields
+- ProfilePage - Name field (with custom styling)
 
 ### File Upload System
 
