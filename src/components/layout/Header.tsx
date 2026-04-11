@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PenSquare, User, LogOut, BarChart3 } from 'lucide-react';
+import { PenSquare, User, LogOut, BarChart3, Key } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
+import { UpdatePasswordDialog } from '@/features/auth/UpdatePasswordDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +22,7 @@ export const Header: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -102,6 +104,10 @@ export const Header: React.FC = () => {
                   <User className="mr-2 h-4 w-4" />
                   <span>{t(TranslationKey.PROFILE)}</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setPasswordDialogOpen(true)}>
+                  <Key className="mr-2 h-4 w-4" />
+                  <span>{t(TranslationKey.CHANGE_PASSWORD)}</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
@@ -121,6 +127,11 @@ export const Header: React.FC = () => {
           )}
         </div>
       </div>
+
+      <UpdatePasswordDialog
+        open={passwordDialogOpen}
+        onOpenChange={setPasswordDialogOpen}
+      />
     </header>
   );
 };

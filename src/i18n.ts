@@ -171,6 +171,10 @@ export enum TranslationKey {
   MAX_SIZE = 'maxSize',
   CLICK_TO_BROWSE_OR_DRAG_AND_DROP = 'clickToBrowseOrDragAndDrop',
   CLICK_TO_TRY_AGAIN = 'clickToTryAgain',
+  CHANGE_PASSWORD = 'changePassword',
+  CURRENT_PASSWORD = 'currentPassword',
+  UPDATE_PASSWORD_DESCRIPTION = 'updatePasswordDescription',
+  PASSWORD_CHANGED_MESSAGE = 'passwordChangedMessage',
 }
 
 export type LanguageKey = TranslationKey;
@@ -347,6 +351,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.CLICK_TO_TRY_AGAIN]: 'Click to try again',
     [TranslationKey.SUPPORTED_FORMATS]: 'Supported formats',
     [TranslationKey.MAX_SIZE]: 'Max size: {maxSize}MB',
+    [TranslationKey.CHANGE_PASSWORD]: 'Change Password',
+    [TranslationKey.CURRENT_PASSWORD]: 'Current Password',
+    [TranslationKey.UPDATE_PASSWORD_DESCRIPTION]: 'Update your password to keep your account secure',
+    [TranslationKey.PASSWORD_CHANGED_MESSAGE]: 'Your password has been updated successfully',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -519,6 +527,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.MAX_SIZE]: 'সর্বাধিক আকার: {maxSize}এমবি',
     [TranslationKey.CLICK_TO_BROWSE_OR_DRAG_AND_DROP]: 'ব্রাউজ করতে ক্লিক করুন বা ড্র্যাগ এবং ড্রপ করুন',
     [TranslationKey.CLICK_TO_TRY_AGAIN]: 'আবার চেষ্টা করতে ক্লিক করুন',
+    [TranslationKey.CHANGE_PASSWORD]: 'পাসওয়ার্ড পরিবর্তন করুন',
+    [TranslationKey.CURRENT_PASSWORD]: 'বর্তমান পাসওয়ার্ড',
+    [TranslationKey.UPDATE_PASSWORD_DESCRIPTION]: 'আপনার অ্যাকাউন্ট সুরক্ষিত রাখতে আপনার পাসওয়ার্ড আপডেট করুন',
+    [TranslationKey.PASSWORD_CHANGED_MESSAGE]: 'আপনার পাসওয়ার্ড সফলভাবে আপডেট হয়েছে',
   },
 };
 

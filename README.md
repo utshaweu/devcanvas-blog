@@ -5,6 +5,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 ## 🚀 Features
 
 - **Authentication & Authorization**: Secure user authentication with Supabase
+- **Password Management**: Secure password update dialog in user profile dropdown
 - **Rich Text Editor**: Powerful content creation with Tiptap
 - **File Upload System**: Beautiful file upload with progress tracking for avatars
 - **Supabase Storage**: Integrated cloud storage for user avatars and images
@@ -60,12 +61,18 @@ devcanvas-blog/
 │   │   ├── ui/             # Shadcn/ui components
 │   │   │   ├── button.tsx
 │   │   │   ├── input.tsx
+│   │   │   ├── dialog.tsx       # Dialog modal component
 │   │   │   ├── file-upload.tsx  # File upload with progress
 │   │   │   └── ...
 │   │   ├── common/         # Common reusable components
 │   │   └── layout/         # Layout components (Header, Footer)
 │   ├── features/           # Feature-based modules (micro-frontends)
 │   │   ├── auth/          # Authentication features
+│   │   │   ├── LoginPage.tsx
+│   │   │   ├── SignupPage.tsx
+│   │   │   ├── ResetPasswordPage.tsx
+│   │   │   ├── ForgotPasswordPage.tsx
+│   │   │   └── UpdatePasswordDialog.tsx  # Password update modal
 │   │   ├── blog/          # Blog post features
 │   │   ├── dashboard/     # Dashboard features
 │   │   ├── profile/       # User profile with avatar upload
@@ -96,6 +103,25 @@ devcanvas-blog/
 - **Font Family**: Inter (Google Fonts)
 - **Features**: Variable font with multiple weights (300-900)
 - **Font Features**: CV02, CV03, CV04, CV11 for improved readability
+
+## 🔐 Password Management
+
+The application includes a secure password update feature integrated in the user profile dropdown:
+
+- **Change Password Dialog**: Accessible from the user avatar dropdown menu in the header
+- **Security Features**:
+  - Current password verification required
+  - New password must be 6+ characters
+  - Confirmation password validation
+  - Password visibility toggles
+  - Prevents using same password as current one
+- **User Experience**:
+  - Beautiful modal dialog with smooth animations
+  - Clear validation error messages
+  - Loading states during submission
+  - Toast notifications for success/error feedback
+- **Bilingual Support**: Available in English and Bengali
+- **Location**: `src/features/auth/UpdatePasswordDialog.tsx`
 
 ## 🚦 Getting Started
 

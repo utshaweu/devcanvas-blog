@@ -62,6 +62,10 @@ The repository is compatible with several AI models to assist developers:
 - **Primitives:** Radix UI for accessibility
 - **Icons:** Lucide React
 - **Rich Text:** Tiptap 2.x with StarterKit
+- **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
+  - Used by UpdatePasswordDialog for secure password changes
+  - Supports animations and smooth transitions
+  - Fully accessible with Radix UI
 
 ### Backend & Database
 - **Backend:** Supabase (PostgreSQL + Auth + Storage)
@@ -889,6 +893,67 @@ export const useNewStore = create<NewState>((set) => ({
   },
 }));
 ```
+
+### Password Update Feature
+
+The application includes a password update feature accessible from the user avatar dropdown in the header:
+
+**Location:** `src/features/auth/UpdatePasswordDialog.tsx`
+
+**Features:**
+- Secure password change dialog with modal
+- Requires current password verification
+- Validates new password (6+ characters)
+- Confirms password match
+- Prevents reusing current password
+- Password visibility toggles (Eye icon)
+- Error validation messages
+- Loading states during submission
+- Toast notifications for feedback
+- Bilingual support (EN/BN)
+
+**Usage in Header:**
+```typescript
+import { UpdatePasswordDialog } from '@/features/auth/UpdatePasswordDialog';
+
+const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+
+// In dropdown menu
+<DropdownMenuItem onClick={() => setPasswordDialogOpen(true)}>
+  <Key className="mr-2 h-4 w-4" />
+  <span>{t(TranslationKey.CHANGE_PASSWORD)}</span>
+</DropdownMenuItem>
+
+// In component
+<UpdatePasswordDialog
+  open={passwordDialogOpen}
+  onOpenChange={setPasswordDialogOpen}
+/>
+```
+
+**Translation Keys Used:**
+- `CHANGE_PASSWORD` - Dialog title
+- `CURRENT_PASSWORD` - Current password label
+- `NEW_PASSWORD` - New password label
+- `CONFIRM_NEW_PASSWORD` - Confirm password label
+- `UPDATE_PASSWORD_DESCRIPTION` - Dialog description
+- `PASSWORD_UPDATED_SUCCESS` - Success notification title
+- `PASSWORD_CHANGED_MESSAGE` - Success notification message
+- `UPDATING_PASSWORD` - Loading state
+- `UPDATE_PASSWORD` - Submit button text
+
+**Auth Integration:**
+```typescript
+const { updatePassword } = useAuth();
+await updatePassword(newPassword);
+```
+
+The feature follows project patterns:
+- React Hook Form + Zod validation
+- Global toast notifications
+- TypeScript with proper typing
+- Tailwind CSS styling
+- Radix UI Dialog component
 
 ### Adding a New UI Component
 
