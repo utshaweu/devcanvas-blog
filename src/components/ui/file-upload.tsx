@@ -328,7 +328,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       {error && (
         <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-md">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <p>{error}</p>
+          <p className='font-medium'>{error}</p>
         </div>
       )}
 

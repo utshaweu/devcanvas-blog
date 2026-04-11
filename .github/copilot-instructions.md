@@ -204,7 +204,91 @@ const { theme, setTheme } = useTheme();
 - CSS variables in globals.css handle colors
 - .dark class toggles on <html>
 
-### 7. Pagination Pattern (Load More)
+### 7. RichTextEditor Pattern
+```typescript
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  content: z.string().min(50, 'Content must be at least 50 characters'),
+});
+
+const { control, formState: { errors } } = useForm({
+  resolver: zodResolver(schema),
+});
+
+// With label and error
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing..."
+    />
+  )}
+/>
+```
+
+**RichTextEditor Features:**
+- Optional label & error props
+- Bold, Italic, Strikethrough, Headings, Lists, Quotes, Code blocks
+- Color picker with preset colors
+- Link & image insertion
+- Undo/Redo functionality
+- Read-only mode support (editable={false})
+- Controller/React Hook Form compatible
+
+### 8. Dialog Form Reset Pattern
+```typescript
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const MyDialog: React.FC<DialogProps> = ({ open, onOpenChange }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors }, reset, handleSubmit } = useForm();
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+**Key Rules:**
+- Call `reset()` when modal closes (`!open`) to clear all validation errors
+- Reset other local state (password visibility, selected colors, etc.)
+- Include `reset` in dependency array to avoid stale closures
+
+### 9. Pagination Pattern (Load More)
 ```typescript
 import { LoadMoreButton } from '@/components/common/LoadMoreButton';
 
@@ -233,7 +317,7 @@ const hasMore = pagination.page < pagination.totalPages;
 - Shows "X of Y posts" counter
 - Auto-hides when all loaded
 
-### 8. Zustand Store Pattern
+### 10. Zustand Store Pattern
 ```typescript
 import { create } from 'zustand';
 
@@ -310,7 +394,7 @@ export const useStore = create<State>((set, get) => ({
 - ALWAYS have clearError
 - Append mode for pagination
 
-### 9. Form Pattern
+### 11. Form Pattern
 ```typescript
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -333,7 +417,7 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
 - Use `z.infer` for types
 - Display error messages
 
-### 10. Password Input Pattern
+### 12. Password Input Pattern
 ```typescript
 import { PasswordInput } from '@/components/ui/password-input';
 import { useState } from 'react';
@@ -386,7 +470,7 @@ const [showPasswords, setShowPasswords] = useState({
 - Customizable via className props
 - Accessibility features (aria-labels)
 
-### 11. Like/Unlike Pattern (RPC)
+### 13. Like/Unlike Pattern (RPC)
 ```typescript
 // Toggle like
 const { error } = await supabase.rpc('toggle_post_like', { 
@@ -404,7 +488,7 @@ await fetchPostById(postId);
 - Always refresh post after toggle
 - Handle errors with toast
 
-### 12. Comments Pattern
+### 14. Comments Pattern
 ```typescript
 // Fetch comments
 const { data, error } = await supabase
@@ -691,11 +775,13 @@ try {
 
 ## Key Features Implementation
 
-### File Upload
+### FileUpload Component
 - Component: `<FileUpload>` from `@/components/ui/file-upload`
+- Optional label prop - displays in upload area
+- Optional error prop - shows external validation errors
 - Buckets: 'avatars' (500KB) or 'featured-images' (500KB)
-- Shows progress, preview, change/remove buttons
-- Bilingual labels
+- Real-time progress, preview, change/remove buttons
+- Bilingual support (EN/BN)
 
 ### Input Component
 - Component: `<Input>` from `@/components/ui/input`
@@ -705,6 +791,18 @@ try {
 - React Hook Form compatible (spreads register props)
 - Backward compatible - works without label/error props
 - Used in: LoginPage, SignupPage, ForgotPasswordPage, PostForm, ProfilePage
+
+### RichTextEditor Component
+- Component: `<RichTextEditor>` from `@/components/common/RichTextEditor`
+- Optional label prop - displays above editor
+- Optional error prop - displays error message below editor
+- Rich formatting toolbar (Bold, Italic, Strikethrough, Headings, Lists, Quotes, Code)
+- Color picker with preset colors
+- Link & image insertion support
+- Undo/Redo functionality
+- Read-only mode support (editable={false})
+- Minimum 300px height with prose styling
+- Used in: PostForm - Content creation
 
 ### Pagination
 - Component: `<LoadMoreButton>` from `@/components/common/LoadMoreButton`

@@ -222,6 +222,62 @@ const { theme, setTheme } = useTheme();
 <button onClick={() => setTheme('dark')}>Dark</button>
 ```
 
+### RichTextEditor Component
+```typescript
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+
+const { control, formState: { errors } } = useForm();
+
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing..."
+    />
+  )}
+/>
+```
+
+### Dialog Form Reset
+```typescript
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+export const MyDialog = ({ open, onOpenChange }) => {
+  const { register, reset, formState: { errors }, handleSubmit } = useForm();
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      // Reset other local state
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
 ### Load More Pagination
 ```typescript
 import { LoadMoreButton } from '@/components/common/LoadMoreButton';

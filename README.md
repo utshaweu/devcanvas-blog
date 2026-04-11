@@ -619,6 +619,105 @@ const hasMore = pagination.page < pagination.totalPages;
 />
 ```
 
+### Rich Text Editor Component
+
+The app includes an enhanced `RichTextEditor` component with optional `label` and `error` props:
+
+- **Optional label prop** - Displays label above editor
+- **Optional error prop** - Shows validation error message below editor
+- **Rich formatting toolbar** - Bold, Italic, Strikethrough, Headings (H1-H4), Lists, Quotes, Code blocks
+- **Color picker** - Text color customization with preset colors
+- **Link & image insertion** - Add URLs and images to content
+- **Undo/Redo** - Full edit history navigation
+- **Customizable styling** via className, containerClassName, labelClassName
+- **Min height 300px** - Comfortable writing space
+- **Read-only mode** - Via editable prop
+- **Prose styling** - Beautiful typography with dark mode support
+
+Usage example:
+```tsx
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+
+const { control, formState: { errors } } = useForm();
+
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing your post..."
+    />
+  )}
+/>
+
+// Minimal usage (backward compatible)
+<RichTextEditor
+  content={contentValue}
+  onChange={setContentValue}
+/>
+```
+
+**Used in:**
+- PostForm - Blog post content creation
+- PostDetailPage - View-only mode (editable={false})
+
+### Dialog Form Reset Pattern
+
+When closing a dialog/modal with a form, reset the form validation errors and field values:
+
+```tsx
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const MyDialog: React.FC<DialogProps> = ({ open, onOpenChange }) => {
+  const { register, formState: { errors }, reset } = useForm();
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      // Reset any other local state (e.g., password visibility)
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Dialog Title</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+**Key Pattern:**
+- Add `useEffect` hook that listens to the `open` prop
+- When `open` is false (modal closing), call `reset()` to clear all form state and validation errors
+- Also reset any local UI state (e.g., password visibility toggles)
+- Include `reset` in dependency array to avoid stale closures
+
+**Used in:**
+- UpdatePasswordDialog - Resets password fields and validation errors on close
+- Any form-based dialog or modal component
+
 ## 🔐 Authentication Flow
 
 1. User signs up with email/password

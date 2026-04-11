@@ -132,15 +132,12 @@ export const ProfilePage: React.FC = () => {
                   id="name"
                   type="text"
                   placeholder={t(TranslationKey.ENTER_NAME_PLACEHOLDER)}
+                  error={errors.name?.message}
                   {...register('name')}
                   disabled={isLoading}
                   className="h-11 transition-all duration-200 focus:ring-2 focus:ring-accent/20"
+                  containerClassName="!space-y-0"
                 />
-                {errors.name && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
-                    {errors.name.message}
-                  </p>
-                )}
               </div>
 
               {/* Email Field (Disabled) */}
@@ -155,6 +152,7 @@ export const ProfilePage: React.FC = () => {
                   {...register('email')}
                   disabled={true}
                   className="h-11 bg-muted/50 cursor-not-allowed opacity-70"
+                  containerClassName="!space-y-0"
                 />
                 <p className="text-xs text-muted-foreground">
                   {t(TranslationKey.EMAIL_CANNOT_BE_CHANGED)}
@@ -186,7 +184,7 @@ export const ProfilePage: React.FC = () => {
                   )}
                 />
                 {errors.avatar_url && (
-                  <p className="text-sm text-destructive">{errors.avatar_url.message}</p>
+                  <p className="mt-1.5 text-sm text-destructive font-medium">{errors.avatar_url.message}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
                   {t(TranslationKey.UPLOAD_AVATAR_HINT)}
@@ -202,14 +200,13 @@ export const ProfilePage: React.FC = () => {
                 <Textarea
                   id="bio"
                   placeholder={t(TranslationKey.BIO_PLACEHOLDER)}
+                  error={errors.bio?.message}
                   {...register('bio')}
                   disabled={isLoading}
                   className="min-h-[120px] resize-none transition-all duration-200 focus:ring-2 focus:ring-accent/20"
                   maxLength={500}
+                  containerClassName="!space-y-0"
                 />
-                {errors.bio && (
-                  <p className="text-sm text-destructive">{errors.bio.message}</p>
-                )}
                 <p className="text-xs text-muted-foreground text-right">
                   {t(TranslationKey.BIO_MAX_LENGTH)}
                 </p>

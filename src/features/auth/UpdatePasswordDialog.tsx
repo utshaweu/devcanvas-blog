@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -59,6 +59,14 @@ export const UpdatePasswordDialog: React.FC<UpdatePasswordDialogProps> = ({
   } = useForm<UpdatePasswordFormData>({
     resolver: zodResolver(updatePasswordSchema),
   });
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      setShowPasswords({ current: false, new: false, confirm: false });
+    }
+  }, [open, reset]);
 
   const onSubmit = async (data: UpdatePasswordFormData) => {
     setIsLoading(true);

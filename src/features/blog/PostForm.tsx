@@ -106,7 +106,7 @@ export const PostForm: React.FC<PostFormProps> = ({
           )}
         />
         {errors.featured_image && (
-          <p className="text-sm text-destructive">{errors.featured_image.message}</p>
+          <p className="mt-1.5 text-sm text-destructive font-medium">{errors.featured_image.message}</p>
         )}
       </div>
 
@@ -146,22 +146,20 @@ export const PostForm: React.FC<PostFormProps> = ({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>{t(TranslationKey.CONTENT)}</Label>
+      <div>
         <Controller
           name="content"
           control={control}
           render={({ field }) => (
             <RichTextEditor
+              label={t(TranslationKey.CONTENT)}
               content={field.value}
               onChange={field.onChange}
               editable={!isLoading}
+              error={errors.content?.message}
             />
           )}
         />
-        {errors.content && (
-          <p className="text-sm text-destructive">{errors.content.message}</p>
-        )}
       </div>
 
       <div className="flex items-center gap-4">

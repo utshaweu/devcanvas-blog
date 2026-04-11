@@ -310,49 +310,6 @@ const {
 />
 ```
 
-### 5. File Upload Pattern
-
-```typescript
-// Using the FileUpload component
-import { FileUpload } from '@/components/ui/file-upload';
-import { Controller } from 'react-hook-form';
-
-// In ProfilePage or any form
-<Controller
-  name="avatar_url"
-  control={control}
-  render={({ field }) => (
-    <FileUpload
-      value={field.value}
-      onChange={field.onChange}
-      onRemove={() => field.onChange('')}
-      bucket="avatars"        // Supabase bucket
-      path={user?.id}         // User folder
-      accept="image/*"        // File types
-      maxSize={0.5}          // 500KB limit
-      disabled={isLoading}
-      label={t(TranslationKey.UPLOAD_AVATAR)}
-      showPreview={true}
-    />
-  )}
-/>
-```
-
-**Key Features:**
-- Real-time upload progress (0-100%)
-- Image preview with Change/Remove buttons
-- File size and type validation
-- Bilingual error messages
-- Direct Supabase Storage integration
-- Automatic unique filename generation
-
-**Storage Setup Required:**
-See `STORAGE_SETUP.md` for creating Supabase storage buckets and policies.
-
-**Available Buckets:**
-- `avatars`: User profile pictures (500KB max)
-- `featured-images`: Blog post images (500KB max)
-
 ### 5. Input Component Pattern
 
 ```typescript
@@ -497,7 +454,74 @@ const [showPasswords, setShowPasswords] = useState({
 - ResetPasswordPage - Password & Confirm Password fields
 - UpdatePasswordDialog - Current, New, & Confirm Password fields
 
-### 7. Protected Routes Pattern
+### 7. RichTextEditor Component Pattern
+
+```typescript
+import { RichTextEditor } from '@/components/common/RichTextEditor';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  content: z.string().min(50, 'Content must be at least 50 characters'),
+});
+
+type FormData = z.infer<typeof schema>;
+
+const { control, formState: { errors } } = useForm<FormData>({
+  resolver: zodResolver(schema),
+});
+
+// With label and error
+<Controller
+  name="content"
+  control={control}
+  render={({ field }) => (
+    <RichTextEditor
+      label="Post Content"
+      content={field.value}
+      onChange={field.onChange}
+      editable={!isLoading}
+      error={errors.content?.message}
+      placeholder="Start writing your post..."
+    />
+  )}
+/>
+
+// Minimal usage (backward compatible)
+<RichTextEditor
+  content={contentValue}
+  onChange={setContentValue}
+/>
+
+// Read-only mode for displaying posts
+<RichTextEditor
+  content={post.content}
+  onChange={() => {}}
+  editable={false}
+  placeholder="Post content"
+/>
+```
+
+**Key Features:**
+- Optional `label` prop - renders label above editor
+- Optional `error` prop - displays error message below editor
+- Rich formatting toolbar (Bold, Italic, Strikethrough, Headings, Lists, Quotes, Code)
+- Color picker with preset colors
+- Link & image insertion via URL
+- Undo/Redo functionality
+- Customizable via className, containerClassName, labelClassName
+- Controller/React Hook Form compatible
+- Read-only mode via `editable` prop
+- Minimum 300px height for comfortable writing
+- Prose styling with dark mode support
+
+**Used in:**
+- PostForm - Blog post creation (with label/error)
+- PostDetailPage - View-only mode (editable={false})
+
+### 8. Protected Routes Pattern
+
 
 ```typescript
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -520,7 +544,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 />
 ```
 
-### 8. Error Handling Pattern
+### 9. Error Handling Pattern
 
 **Modern Approach: Use Global Toast Notifications**
 
@@ -588,7 +612,75 @@ try {
 
 ```
 
-### 7. Pagination Pattern (Load More Button)
+### 9. Dialog Form Reset Pattern
+
+When closing a dialog/modal with a form, reset validation errors and field values:
+
+```typescript
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+const formSchema = z.object({
+  password: z.string().min(6),
+  confirmPassword: z.string().min(6),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
+});
+
+interface DialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const PasswordDialog: React.FC<DialogProps> = ({ open, onOpenChange }) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const { register, formState: { errors }, reset, handleSubmit } = useForm({
+    resolver: zodResolver(formSchema),
+  });
+
+  // Reset form and validation errors when modal is closed
+  useEffect(() => {
+    if (!open) {
+      reset();
+      // Reset other local state (password visibility, etc.)
+      setShowPassword(false);
+    }
+  }, [open, reset]);
+
+  const onSubmit = async (data: any) => {
+    // Handle form submission
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Update Password</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Form fields */}
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+**Key Points:**
+- Add `useEffect` hook that listens to the `open` prop
+- When `open` is false (modal closing), call `reset()` to clear form state and all validation errors
+- Also reset any local UI state (password visibility, selected colors, etc.)
+- Include `reset` in dependency array
+
+**Used in:**
+- UpdatePasswordDialog - Clears all password fields and Zod validation errors
+- Any form-based dialog or modal component
+
+### 10. Pagination Pattern (Load More Button)
 
 **Overview:**  
 The blog uses a "Load More" pagination strategy similar to Facebook, Medium, and Twitter for seamless content browsing.
