@@ -6,6 +6,7 @@ This file helps GitHub Copilot understand the project structure and conventions.
 Full-stack blog platform with:
 - File upload system (avatars & featured images)
 - Infinite scroll pagination (Load More)
+- Post search (debounced, Medium-style search bar)
 - Multilingual support (EN/BN)
 - Dark mode (Light/Dark/System)
 - Comments system (nested)
@@ -138,6 +139,30 @@ toggle_post_like(p_post_id UUID)
 ```
 
 ## Common Patterns
+
+### SearchBar Component
+```typescript
+import { SearchBar } from '@/components/common/SearchBar';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedSearchQuery = useDebounce(searchQuery, 400);
+
+<SearchBar
+  value={searchQuery}
+  onChange={setSearchQuery}
+  onClear={() => setSearchQuery('')}
+  placeholder={t(TranslationKey.SEARCH_POSTS_PLACEHOLDER)}
+  clearButtonLabel={t(TranslationKey.CLEAR_SEARCH)}
+  helperText={searchHelperText}
+/>
+```
+
+Rules:
+- Use debounced search input before requesting posts
+- Preserve load-more pagination behavior while searching
+- Ensure dark-mode readability for input text, placeholder, and helper text
+- Use translation keys for all search UI strings
 
 ### Input Component
 ```typescript

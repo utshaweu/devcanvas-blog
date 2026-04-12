@@ -62,6 +62,7 @@ The repository is compatible with several AI models to assist developers:
 - **Primitives:** Radix UI for accessibility
 - **Icons:** Lucide React
 - **Rich Text:** Tiptap 2.x with StarterKit
+- **Search UI:** Reusable `SearchBar` component for blog listing search
 - **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
   - Used by UpdatePasswordDialog for secure password changes
   - Supports animations and smooth transitions
@@ -520,7 +521,34 @@ const { control, formState: { errors } } = useForm<FormData>({
 - PostForm - Blog post creation (with label/error)
 - PostDetailPage - View-only mode (editable={false})
 
-### 8. Protected Routes Pattern
+### 8. Blog Search Pattern
+
+Use a reusable `SearchBar` in blog listing pages to keep UX and behavior consistent.
+
+```typescript
+import { SearchBar } from '@/components/common/SearchBar';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedSearchQuery = useDebounce(searchQuery, 400);
+
+<SearchBar
+  value={searchQuery}
+  onChange={setSearchQuery}
+  onClear={() => setSearchQuery('')}
+  placeholder={t(TranslationKey.SEARCH_POSTS_PLACEHOLDER)}
+  clearButtonLabel={t(TranslationKey.CLEAR_SEARCH)}
+  helperText={searchHelperText}
+/>
+```
+
+**Rules:**
+- Keep search text and helper text readable in dark mode (explicit foreground classes)
+- Debounce query updates before calling store fetch methods
+- Preserve existing pagination and load-more behavior for active queries
+- Use translation keys for all search-related UI text
+
+### 9. Protected Routes Pattern
 
 
 ```typescript

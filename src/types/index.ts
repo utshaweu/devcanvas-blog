@@ -394,3 +394,14 @@ export interface TextareaProps
   containerClassName?: string;
   labelClassName?: string;
 }
+
+export interface SearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+  onClear: () => void;
+  placeholder: string;
+  clearButtonLabel: string;
+  label?: string;
+  helperText?: string;
+  className?: string;
+}

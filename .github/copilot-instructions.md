@@ -4,6 +4,7 @@
 You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogging platform with:
 - **File Upload System**: Avatar & featured image uploads with Supabase Storage
 - **Infinite Scroll**: Load More pagination (9 posts per page)
+- **Post Search**: Debounced, Medium-style search on blog list with pagination support
 - **Multilingual**: English and Bangla support with runtime switching
 - **Dark Mode**: Light/Dark/System theme with persistence
 - **Comments System**: Nested comments on blog posts
@@ -358,6 +359,30 @@ const hasMore = pagination.page < pagination.totalPages;
 - Append mode: new posts added to list
 - Shows "X of Y posts" counter
 - Auto-hides when all loaded
+
+### 10. Blog Search Pattern
+```typescript
+import { SearchBar } from '@/components/common/SearchBar';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedSearchQuery = useDebounce(searchQuery, 400);
+
+<SearchBar
+  value={searchQuery}
+  onChange={setSearchQuery}
+  onClear={() => setSearchQuery('')}
+  placeholder={t(TranslationKey.SEARCH_POSTS_PLACEHOLDER)}
+  clearButtonLabel={t(TranslationKey.CLEAR_SEARCH)}
+  helperText={searchHelperText}
+/>
+```
+
+**Search Rules:**
+- Use debounced query updates before fetching posts
+- Keep search text readable in dark mode with explicit foreground classes
+- Keep load-more behavior in sync with the active search query
+- All visible search text must use translation keys
 
 ### 10. Zustand Store Pattern
 ```typescript

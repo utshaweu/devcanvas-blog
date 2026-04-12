@@ -16,6 +16,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Comments System**: Nested comments on blog posts with full CRUD operations and row-level security
 - **Like System**: Post likes with real-time tracking and user engagement
 - **Analytics Dashboard**: Track views, likes, and engagement
+- **Post Search**: Medium-style debounced search on blog list with Load More compatibility
 - **Responsive Design**: Mobile-first, works on all devices
 - **Multilingual**: English and Bangla support with runtime switching
 - **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
@@ -678,6 +679,40 @@ The blog uses a "Load More" pagination strategy (similar to Facebook, Medium, Tw
   - `loadMorePosts()` - Convenience method to load next page
   - `resetPagination()` - Reset to page 1
 - **Used In**: BlogListPage, DashboardPage (with filters)
+
+### Blog Search Pattern
+
+The blog list supports a reusable, responsive search experience:
+
+- **Component**: `SearchBar` in `src/components/common/SearchBar.tsx`
+- **Behavior**:
+  - Debounced input via `useDebounce` (400ms)
+  - Searches title, excerpt, and content
+  - Keeps pagination and Load More behavior in sync with current query
+- **Dark Mode**:
+  - Explicit `text-foreground` and dark-mode text color classes for readable input text
+  - Proper placeholder and caret contrast
+- **i18n**:
+  - Uses translation keys for placeholder, helper text, clear button, and result summary
+
+Example usage:
+
+```tsx
+import { SearchBar } from '@/components/common/SearchBar';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedSearchQuery = useDebounce(searchQuery, 400);
+
+<SearchBar
+  value={searchQuery}
+  onChange={setSearchQuery}
+  onClear={() => setSearchQuery('')}
+  placeholder={t(TranslationKey.SEARCH_POSTS_PLACEHOLDER)}
+  clearButtonLabel={t(TranslationKey.CLEAR_SEARCH)}
+  helperText={searchHelperText}
+/>
+```
 
 Example usage:
 ```typescript
