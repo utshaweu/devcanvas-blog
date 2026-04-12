@@ -38,6 +38,48 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
   - `avatars` (500KB limit, public)
   - `featured-images` (500KB limit, public)
 
+## Database Optimization
+
+### Posts Table Indexes
+
+To optimize query performance, add these indexes to the `posts` table in your Supabase SQL editor:
+
+```sql
+-- ============================================
+-- Add Indexes to Posts Table for Performance
+-- ============================================
+
+-- Index for author_id lookups (most critical)
+-- Used in: fetchUserPosts, fetchUserPostsStats
+CREATE INDEX IF NOT EXISTS idx_posts_author_id ON posts(author_id);
+
+-- Index for published status queries
+-- Used in: fetchPosts (filters by published = true)
+CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(published);
+
+-- Composite index for published posts ordered by date
+-- Used in: fetchPosts (published = true ORDER BY published_at DESC)
+CREATE INDEX IF NOT EXISTS idx_posts_published_published_at 
+  ON posts(published, published_at DESC);
+
+-- Index for slug lookups (used in fetchPostBySlug)
+CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
+
+-- Composite index for user's published posts
+-- Used in: fetchUserPosts with published filter
+CREATE INDEX IF NOT EXISTS idx_posts_author_published 
+  ON posts(author_id, published);
+
+-- Composite index for sorting user posts by creation date
+-- Used in: fetchUserPosts (ORDER BY created_at DESC)
+CREATE INDEX IF NOT EXISTS idx_posts_author_created_at 
+  ON posts(author_id, created_at DESC);
+
+-- Index for category_id lookups (if filtering by category)
+-- Consider adding if category filtering is implemented
+CREATE INDEX IF NOT EXISTS idx_posts_category_id ON posts(category_id);
+```
+
 ## Design System (NEVER CHANGE)
 
 ### Color Palette
