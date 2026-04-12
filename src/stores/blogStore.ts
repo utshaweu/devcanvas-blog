@@ -8,6 +8,7 @@ interface BlogState {
   currentPost: BlogPost | null;
   categories: Category[];
   tags: Tag[];
+  currentSearchQuery: string;
   isLoading: boolean;
   error: string | null;
   pagination: {
@@ -18,7 +19,7 @@ interface BlogState {
   };
 
   // Actions
-  fetchPosts: (page?: number, limit?: number, append?: boolean) => Promise<void>;
+  fetchPosts: (page?: number, limit?: number, append?: boolean, searchQuery?: string) => Promise<void>;
   fetchUserPosts: (userId: string, publishedFilter?: 'all' | 'published' | 'draft', page?: number, limit?: number, append?: boolean) => Promise<void>;
   fetchUserPostsStats: (userId: string) => Promise<BlogPost[]>;
   fetchPostById: (id: string) => Promise<void>;
@@ -41,6 +42,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   currentPost: null,
   categories: [],
   tags: [],
+  currentSearchQuery: '',
   isLoading: false,
   error: null,
   pagination: {
@@ -50,14 +52,19 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     totalPages: 0,
   },
 
-  fetchPosts: async (page = 1, limit = 9, append = false) => {
+  fetchPosts: async (page = 1, limit = 9, append = false, searchQuery = '') => {
     set({ isLoading: true, error: null });
 
     try {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
+      const normalizedSearchQuery = searchQuery.trim();
+      const sanitizedSearchQuery = normalizedSearchQuery
+        .replace(/[,%]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 
-      const { data, error, count } = await supabase
+      let query = supabase
         .from('posts')
         .select(`
           *,
@@ -65,7 +72,14 @@ export const useBlogStore = create<BlogState>((set, get) => ({
           category:categories(*),
           tags:post_tags(tag:tags(*))
         `, { count: 'exact' })
-        .eq('published', true)
+        .eq('published', true);
+
+      if (sanitizedSearchQuery) {
+        const pattern = `%${sanitizedSearchQuery}%`;
+        query = query.or(`title.ilike.${pattern},excerpt.ilike.${pattern},content.ilike.${pattern}`);
+      }
+
+      const { data, error, count } = await query
         .order('published_at', { ascending: false })
         .range(from, to);
 
@@ -83,6 +97,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       set(state => ({
         posts: append ? [...state.posts, ...posts] : posts,
+        currentSearchQuery: normalizedSearchQuery,
         pagination: {
           page,
           limit,
@@ -445,11 +460,11 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   },
 
   loadMorePosts: async () => {
-    const { pagination } = get();
+    const { pagination, currentSearchQuery } = get();
     const nextPage = pagination.page + 1;
     
     if (nextPage <= pagination.totalPages) {
-      await get().fetchPosts(nextPage, pagination.limit, true);
+      await get().fetchPosts(nextPage, pagination.limit, true, currentSearchQuery);
     }
   },
 
@@ -465,6 +480,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
   resetPagination: () => {
     set({
       posts: [],
+      currentSearchQuery: '',
       pagination: {
         page: 1,
         limit: 9,

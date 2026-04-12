@@ -62,6 +62,7 @@ The repository is compatible with several AI models to assist developers:
 - **Primitives:** Radix UI for accessibility
 - **Icons:** Lucide React
 - **Rich Text:** Tiptap 2.x with StarterKit
+- **Search UI:** Reusable `SearchBar` component for blog listing search
 - **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
   - Used by UpdatePasswordDialog for secure password changes
   - Supports animations and smooth transitions
@@ -520,7 +521,34 @@ const { control, formState: { errors } } = useForm<FormData>({
 - PostForm - Blog post creation (with label/error)
 - PostDetailPage - View-only mode (editable={false})
 
-### 8. Protected Routes Pattern
+### 8. Blog Search Pattern
+
+Use a reusable `SearchBar` in blog listing pages to keep UX and behavior consistent.
+
+```typescript
+import { SearchBar } from '@/components/common/SearchBar';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedSearchQuery = useDebounce(searchQuery, 400);
+
+<SearchBar
+  value={searchQuery}
+  onChange={setSearchQuery}
+  onClear={() => setSearchQuery('')}
+  placeholder={t(TranslationKey.SEARCH_POSTS_PLACEHOLDER)}
+  clearButtonLabel={t(TranslationKey.CLEAR_SEARCH)}
+  helperText={searchHelperText}
+/>
+```
+
+**Rules:**
+- Keep search text and helper text readable in dark mode (explicit foreground classes)
+- Debounce query updates before calling store fetch methods
+- Preserve existing pagination and load-more behavior for active queries
+- Use translation keys for all search-related UI text
+
+### 9. Protected Routes Pattern
 
 
 ```typescript
@@ -785,6 +813,215 @@ interface LoadMoreButtonProps {
 
 ---
 
+## 💬 Comments System Pattern
+
+### Overview
+The comments system supports nested comments (replies to comments) on blog posts with full CRUD operations and real-time updates.
+
+### Using Comments in Components
+
+**Fetching Comments with Author Info:**
+```typescript
+// Fetch all comments for a post with author information
+const fetchPostComments = async (postId: string) => {
+  const { data, error } = await supabase
+    .from('comments')
+    .select(`
+      *,
+      author:author_id (id, name, avatar_url),
+      children:comments!parent_id (
+        *,
+        author:author_id (id, name, avatar_url)
+      )
+    `)
+    .eq('post_id', postId)
+    .is('parent_id', null) // Only root comments
+    .order('created_at', { ascending: false });
+    
+  return data;
+};
+```
+
+**Creating a Comment:**
+```typescript
+const createComment = async (postId: string, content: string, parentId?: string) => {
+  const { data, error } = await supabase
+    .from('comments')
+    .insert({
+      post_id: postId,
+      author_id: user.id,
+      content,
+      parent_id: parentId || null,
+    })
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+};
+```
+
+**Updating a Comment:**
+```typescript
+const updateComment = async (commentId: string, content: string) => {
+  const { data, error } = await supabase
+    .from('comments')
+    .update({ content, updated_at: new Date() })
+    .eq('id', commentId)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+};
+```
+
+**Deleting a Comment:**
+```typescript
+const deleteComment = async (commentId: string) => {
+  const { error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', commentId);
+    
+  if (error) throw error;
+};
+```
+
+### Key Features
+- Parent-child relationships via `parent_id` field
+- Cascade delete when posts or parent comments are deleted
+- RLS policies enforce user ownership for update/delete
+- Real-time subscriptions for live comment updates
+- Timestamps track creation and modification
+
+### Database Constraints
+- `post_id` references `posts` table with CASCADE delete
+- `author_id` references `users` table with CASCADE delete
+- `parent_id` self-references for nested replies
+- All timestamp fields automatically set/updated
+
+### Row-Level Security Policies
+- **Read**: Anyone can read comments on published posts
+- **Create**: Authenticated users can create comments
+- **Update**: Users can only update their own comments
+- **Delete**: Users can only delete their own comments
+
+---
+
+## 👍 Like System Pattern
+
+### Overview
+The like system tracks user engagement on blog posts with real-time count aggregation using Supabase RPC functions.
+
+### Using Likes in Components
+
+**Toggling a Post Like (Atomic RPC):**
+```typescript
+// Use RPC function for atomic like/unlike operation
+const toggleLike = async (postId: string) => {
+  const { data, error } = await supabase
+    .rpc('toggle_post_like', { p_post_id: postId });
+    
+  if (error) throw error;
+  return data; // Returns { liked: boolean, likes: number }
+};
+```
+
+**Checking if User Liked a Post:**
+```typescript
+const checkIfLiked = async (postId: string) => {
+  const { data } = await supabase
+    .from('post_likes')
+    .select('id')
+    .eq('post_id', postId)
+    .eq('user_id', user.id)
+    .single();
+    
+  return !!data; // Returns true if liked
+};
+```
+
+**Getting Like Count:**
+```typescript
+// Direct from posts table (aggregated)
+const getLikesCount = (post: BlogPost) => {
+  return post.likes; // Updated automatically by RPC function
+};
+```
+
+**Real-time Like Updates (Subscription):**
+```typescript
+const subscribeToLikes = (postId: string, onUpdate: (likes: number) => void) => {
+  const subscription = supabase
+    .from('posts')
+    .on('UPDATE', payload => {
+      if (payload.new.id === postId) {
+        onUpdate(payload.new.likes);
+      }
+    })
+    .subscribe();
+    
+  return subscription;
+};
+```
+
+### RPC Function (Supabase)
+
+The `toggle_post_like` function ensures atomic operations:
+```sql
+CREATE OR REPLACE FUNCTION toggle_post_like(p_post_id UUID)
+RETURNS TABLE(liked BOOLEAN, likes INTEGER) AS $$
+DECLARE
+  v_user_id UUID;
+BEGIN
+  v_user_id := auth.uid();
+  
+  IF EXISTS (SELECT 1 FROM post_likes WHERE post_id = p_post_id AND user_id = v_user_id) THEN
+    DELETE FROM post_likes WHERE post_id = p_post_id AND user_id = v_user_id;
+    liked := FALSE;
+  ELSE
+    INSERT INTO post_likes (post_id, user_id) VALUES (p_post_id, v_user_id);
+    liked := TRUE;
+  END IF;
+  
+  SELECT COUNT(*)::INTEGER INTO likes FROM post_likes WHERE post_id = p_post_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+### Key Features
+- One like per user per post (unique constraint)
+- Atomic toggle operation (like/unlike in single RPC call)
+- Automatic count aggregation in posts table
+- Real-time updates via Supabase subscriptions
+- Only authenticated users can like posts
+
+### Database Table
+```sql
+CREATE TABLE post_likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(post_id, user_id)
+);
+```
+
+### Row-Level Security Policies
+- **Read**: Public (anyone can see like counts)
+- **Create/Delete**: Users can only manage their own likes
+- **Updates**: Not applicable (only CRUD)
+
+### Best Practices
+- Use RPC `toggle_post_like()` for atomic operations
+- Subscribe to post updates for real-time like counts
+- Handle optimistic UI updates for better UX
+- Show loading state during like toggle
+- Use toast notifications for like actions
+
+---
+
 ## 🗄️ Database Schema
 
 ### Tables
@@ -867,6 +1104,17 @@ CREATE TABLE post_tags (
 );
 ```
 
+#### post_likes
+```sql
+CREATE TABLE post_likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(post_id, user_id)
+);
+```
+
 ### Row Level Security (RLS) Policies
 
 ```sql
@@ -877,6 +1125,7 @@ ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
 
 -- Users can read all profiles
 CREATE POLICY "Users can read all profiles" ON users
@@ -946,6 +1195,19 @@ CREATE POLICY "Anyone can read post_tags" ON post_tags FOR SELECT USING (true);
 CREATE POLICY "Users can manage tags for own posts" ON post_tags
   FOR ALL
   USING ((SELECT author_id FROM posts WHERE posts.id = post_tags.post_id) = auth.uid());
+
+-- Anyone can read post likes
+CREATE POLICY "Anyone can read post likes" ON post_likes FOR SELECT USING (true);
+
+-- Authenticated users can create likes
+CREATE POLICY "Authenticated users can like posts" ON post_likes
+  FOR INSERT TO authenticated
+  WITH CHECK (user_id = auth.uid());
+
+-- Users can delete their own likes
+CREATE POLICY "Users can delete their own likes" ON post_likes
+  FOR DELETE
+  USING (user_id = auth.uid());
 ```
 
 ### Post Likes & Views Feature Setup
@@ -1035,6 +1297,40 @@ BEGIN
   WHERE id = p_post_id;
 END;
 $$;
+
+-- ============================================
+-- Add Indexes to Posts Table for Performance
+-- ============================================
+
+-- Index for author_id lookups (most critical)
+-- Used in: fetchUserPosts, fetchUserPostsStats
+CREATE INDEX IF NOT EXISTS idx_posts_author_id ON posts(author_id);
+
+-- Index for published status queries
+-- Used in: fetchPosts (filters by published = true)
+CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(published);
+
+-- Composite index for published posts ordered by date
+-- Used in: fetchPosts (published = true ORDER BY published_at DESC)
+CREATE INDEX IF NOT EXISTS idx_posts_published_published_at 
+  ON posts(published, published_at DESC);
+
+-- Index for slug lookups (used in fetchPostBySlug)
+CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
+
+-- Composite index for user's published posts
+-- Used in: fetchUserPosts with published filter
+CREATE INDEX IF NOT EXISTS idx_posts_author_published 
+  ON posts(author_id, published);
+
+-- Composite index for sorting user posts by creation date
+-- Used in: fetchUserPosts (ORDER BY created_at DESC)
+CREATE INDEX IF NOT EXISTS idx_posts_author_created_at 
+  ON posts(author_id, created_at DESC);
+
+-- Index for category_id lookups (if filtering by category)
+-- Consider adding if category filtering is implemented
+CREATE INDEX IF NOT EXISTS idx_posts_category_id ON posts(category_id);
 ```
 
 **Usage in frontend:**

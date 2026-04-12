@@ -19,6 +19,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   className,
   label,
   showPreview = true,
+  errors,
 }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -337,6 +338,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         <p className="text-xs text-muted-foreground">
           {t(TranslationKey.SUPPORTED_FORMATS)}: {accept.replace(/image\/\*/g, 'JPG, PNG, GIF, WebP')}
         </p>
+      )}
+      {errors && (
+        <p className="mt-1.5 text-sm text-destructive font-medium">{errors}</p>
       )}
     </div>
   );

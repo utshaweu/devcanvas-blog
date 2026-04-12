@@ -13,7 +13,10 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **State Management**: Efficient state handling with Zustand
 - **Type Safety**: Full TypeScript support throughout
 - **Form Validation**: Robust validation with React Hook Form and Zod
+- **Comments System**: Nested comments on blog posts with full CRUD operations and row-level security
+- **Like System**: Post likes with real-time tracking and user engagement
 - **Analytics Dashboard**: Track views, likes, and engagement
+- **Post Search**: Medium-style debounced search on blog list with Load More compatibility
 - **Responsive Design**: Mobile-first, works on all devices
 - **Multilingual**: English and Bangla support with runtime switching
 - **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
@@ -104,6 +107,51 @@ devcanvas-blog/
 - **Font Family**: Inter (Google Fonts)
 - **Features**: Variable font with multiple weights (300-900)
 - **Font Features**: CV02, CV03, CV04, CV11 for improved readability
+
+## 💬 Comments System
+
+The application features a comprehensive nested comments system on blog posts:
+
+- **Nested Comments**: Support for parent comments and replies
+- **Full CRUD Operations**: Create, read, update, and delete comments
+- **Real-time Updates**: Supabase subscriptions for live comment updates
+- **Row-Level Security (RLS)**:
+  - Anyone can read comments on published posts
+  - Authenticated users can create comments on published posts
+  - Users can only update/delete their own comments
+  - Comments are automatically deleted when posts are deleted (CASCADE)
+- **User Experience**:
+  - Display author information with timestamps
+  - Show parent comment context for replies
+  - Beautiful comment threads with proper indentation
+  - Toast notifications for all comment actions
+- **Bilingual Support**: Available in English and Bengali
+- **Database Table**: `comments` with fields:
+  - `id` (UUID primary key)
+  - `post_id` (reference to posts table)
+  - `user_id` (reference to auth.users)
+  - `parent_id` (for nested replies, references comments table)
+  - `content` (comment text)
+  - `created_at` (timestamp)
+  - `updated_at` (timestamp)
+
+## 👍 Like System
+
+Post engagement tracking with real-time likes:
+
+- **Post Likes**: Track user engagement on blog posts
+- **Like Tracking**: Toggle likes with real-time count updates
+- **Unique Constraints**: One like per user per post
+- **Real-time Updates**: Supabase RPC function `toggle_post_like()` for atomic operations
+- **Analytics**: Like counts aggregated in the posts table
+- **User Experience**:
+  - Visual feedback on liked status
+  - Real-time like count updates
+  - Toast notifications for like actions
+- **Row-Level Security**: Authenticated users can manage their own likes
+- **Database Table**: `post_likes` with:
+  - Composite primary key (user_id, post_id)
+  - Foreign key constraints for data integrity
 
 ## 🔐 Password Management
 
@@ -387,6 +435,40 @@ BEGIN
   WHERE id = p_post_id;
 END;
 $$;
+
+-- ============================================
+-- Add Indexes to Posts Table for Performance
+-- ============================================
+
+-- Index for author_id lookups (most critical)
+-- Used in: fetchUserPosts, fetchUserPostsStats
+CREATE INDEX IF NOT EXISTS idx_posts_author_id ON posts(author_id);
+
+-- Index for published status queries
+-- Used in: fetchPosts (filters by published = true)
+CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(published);
+
+-- Composite index for published posts ordered by date
+-- Used in: fetchPosts (published = true ORDER BY published_at DESC)
+CREATE INDEX IF NOT EXISTS idx_posts_published_published_at 
+  ON posts(published, published_at DESC);
+
+-- Index for slug lookups (used in fetchPostBySlug)
+CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
+
+-- Composite index for user's published posts
+-- Used in: fetchUserPosts with published filter
+CREATE INDEX IF NOT EXISTS idx_posts_author_published 
+  ON posts(author_id, published);
+
+-- Composite index for sorting user posts by creation date
+-- Used in: fetchUserPosts (ORDER BY created_at DESC)
+CREATE INDEX IF NOT EXISTS idx_posts_author_created_at 
+  ON posts(author_id, created_at DESC);
+
+-- Index for category_id lookups (if filtering by category)
+-- Consider adding if category filtering is implemented
+CREATE INDEX IF NOT EXISTS idx_posts_category_id ON posts(category_id);
 ```
 
 5. **Set up Supabase Storage** (for avatar uploads)
@@ -597,6 +679,40 @@ The blog uses a "Load More" pagination strategy (similar to Facebook, Medium, Tw
   - `loadMorePosts()` - Convenience method to load next page
   - `resetPagination()` - Reset to page 1
 - **Used In**: BlogListPage, DashboardPage (with filters)
+
+### Blog Search Pattern
+
+The blog list supports a reusable, responsive search experience:
+
+- **Component**: `SearchBar` in `src/components/common/SearchBar.tsx`
+- **Behavior**:
+  - Debounced input via `useDebounce` (400ms)
+  - Searches title, excerpt, and content
+  - Keeps pagination and Load More behavior in sync with current query
+- **Dark Mode**:
+  - Explicit `text-foreground` and dark-mode text color classes for readable input text
+  - Proper placeholder and caret contrast
+- **i18n**:
+  - Uses translation keys for placeholder, helper text, clear button, and result summary
+
+Example usage:
+
+```tsx
+import { SearchBar } from '@/components/common/SearchBar';
+import { useDebounce } from '@/hooks/useDebounce';
+
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedSearchQuery = useDebounce(searchQuery, 400);
+
+<SearchBar
+  value={searchQuery}
+  onChange={setSearchQuery}
+  onClear={() => setSearchQuery('')}
+  placeholder={t(TranslationKey.SEARCH_POSTS_PLACEHOLDER)}
+  clearButtonLabel={t(TranslationKey.CLEAR_SEARCH)}
+  helperText={searchHelperText}
+/>
+```
 
 Example usage:
 ```typescript

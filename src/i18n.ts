@@ -175,6 +175,12 @@ export enum TranslationKey {
   CURRENT_PASSWORD = 'currentPassword',
   UPDATE_PASSWORD_DESCRIPTION = 'updatePasswordDescription',
   PASSWORD_CHANGED_MESSAGE = 'passwordChangedMessage',
+  SEARCH_POSTS_LABEL = 'searchPostsLabel',
+  SEARCH_POSTS_PLACEHOLDER = 'searchPostsPlaceholder',
+  SEARCH_POSTS_HELPER = 'searchPostsHelper',
+  SEARCH_RESULTS_SUMMARY = 'searchResultsSummary',
+  NO_SEARCH_RESULTS = 'noSearchResults',
+  CLEAR_SEARCH = 'clearSearch',
 }
 
 export type LanguageKey = TranslationKey;
@@ -355,6 +361,12 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.CURRENT_PASSWORD]: 'Current Password',
     [TranslationKey.UPDATE_PASSWORD_DESCRIPTION]: 'Update your password to keep your account secure',
     [TranslationKey.PASSWORD_CHANGED_MESSAGE]: 'Your password has been updated successfully',
+    [TranslationKey.SEARCH_POSTS_LABEL]: 'Search posts',
+    [TranslationKey.SEARCH_POSTS_PLACEHOLDER]: 'Search by title, excerpt, or keyword',
+    [TranslationKey.SEARCH_POSTS_HELPER]: 'Discover stories quickly with an instant search experience.',
+    [TranslationKey.SEARCH_RESULTS_SUMMARY]: 'Found {count} posts for "{query}"',
+    [TranslationKey.NO_SEARCH_RESULTS]: 'No posts found for your search.',
+    [TranslationKey.CLEAR_SEARCH]: 'Clear search',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -531,6 +543,12 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.CURRENT_PASSWORD]: 'বর্তমান পাসওয়ার্ড',
     [TranslationKey.UPDATE_PASSWORD_DESCRIPTION]: 'আপনার অ্যাকাউন্ট সুরক্ষিত রাখতে আপনার পাসওয়ার্ড আপডেট করুন',
     [TranslationKey.PASSWORD_CHANGED_MESSAGE]: 'আপনার পাসওয়ার্ড সফলভাবে আপডেট হয়েছে',
+    [TranslationKey.SEARCH_POSTS_LABEL]: 'পোস্ট খুঁজুন',
+    [TranslationKey.SEARCH_POSTS_PLACEHOLDER]: 'শিরোনাম, সারাংশ বা কীওয়ার্ড দিয়ে খুঁজুন',
+    [TranslationKey.SEARCH_POSTS_HELPER]: 'দ্রুত খোঁজ করে আপনার পছন্দের গল্প আবিষ্কার করুন।',
+    [TranslationKey.SEARCH_RESULTS_SUMMARY]: '"{query}" এর জন্য {count}টি পোস্ট পাওয়া গেছে',
+    [TranslationKey.NO_SEARCH_RESULTS]: 'আপনার খোঁজ অনুযায়ী কোন পোস্ট পাওয়া যায়নি।',
+    [TranslationKey.CLEAR_SEARCH]: 'খোঁজ মুছুন',
   },
 };
 

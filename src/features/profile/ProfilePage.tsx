@@ -180,12 +180,10 @@ export const ProfilePage: React.FC = () => {
                       disabled={isLoading}
                       label={t(TranslationKey.UPLOAD_AVATAR)}
                       showPreview={true}
+                      errors={errors.avatar_url?.message}
                     />
                   )}
                 />
-                {errors.avatar_url && (
-                  <p className="mt-1.5 text-sm text-destructive font-medium">{errors.avatar_url.message}</p>
-                )}
                 <p className="text-xs text-muted-foreground">
                   {t(TranslationKey.UPLOAD_AVATAR_HINT)}
                 </p>
