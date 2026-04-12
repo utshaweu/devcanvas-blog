@@ -102,12 +102,10 @@ export const PostForm: React.FC<PostFormProps> = ({
               disabled={isLoading}
               label={t(TranslationKey.FEATURED_IMAGE)}
               showPreview={true}
+              errors={errors.featured_image?.message}
             />
           )}
         />
-        {errors.featured_image && (
-          <p className="mt-1.5 text-sm text-destructive font-medium">{errors.featured_image.message}</p>
-        )}
       </div>
 
       <div className="space-y-2">

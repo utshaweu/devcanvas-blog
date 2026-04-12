@@ -13,6 +13,8 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **State Management**: Efficient state handling with Zustand
 - **Type Safety**: Full TypeScript support throughout
 - **Form Validation**: Robust validation with React Hook Form and Zod
+- **Comments System**: Nested comments on blog posts with full CRUD operations and row-level security
+- **Like System**: Post likes with real-time tracking and user engagement
 - **Analytics Dashboard**: Track views, likes, and engagement
 - **Responsive Design**: Mobile-first, works on all devices
 - **Multilingual**: English and Bangla support with runtime switching
@@ -104,6 +106,51 @@ devcanvas-blog/
 - **Font Family**: Inter (Google Fonts)
 - **Features**: Variable font with multiple weights (300-900)
 - **Font Features**: CV02, CV03, CV04, CV11 for improved readability
+
+## 💬 Comments System
+
+The application features a comprehensive nested comments system on blog posts:
+
+- **Nested Comments**: Support for parent comments and replies
+- **Full CRUD Operations**: Create, read, update, and delete comments
+- **Real-time Updates**: Supabase subscriptions for live comment updates
+- **Row-Level Security (RLS)**:
+  - Anyone can read comments on published posts
+  - Authenticated users can create comments on published posts
+  - Users can only update/delete their own comments
+  - Comments are automatically deleted when posts are deleted (CASCADE)
+- **User Experience**:
+  - Display author information with timestamps
+  - Show parent comment context for replies
+  - Beautiful comment threads with proper indentation
+  - Toast notifications for all comment actions
+- **Bilingual Support**: Available in English and Bengali
+- **Database Table**: `comments` with fields:
+  - `id` (UUID primary key)
+  - `post_id` (reference to posts table)
+  - `user_id` (reference to auth.users)
+  - `parent_id` (for nested replies, references comments table)
+  - `content` (comment text)
+  - `created_at` (timestamp)
+  - `updated_at` (timestamp)
+
+## 👍 Like System
+
+Post engagement tracking with real-time likes:
+
+- **Post Likes**: Track user engagement on blog posts
+- **Like Tracking**: Toggle likes with real-time count updates
+- **Unique Constraints**: One like per user per post
+- **Real-time Updates**: Supabase RPC function `toggle_post_like()` for atomic operations
+- **Analytics**: Like counts aggregated in the posts table
+- **User Experience**:
+  - Visual feedback on liked status
+  - Real-time like count updates
+  - Toast notifications for like actions
+- **Row-Level Security**: Authenticated users can manage their own likes
+- **Database Table**: `post_likes` with:
+  - Composite primary key (user_id, post_id)
+  - Foreign key constraints for data integrity
 
 ## 🔐 Password Management
 

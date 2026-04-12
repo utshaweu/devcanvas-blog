@@ -289,6 +289,7 @@ export interface FileUploadProps {
   error?: string; // Validation error message (external errors)
   containerClassName?: string; // Additional CSS classes for container
   labelClassName?: string; // Additional CSS classes for label
+  errors?: string; // Validation error message (internal errors from file upload)
 }
 
 export interface MultiSelectOption {
