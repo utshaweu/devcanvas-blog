@@ -130,6 +130,7 @@ src/
 │   ├── common/              # Reusable composed components
 │   │   ├── RichTextEditor.tsx   # Tiptap editor wrapper
 │   │   ├── LoadingSpinner.tsx   # Loading states
+│   │   ├── NotFound.tsx         # 404 Error page
 │   │   └── MultiSelect.tsx      # Multi-select with chips
 │   └── layout/              # Layout components
 │       └── Header.tsx       # Main navigation
@@ -810,6 +811,87 @@ interface LoadMoreButtonProps {
 - Reset on filter changes (e.g., in DashboardPage when switching between All/Published/Draft)
 - Clean up on unmount to prevent state leaks
 - Use `append: true` for load more, `append: false` for initial/filter changes
+
+### 11. 404 Error Page Pattern
+
+**Overview:**  
+A beautiful, multilingual 404 page that gracefully handles non-existent routes with smooth animations and clear navigation options.
+
+**Component:** `NotFound` in `src/components/common/NotFound.tsx`
+
+**Features:**
+- **Design**: Subtle animated accent-colored blobs, responsive layout
+- **Multilingual**: Supports English and Bangla with `useTranslation` hook
+- **Theme Aware**: Uses project color system (respects light/dark mode)
+- **Navigation**: Two action buttons - "Go Home" and "Go Back"
+- **Performance**: Overflow-hidden prevents horizontal scrolling on large screens
+
+**Usage in App Routes:**
+```typescript
+import { NotFound } from '@/components/common/NotFound';
+
+// In App.tsx routes
+<Routes>
+  {/* All other routes */}
+  {/* 404 Route - must be last */}
+  <Route path="*" element={<NotFound />} />
+</Routes>
+```
+
+**Component Implementation:**
+```typescript
+import { NotFound } from '@/components/common/NotFound';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
+
+export const NotFound: React.FC = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const handleGoHome = () => navigate('/');
+  const handleGoBack = () => navigate(-1);
+
+  return (
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-12 overflow-hidden">
+      {/* Background and animations */}
+      <div className="absolute inset-0 bg-gradient-to-br from-background to-background/50 pointer-events-none" />
+      {/* Animated blobs clipped by overflow-hidden parent */}
+      
+      {/* Content with translations */}
+      <div className="relative z-10 max-w-2xl w-full text-center space-y-8">
+        <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+          {t(TranslationKey.PAGE_NOT_FOUND)}
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          {t(TranslationKey.PAGE_NOT_FOUND_DESCRIPTION)}
+        </p>
+        {/* Action buttons */}
+      </div>
+    </div>
+  );
+};
+```
+
+**Translation Keys:**
+- `PAGE_NOT_FOUND` - "Page Not Found" / "পৃষ্ঠা পাওয়া যায়নি"
+- `PAGE_NOT_FOUND_DESCRIPTION` - Brief description text
+- `PAGE_NOT_FOUND_MESSAGE` - Friendly message
+- `GO_HOME` - "Go Home" button text
+- `GO_BACK` - "Go Back" button text
+
+**Styling Notes:**
+- Uses `overflow-hidden` on parent container to clip absolutely positioned blobs
+- Blobs positioned with negative values (`-left-32`, `-right-32`) to be partially outside
+- Smooth animations defined in `src/styles/globals.css` (`.animate-blob`, `.animation-delay-2000`, `.animation-delay-4000`)
+- Button variants: primary (accent) and outline for secondary action
+- Uses standard form colors: `text-foreground`, `text-muted-foreground`, `bg-accent`
+
+**Best Practices:**
+- Route must be placed **last** in routes list (catch-all)
+- Always use `useTranslation()` for all text
+- Use project Button component with proper variants
+- Ensure blobs are properly clipped to prevent horizontal scrollbar
+- Test on mobile and desktop for responsive behavior
 
 ---
 

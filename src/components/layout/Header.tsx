@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PenSquare, User, LogOut, BarChart3, Key } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useGlobalToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -22,10 +23,15 @@ export const Header: React.FC = () => {
   const { language, setLanguage } = useLanguage();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { success: toastSuccess } = useGlobalToast();
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
+    toastSuccess(
+      t(TranslationKey.LOGOUT_SUCCESS_TITLE),
+      t(TranslationKey.LOGOUT_SUCCESS_MESSAGE)
+    );
     navigate('/');
   };
 

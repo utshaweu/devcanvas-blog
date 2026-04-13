@@ -17,6 +17,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Like System**: Post likes with real-time tracking and user engagement
 - **Analytics Dashboard**: Track views, likes, and engagement
 - **Post Search**: Medium-style debounced search on blog list with Load More compatibility
+- **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
 - **Responsive Design**: Mobile-first, works on all devices
 - **Multilingual**: English and Bangla support with runtime switching
 - **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
@@ -171,6 +172,26 @@ The application includes a secure password update feature integrated in the user
   - Toast notifications for success/error feedback
 - **Bilingual Support**: Available in English and Bengali
 - **Location**: `src/features/auth/UpdatePasswordDialog.tsx`
+
+## 📄 404 Error Page
+
+A beautiful and multilingual 404 page for graceful handling of non-existent routes:
+
+- **Design Features**:
+  - Subtle animated blobs for visual interest
+  - Responsive layout that works on all devices
+  - Uses project's color system and theme colors
+  - Smooth animations with overflow prevention
+- **Multilingual Support**: English and Bangla translations
+- **Navigation Options**:
+  - "Go Home" button to return to the blog homepage
+  - "Go Back" button to navigate to the previous page
+- **User Experience**:
+  - Clear, friendly messaging
+  - Integrated with existing theme (light/dark mode)
+  - Uses project's Button component with proper variants
+- **Location**: `src/components/common/NotFound.tsx`
+- **Translation Keys**: `PAGE_NOT_FOUND`, `PAGE_NOT_FOUND_DESCRIPTION`, `PAGE_NOT_FOUND_MESSAGE`, `GO_HOME`, `GO_BACK`
 
 ## 🚦 Getting Started
 
