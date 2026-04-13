@@ -27,7 +27,7 @@ export const NotFound: React.FC = () => {
         {/* 404 Number */}
         <div className="space-y-3">
           <div className="text-8xl md:text-9xl font-bold text-accent opacity-20">
-            404
+            {t(TranslationKey.PAGE_NOT_FOUND_404)}
           </div>
         </div>
 

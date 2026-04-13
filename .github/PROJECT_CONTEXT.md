@@ -12,6 +12,7 @@ Full-stack blog platform with:
 - Comments system (nested)
 - Like system (toggle with RPC)
 - Rich text editor (Tiptap)
+- 404 error page (beautiful, animated)
 
 ## Key Technologies
 - **Frontend:** React 18 + TypeScript + Vite (port 3012) + Tailwind CSS
@@ -317,6 +318,44 @@ const { posts, pagination, loadMorePosts } = useBlogStore();
   totalCount={pagination.total}
 />
 ```
+
+### 404 Error Page
+```typescript
+import { NotFound } from '@/components/common/NotFound';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
+
+// The NotFound component is automatically integrated as the catch-all route
+// In App.tsx routes:
+<Route path="*" element={<NotFound />} />
+
+// Component usage (for reference):
+export const NotFound: React.FC = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  return (
+    <div className="relative min-h-screen flex items-center justify-center px-4 py-12 overflow-hidden">
+      {/* Animated background with clipped blobs */}
+      <div className="relative z-10 max-w-2xl w-full text-center space-y-8">
+        <h1>{t(TranslationKey.PAGE_NOT_FOUND)}</h1>
+        <p>{t(TranslationKey.PAGE_NOT_FOUND_DESCRIPTION)}</p>
+        <Button onClick={() => navigate('/')}>
+          {t(TranslationKey.GO_HOME)}
+        </Button>
+      </div>
+    </div>
+  );
+};
+```
+
+**Features:**
+- Multilingual (EN/BN)
+- Theme-aware (light/dark mode)
+- Animated accent-colored blobs
+- No horizontal scroll issues (overflow-hidden parent)
+- Uses project Button component and colors
 
 ### Form with Validation
 ```typescript

@@ -186,6 +186,9 @@ export enum TranslationKey {
   PAGE_NOT_FOUND_MESSAGE = 'pageNotFoundMessage',
   GO_HOME = 'goHome',
   GO_BACK = 'goBack',
+  PAGE_NOT_FOUND_404 = 'pageNotFound404',
+  LOGOUT_SUCCESS_TITLE = 'logoutSuccessTitle',
+  LOGOUT_SUCCESS_MESSAGE = 'logoutSuccessMessage',
 }
 
 export type LanguageKey = TranslationKey;
@@ -377,6 +380,9 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.PAGE_NOT_FOUND_MESSAGE]: 'Don\'t worry, let\'s get you back on track.',
     [TranslationKey.GO_HOME]: 'Go Home',
     [TranslationKey.GO_BACK]: 'Go Back',
+    [TranslationKey.PAGE_NOT_FOUND_404]: '404',
+    [TranslationKey.LOGOUT_SUCCESS_TITLE]: 'Logged out',
+    [TranslationKey.LOGOUT_SUCCESS_MESSAGE]: 'You have been logged out successfully. See you next time!',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -564,6 +570,9 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.PAGE_NOT_FOUND_MESSAGE]: 'চিন্তা করবেন না, আমরা আপনাকে আবার সঠিক পথে রাখব।',
     [TranslationKey.GO_HOME]: 'বাড়িতে যান',
     [TranslationKey.GO_BACK]: 'ফিরে যান',
+    [TranslationKey.PAGE_NOT_FOUND_404]: '৪০৪',
+    [TranslationKey.LOGOUT_SUCCESS_TITLE]: 'লগ আউট হয়েছে',
+    [TranslationKey.LOGOUT_SUCCESS_MESSAGE]: 'আপনি সফলভাবে লগ আউট করেছেন। আবার দেখা হবে!',
   },
 };
 
