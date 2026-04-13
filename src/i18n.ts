@@ -181,6 +181,11 @@ export enum TranslationKey {
   SEARCH_RESULTS_SUMMARY = 'searchResultsSummary',
   NO_SEARCH_RESULTS = 'noSearchResults',
   CLEAR_SEARCH = 'clearSearch',
+  PAGE_NOT_FOUND = 'pageNotFound',
+  PAGE_NOT_FOUND_DESCRIPTION = 'pageNotFoundDescription',
+  PAGE_NOT_FOUND_MESSAGE = 'pageNotFoundMessage',
+  GO_HOME = 'goHome',
+  GO_BACK = 'goBack',
 }
 
 export type LanguageKey = TranslationKey;
@@ -367,6 +372,11 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.SEARCH_RESULTS_SUMMARY]: 'Found {count} posts for "{query}"',
     [TranslationKey.NO_SEARCH_RESULTS]: 'No posts found for your search.',
     [TranslationKey.CLEAR_SEARCH]: 'Clear search',
+    [TranslationKey.PAGE_NOT_FOUND]: 'Page Not Found',
+    [TranslationKey.PAGE_NOT_FOUND_DESCRIPTION]: 'The page you\'re looking for doesn\'t exist or has been moved.',
+    [TranslationKey.PAGE_NOT_FOUND_MESSAGE]: 'Don\'t worry, let\'s get you back on track.',
+    [TranslationKey.GO_HOME]: 'Go Home',
+    [TranslationKey.GO_BACK]: 'Go Back',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -549,6 +559,11 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.SEARCH_RESULTS_SUMMARY]: '"{query}" এর জন্য {count}টি পোস্ট পাওয়া গেছে',
     [TranslationKey.NO_SEARCH_RESULTS]: 'আপনার খোঁজ অনুযায়ী কোন পোস্ট পাওয়া যায়নি।',
     [TranslationKey.CLEAR_SEARCH]: 'খোঁজ মুছুন',
+    [TranslationKey.PAGE_NOT_FOUND]: 'পৃষ্ঠা পাওয়া যায়নি',
+    [TranslationKey.PAGE_NOT_FOUND_DESCRIPTION]: 'আপনি যে পৃষ্ঠাটি খুঁজছেন তা বিদ্যমান নেই বা সরানো হয়েছে।',
+    [TranslationKey.PAGE_NOT_FOUND_MESSAGE]: 'চিন্তা করবেন না, আমরা আপনাকে আবার সঠিক পথে রাখব।',
+    [TranslationKey.GO_HOME]: 'বাড়িতে যান',
+    [TranslationKey.GO_BACK]: 'ফিরে যান',
   },
 };
 
