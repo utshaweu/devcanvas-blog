@@ -16,6 +16,7 @@ import { LoadingOverlay } from '@/components/common/LoadingSpinner';
 import { GlobalToastProvider } from '@/contexts/ToastContext';
 import { ToastProvider } from '@/components/ui/toast';
 import { ToastContainer } from '@/components/common/ToastContainer';
+import { NotFound } from '@/components/common/NotFound';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -131,7 +132,7 @@ function App() {
                 />
 
                 {/* 404 Route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
             <ToastContainer />
