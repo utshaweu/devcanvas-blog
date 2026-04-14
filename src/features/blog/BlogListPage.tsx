@@ -4,10 +4,11 @@ import { useBlogStore } from '@/stores/blogStore';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { Card, CardContent } from '@/components/ui/card';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { BlogPostCard } from '@/components/common/BlogPostCard';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { LoadMoreButton } from '@/components/common/LoadMoreButton';
 import { SearchBar } from '@/components/common/SearchBar';
+import { VirtualizedGrid } from '@/components/common/VirtualizedGrid';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export const BlogListPage: React.FC = () => {
@@ -80,26 +81,25 @@ export const BlogListPage: React.FC = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.length === 0 ? (
-            <Card className="col-span-1 md:col-span-2 lg:col-span-3">
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">
-                  {normalizedSearchQuery ? t(TranslationKey.NO_SEARCH_RESULTS) : t(TranslationKey.NO_POSTS_AVAILABLE)}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            posts.map((post) => (
-              <Link key={post.id} to={`/blog/${post.slug}`}>
-                <BlogPostCard
-                  post={post}
-                  variant="default"
-                />
+        {posts.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">
+                {normalizedSearchQuery ? t(TranslationKey.NO_SEARCH_RESULTS) : t(TranslationKey.NO_POSTS_AVAILABLE)}
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <VirtualizedGrid
+            items={posts}
+            getItemKey={(post) => post.id}
+            renderItem={(post) => (
+              <Link to={`/blog/${post.slug}`}>
+                <BlogPostCard post={post} variant="default" />
               </Link>
-            ))
-          )}
-        </div>
+            )}
+          />
+        )}
 
         {posts.length > 0 && (
           <LoadMoreButton

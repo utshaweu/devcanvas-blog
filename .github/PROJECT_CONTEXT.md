@@ -6,6 +6,7 @@ This file helps GitHub Copilot understand the project structure and conventions.
 Full-stack blog platform with:
 - File upload system (avatars & featured images)
 - Infinite scroll pagination (Load More)
+- Virtualized post grid rendering for large lists
 - Post search (debounced, Medium-style search bar)
 - Multilingual support (EN/BN)
 - Dark mode (Light/Dark/System)
@@ -19,6 +20,7 @@ Full-stack blog platform with:
 - **State:** Zustand (global) + React Hook Form (forms) + Toast Context
 - **Validation:** Zod schemas
 - **UI:** Shadcn/ui components (Radix UI)
+- **Virtualization:** react-virtuoso (`VirtualizedGrid`)
 - **Backend:** Supabase (PostgreSQL + Auth + Storage)
 - **Editor:** Tiptap for rich text
 - **i18n:** Custom translation system with enum keys
@@ -307,8 +309,15 @@ export const MyDialog = ({ open, onOpenChange }) => {
 ### Load More Pagination
 ```typescript
 import { LoadMoreButton } from '@/components/common/LoadMoreButton';
+import { VirtualizedGrid } from '@/components/common/VirtualizedGrid';
 
 const { posts, pagination, loadMorePosts } = useBlogStore();
+
+<VirtualizedGrid
+  items={posts}
+  getItemKey={(post) => post.id}
+  renderItem={(post) => <PostCard post={post} />}
+/>
 
 <LoadMoreButton 
   isLoading={isLoading}

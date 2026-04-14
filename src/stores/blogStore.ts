@@ -63,15 +63,29 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         .replace(/[,%]/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
+      const { currentSearchQuery } = get();
+      const shouldRequestExactCount = !append || page === 1 || normalizedSearchQuery !== currentSearchQuery;
+      const selectOptions = shouldRequestExactCount ? { count: 'exact' as const } : undefined;
 
       let query = supabase
         .from('posts')
         .select(`
-          *,
-          author:users(*),
-          category:categories(*),
-          tags:post_tags(tag:tags(*))
-        `, { count: 'exact' })
+          id,
+          title,
+          slug,
+          excerpt,
+          featured_image,
+          author_id,
+          published,
+          published_at,
+          views,
+          likes,
+          created_at,
+          updated_at,
+          author:users(id, name, avatar_url),
+          category:categories(id, name, slug, description, post_count, created_at),
+          tags:post_tags(tag:tags(id, name, slug, post_count, created_at))
+        `, selectOptions)
         .eq('published', true);
 
       if (sanitizedSearchQuery) {
@@ -89,23 +103,28 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         const postData = post as Record<string, unknown>;
         return {
           ...postData,
+          content: typeof postData.content === 'string' ? postData.content : '',
           tags: Array.isArray(postData.tags) 
             ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
             : [],
         };
       }) || []) as BlogPost[];
 
-      set(state => ({
-        posts: append ? [...state.posts, ...posts] : posts,
-        currentSearchQuery: normalizedSearchQuery,
-        pagination: {
-          page,
-          limit,
-          total: count || 0,
-          totalPages: Math.ceil((count || 0) / limit),
-        },
-        isLoading: false,
-      }));
+      set((state) => {
+        const total = typeof count === 'number' ? count : state.pagination.total;
+
+        return {
+          posts: append ? [...state.posts, ...posts] : posts,
+          currentSearchQuery: normalizedSearchQuery,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: total > 0 ? Math.ceil(total / limit) : 0,
+          },
+          isLoading: false,
+        };
+      });
     } catch (error: unknown) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch posts',
@@ -120,15 +139,28 @@ export const useBlogStore = create<BlogState>((set, get) => ({
     try {
       const from = (page - 1) * limit;
       const to = from + limit - 1;
+      const shouldRequestExactCount = !append || page === 1;
+      const selectOptions = shouldRequestExactCount ? { count: 'exact' as const } : undefined;
 
       let query = supabase
         .from('posts')
         .select(`
-          *,
-          author:users(*),
-          category:categories(*),
-          tags:post_tags(tag:tags(*))
-        `, { count: 'exact' })
+          id,
+          title,
+          slug,
+          excerpt,
+          featured_image,
+          author_id,
+          published,
+          published_at,
+          views,
+          likes,
+          created_at,
+          updated_at,
+          author:users(id, name, avatar_url),
+          category:categories(id, name, slug, description, post_count, created_at),
+          tags:post_tags(tag:tags(id, name, slug, post_count, created_at))
+        `, selectOptions)
         .eq('author_id', userId);
 
       // Apply published filter
@@ -149,22 +181,27 @@ export const useBlogStore = create<BlogState>((set, get) => ({
         const postData = post as Record<string, unknown>;
         return {
           ...postData,
+          content: typeof postData.content === 'string' ? postData.content : '',
           tags: Array.isArray(postData.tags) 
             ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
             : [],
         };
       }) || []) as BlogPost[];
 
-      set(state => ({
-        posts: append ? [...state.posts, ...posts] : posts,
-        pagination: {
-          page,
-          limit,
-          total: count || 0,
-          totalPages: Math.ceil((count || 0) / limit),
-        },
-        isLoading: false,
-      }));
+      set((state) => {
+        const total = typeof count === 'number' ? count : state.pagination.total;
+
+        return {
+          posts: append ? [...state.posts, ...posts] : posts,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: total > 0 ? Math.ceil(total / limit) : 0,
+          },
+          isLoading: false,
+        };
+      });
     } catch (error: unknown) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch user posts',

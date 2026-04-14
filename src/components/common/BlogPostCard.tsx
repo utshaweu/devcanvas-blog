@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, Heart, Edit, Trash2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import type { BlogPostCardProps } from '@/types';
 
-export const BlogPostCard: React.FC<BlogPostCardProps> = ({
+const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
   post,
   variant = 'default',
   onEdit,
@@ -18,9 +18,14 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({
 }) => {
   const { t } = useTranslation();
   const isDashboard = variant === 'dashboard';
+  const publishDate = post.published_at || post.created_at;
 
   const visibleTags = post.tags?.slice(0, 3) ?? [];
   const remainingTags = Math.max((post.tags?.length ?? 0) - visibleTags.length, 0);
+  const formattedPublishDate = useMemo(
+    () => `${formatRelativeTime(publishDate)} • ${formatDate(publishDate)}`,
+    [publishDate]
+  );
 
   return (
     <Card className="group h-full cursor-pointer flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -73,7 +78,7 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({
                 {post.published ? t(TranslationKey.PUBLISHED) : t(TranslationKey.DRAFT)}
               </Badge>
               <span className="text-muted-foreground">
-                {formatRelativeTime(post.published_at || post.created_at)} • {formatDate(post.published_at || post.created_at)}
+                {formattedPublishDate}
               </span>
             </div>
           )}
@@ -84,7 +89,7 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({
               <span>{post.author?.name}</span>
               <span>•</span>
               <span>
-                {formatRelativeTime(post.published_at || post.created_at)} • {formatDate(post.published_at || post.created_at)}
+                {formattedPublishDate}
               </span>
             </div>
           )}
@@ -142,3 +147,7 @@ export const BlogPostCard: React.FC<BlogPostCardProps> = ({
     </Card>
   );
 };
+
+BlogPostCardComponent.displayName = 'BlogPostCard';
+
+export const BlogPostCard = React.memo(BlogPostCardComponent);

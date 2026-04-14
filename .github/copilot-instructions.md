@@ -4,6 +4,7 @@
 You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogging platform with:
 - **File Upload System**: Avatar & featured image uploads with Supabase Storage
 - **Infinite Scroll**: Load More pagination (9 posts per page)
+- **Virtualized Grid Rendering**: Windowed rendering for large post collections
 - **Post Search**: Debounced, Medium-style search on blog list with pagination support
 - **Multilingual**: English and Bangla support with runtime switching
 - **Dark Mode**: Light/Dark/System theme with persistence
@@ -32,6 +33,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Tiptap 2.x (rich text editor)
 - Custom FileUpload component (with progress tracking)
 - Custom PasswordInput component (with visibility toggle)
+- VirtualizedGrid component (react-virtuoso powered)
 
 ### Backend & Storage
 - Supabase (PostgreSQL + Auth + Storage)
@@ -359,6 +361,7 @@ const hasMore = pagination.page < pagination.totalPages;
 - Append mode: new posts added to list
 - Shows "X of Y posts" counter
 - Auto-hides when all loaded
+- Use `VirtualizedGrid` for large card lists (including blog list and dashboard)
 
 ### 10. Blog Search Pattern
 ```typescript
