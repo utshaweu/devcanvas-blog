@@ -718,6 +718,8 @@ The blog uses a "Load More" pagination strategy similar to Facebook, Medium, and
 - **Page Size:** 9 posts per page (optimized for 3-column grid)
 - **Strategy:** Append mode - new posts are added to existing list
 - **Component:** `LoadMoreButton` in `src/components/common/LoadMoreButton.tsx`
+- **Virtualized Base:** `VirtualizedGrid` in `src/components/common/VirtualizedGrid.tsx`
+- **Shared Usage:** `VirtualizedGrid` is used by both `BlogListPage` and `DashboardPage`
 
 **Store Methods:**
 ```typescript
@@ -805,6 +807,7 @@ interface LoadMoreButtonProps {
 - Auto-hides when all posts are loaded
 - Shows "No more posts to load" message when done
 - Fully internationalized (i18n keys: `LOAD_MORE`, `LOADING_MORE`, `NO_MORE_POSTS`, `SHOWING_POSTS_COUNT`)
+- Windowed rendering keeps DOM size small with large datasets
 
 **Best Practices:**
 - Always call `resetPagination()` before initial fetch

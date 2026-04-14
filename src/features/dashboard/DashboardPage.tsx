@@ -4,14 +4,15 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PenSquare, FileText, Eye, Heart } from 'lucide-react';
 import { useBlogStore } from '@/stores/blogStore';
 import { useGlobalToast } from '@/contexts/ToastContext';
+import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { StatCard } from '@/components/common/StatCard';
-import { BlogPostCard } from '@/components/common/BlogPostCard';
 import { LoadMoreButton } from '@/components/common/LoadMoreButton';
+import { VirtualizedGrid } from '@/components/common/VirtualizedGrid';
 import { cn } from '@/utils/helpers';
 import type { BlogPost } from '@/types';
 
@@ -214,9 +215,11 @@ export const DashboardPage: React.FC = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {posts.map((post) => (
-                    <Link key={post.id} to={`/blog/${post.slug}`}>
+                <VirtualizedGrid
+                  items={posts}
+                  getItemKey={(post) => post.id}
+                  renderItem={(post) => (
+                    <Link to={`/blog/${post.slug}`}>
                       <BlogPostCard
                         post={post}
                         variant="dashboard"
@@ -225,8 +228,8 @@ export const DashboardPage: React.FC = () => {
                         isDeleting={deletingId === post.id}
                       />
                     </Link>
-                  ))}
-                </div>
+                  )}
+                />
                 
                 <LoadMoreButton
                   isLoading={isLoading && posts.length > 0}

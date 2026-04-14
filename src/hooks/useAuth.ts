@@ -17,12 +17,7 @@ export function useAuth() {
     resetPassword,
     updatePassword,
     clearError,
-    initialize,
   } = useAuthStore();
-
-  useEffect(() => {
-    initialize();
-  }, [initialize]);
 
   return {
     user,

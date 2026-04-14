@@ -405,3 +405,15 @@ export interface SearchBarProps {
   helperText?: string;
   className?: string;
 }
+
+export interface VirtualizedGridProps<T> {
+  items: T[];
+  renderItem: (item: T, index: number) => React.ReactNode;
+  className?: string;
+  itemClassName?: string;
+  overscan?: number;
+  useWindowScroll?: boolean;
+  getItemKey?: (item: T, index: number) => string;
+}
+
+export type VirtualizedGridComponent = <T,>(props: VirtualizedGridProps<T>) => JSX.Element;

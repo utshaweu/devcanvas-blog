@@ -3,6 +3,10 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
 import type { User, AuthSession, LoginCredentials, SignupCredentials } from '@/types';
 
+let authSubscription: { unsubscribe: () => void } | null = null;
+let initializePromise: Promise<void> | null = null;
+let isInitialized = false;
+
 interface AuthState {
   user: User | null;
   session: AuthSession | null;
@@ -28,7 +32,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       session: null,
       isAuthenticated: false,
-      isLoading: false,
+      isLoading: true,
       error: null,
 
       login: async (credentials: LoginCredentials) => {
@@ -245,21 +249,44 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
 
       initialize: async () => {
-        const { refreshSession } = get();
-        await refreshSession();
+        if (isInitialized) {
+          return;
+        }
 
-        // Set up auth state change listener
-        supabase.auth.onAuthStateChange((_event, session) => {
-          if (session) {
-            refreshSession();
-          } else {
+        if (initializePromise) {
+          return initializePromise;
+        }
+
+        initializePromise = (async () => {
+          set({ isLoading: true, error: null });
+          const { refreshSession } = get();
+          await refreshSession();
+
+          if (authSubscription) {
+            authSubscription.unsubscribe();
+          }
+
+          const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session) {
+              void get().refreshSession();
+              return;
+            }
+
             set({
               user: null,
               session: null,
               isAuthenticated: false,
             });
-          }
+          });
+
+          authSubscription = data.subscription;
+          isInitialized = true;
+          set({ isLoading: false });
+        })().finally(() => {
+          initializePromise = null;
         });
+
+        return initializePromise;
       },
     }),
     {

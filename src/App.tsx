@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { LoginPage } from '@/features/auth/LoginPage';
@@ -12,6 +12,7 @@ import { BlogPostPage } from '@/features/blog/BlogPostPage';
 import { CreatePostPage } from '@/features/blog/CreatePostPage';
 import { EditPostPage } from '@/features/blog/EditPostPage';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/stores/authStore';
 import { LoadingOverlay } from '@/components/common/LoadingSpinner';
 import { GlobalToastProvider } from '@/contexts/ToastContext';
 import { ToastProvider } from '@/components/ui/toast';
@@ -55,6 +56,12 @@ const GuestRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 };
 
 function App() {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <ThemeProvider>
       <LanguageProvider>

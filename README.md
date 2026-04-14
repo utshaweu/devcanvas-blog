@@ -17,6 +17,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Like System**: Post likes with real-time tracking and user engagement
 - **Analytics Dashboard**: Track views, likes, and engagement
 - **Post Search**: Medium-style debounced search on blog list with Load More compatibility
+- **Reusable Virtualized Grid**: Efficient rendering for large collections using the shared VirtualizedGrid component
 - **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
 - **Responsive Design**: Mobile-first, works on all devices
 - **Multilingual**: English and Bangla support with runtime switching
@@ -37,6 +38,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Rich Text Editor**: Tiptap 2.x
 - **Icons**: Lucide React
 - **Charts**: Recharts 2.x
+- **Large List Virtualization**: react-virtuoso
 
 ### Backend & Database
 - **Database**: Supabase (PostgreSQL)
