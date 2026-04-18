@@ -20,6 +20,11 @@ export const BlogPostPage: React.FC = () => {
   const { currentPost, isLoading, fetchPostBySlug, incrementViews, toggleLike } = useBlogStore();
   const viewCountedRef = useRef<string | null>(null);
 
+  const handleFeaturedImageError: React.ReactEventHandler<HTMLImageElement> = (event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = DEFAULT_FEATURED_IMAGE;
+  };
+
   const handleLikeClick = () => {
     if (!isAuthenticated) {
       toastWarning(
@@ -110,6 +115,10 @@ export const BlogPostPage: React.FC = () => {
           <img
             src={currentPost.featured_image || DEFAULT_FEATURED_IMAGE}
             alt={currentPost.title}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onError={handleFeaturedImageError}
             className="w-full h-96 object-cover rounded-lg"
           />
         </header>

@@ -19,6 +19,12 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
   const { t } = useTranslation();
   const isDashboard = variant === 'dashboard';
   const publishDate = post.published_at || post.created_at;
+  const featuredImageSrc = post.featured_image || DEFAULT_FEATURED_IMAGE;
+
+  const handleImageError: React.ReactEventHandler<HTMLImageElement> = (event) => {
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = DEFAULT_FEATURED_IMAGE;
+  };
 
   const visibleTags = post.tags?.slice(0, 3) ?? [];
   const remainingTags = Math.max((post.tags?.length ?? 0) - visibleTags.length, 0);
@@ -33,8 +39,11 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
         <div className="space-y-2">
           <div className="relative mb-2">
             <img
-              src={post.featured_image || DEFAULT_FEATURED_IMAGE}
+              src={featuredImageSrc}
               alt={post.title}
+              loading="lazy"
+              decoding="async"
+              onError={handleImageError}
               className="h-48 w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />
             {post.category?.name && (
