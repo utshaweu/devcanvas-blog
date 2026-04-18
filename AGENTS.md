@@ -1079,6 +1079,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 - One like per user per post (unique constraint)
 - Atomic toggle operation (like/unlike in single RPC call)
 - Automatic count aggregation in posts table
+- Post card comment count should use `post.comments` from the `posts` table (kept in sync by a database trigger on the `comments` table)
 - Real-time updates via Supabase subscriptions
 - Only authenticated users can like posts
 
@@ -1139,6 +1140,7 @@ CREATE TABLE posts (
   published_at TIMESTAMP WITH TIME ZONE,
   views INTEGER DEFAULT 0,
   likes INTEGER DEFAULT 0,
+  comments INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -1300,6 +1302,62 @@ CREATE POLICY "Users can delete their own likes" ON post_likes
 To enable the post like/unlike and views tracking functionality, run the following SQL in your Supabase SQL Editor:
 
 ```sql
+-- ============================================
+-- Comments Counter Setup for Posts
+-- ============================================
+
+-- Backfill comments count from existing comments data
+UPDATE public.posts p
+SET comments = COALESCE(c.comment_count, 0)
+FROM (
+  SELECT post_id, COUNT(*)::INTEGER AS comment_count
+  FROM public.comments
+  GROUP BY post_id
+) c
+WHERE p.id = c.post_id;
+
+-- Keep posts.comments in sync with comments changes
+CREATE OR REPLACE FUNCTION public.sync_post_comments_count()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.posts
+    SET comments = comments + 1
+    WHERE id = NEW.post_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.posts
+    SET comments = GREATEST(comments - 1, 0)
+    WHERE id = OLD.post_id;
+    RETURN OLD;
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF NEW.post_id IS DISTINCT FROM OLD.post_id THEN
+      UPDATE public.posts
+      SET comments = GREATEST(comments - 1, 0)
+      WHERE id = OLD.post_id;
+
+      UPDATE public.posts
+      SET comments = comments + 1
+      WHERE id = NEW.post_id;
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_sync_post_comments_count ON public.comments;
+
+CREATE TRIGGER trg_sync_post_comments_count
+AFTER INSERT OR UPDATE OR DELETE ON public.comments
+FOR EACH ROW
+EXECUTE FUNCTION public.sync_post_comments_count();
+
+CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
+
 -- Drop existing functions if parameter names need to change
 DROP FUNCTION IF EXISTS public.toggle_post_like(uuid);
 DROP FUNCTION IF EXISTS public.increment_post_views(uuid);

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Heart, Edit, Trash2 } from 'lucide-react';
+import { Eye, Heart, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Badge } from './Badge';
 import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
@@ -103,6 +103,10 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
             <span className="flex items-center gap-1">
               <Heart className="h-3 w-3" />
               {post.likes}
+            </span>
+            <span className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" />
+              {post.comments}
             </span>
           </div>
         </div>
