@@ -21,6 +21,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   cancelLabel,
   replyPlaceholder,
   editPlaceholder,
+  viewRepliesLabel,
+  hideRepliesLabel,
   onRequireLogin,
   onReply,
   onEdit,
@@ -29,11 +31,14 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 }) => {
   const [isReplying, setIsReplying] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [areRepliesVisible, setAreRepliesVisible] = useState<boolean>(false);
   const [replyText, setReplyText] = useState<string>('');
   const [editText, setEditText] = useState<string>(comment.content);
 
   const isOwner = Boolean(currentUserId && comment.author_id === currentUserId);
   const hasAvatar = Boolean(comment.author?.avatar_url);
+  const replyCount = comment.replies.length;
+  const formattedViewRepliesLabel = viewRepliesLabel.replace('{count}', String(replyCount));
 
   const handleReplyStart = () => {
     if (!isAuthenticated) {
@@ -56,6 +61,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
     await onReply(comment.id, content);
     setReplyText('');
     setIsReplying(false);
+    setAreRepliesVisible(true);
   };
 
   const handleEditSubmit = async () => {
@@ -121,7 +127,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           </div>
 
           {!isEditing && (
-            <div className="mt-1 flex items-center gap-1">
+            <div className="mt-1 flex flex-wrap items-center gap-1">
               <Button
                 type="button"
                 variant="ghost"
@@ -157,6 +163,18 @@ export const CommentItem: React.FC<CommentItemProps> = ({
                   </Button>
                 </>
               )}
+
+              {replyCount > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAreRepliesVisible((previous) => !previous)}
+                  className="h-8 px-2 text-xs font-semibold text-accent"
+                >
+                  {areRepliesVisible ? hideRepliesLabel : formattedViewRepliesLabel}
+                </Button>
+              )}
             </div>
           )}
 
@@ -179,7 +197,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         </div>
       </div>
 
-      {comment.replies.length > 0 && (
+      {replyCount > 0 && areRepliesVisible && (
         <div className="ml-6 border-l border-border pl-4 space-y-3">
           {comment.replies.map((reply) => (
             <CommentItem
@@ -197,6 +215,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               cancelLabel={cancelLabel}
               replyPlaceholder={replyPlaceholder}
               editPlaceholder={editPlaceholder}
+              viewRepliesLabel={viewRepliesLabel}
+              hideRepliesLabel={hideRepliesLabel}
               onRequireLogin={onRequireLogin}
               onReply={onReply}
               onEdit={onEdit}

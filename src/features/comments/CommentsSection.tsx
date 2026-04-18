@@ -122,13 +122,16 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
   };
 
   return (
-    <Card className={cn('border-border', className)}>
-      <CardHeader>
-        <CardTitle className="text-xl">
-          {t(TranslationKey.COMMENTS)} ({totalComments})
-        </CardTitle>
+    <Card className={cn('border-border bg-card/95 shadow-sm', className)}>
+      <CardHeader className="border-b border-border/70 pb-4">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-xl">{t(TranslationKey.COMMENTS)}</CardTitle>
+          <span className="inline-flex min-w-8 items-center justify-center rounded-full bg-accent/15 px-2 py-1 text-xs font-semibold text-accent">
+            {totalComments}
+          </span>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {isAuthenticated ? (
           <CommentComposer
             value={newCommentText}
@@ -139,7 +142,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             submitLabel={t(TranslationKey.POST_COMMENT)}
           />
         ) : (
-          <div className="rounded-md border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
             {t(TranslationKey.LOGIN_REQUIRED_TO_COMMENT_MESSAGE)}
           </div>
         )}
@@ -153,7 +156,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             {t(TranslationKey.NO_COMMENTS_YET)}
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {comments.map((comment) => (
               <CommentItem
                 key={comment.id}
@@ -170,6 +173,8 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                 cancelLabel={t(TranslationKey.CANCEL)}
                 replyPlaceholder={t(TranslationKey.WRITE_REPLY_PLACEHOLDER)}
                 editPlaceholder={t(TranslationKey.EDIT_COMMENT_PLACEHOLDER)}
+                viewRepliesLabel={t(TranslationKey.VIEW_ALL_REPLIES)}
+                hideRepliesLabel={t(TranslationKey.HIDE_REPLIES)}
                 onRequireLogin={notifyLoginRequired}
                 onReply={handleReply}
                 onEdit={handleEdit}

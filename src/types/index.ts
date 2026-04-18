@@ -354,6 +354,8 @@ export interface CommentItemProps {
   cancelLabel: string;
   replyPlaceholder: string;
   editPlaceholder: string;
+  viewRepliesLabel: string;
+  hideRepliesLabel: string;
   onRequireLogin: () => void;
   onReply: (parentId: string, content: string) => Promise<void>;
   onEdit: (commentId: string, content: string) => Promise<void>;
