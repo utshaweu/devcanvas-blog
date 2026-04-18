@@ -11,7 +11,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Comments System**: Nested comments on blog posts
 - **Like System**: Post likes with real-time tracking
 - **Rich Text Editor**: Tiptap with full formatting support
-- **Analytics**: Dashboard with views, likes, and engagement metrics
+- **Analytics**: Dashboard with views, likes, comments, and engagement metrics
 
 ## Tech Stack (DO NOT SUGGEST ALTERNATIVES)
 
@@ -81,6 +81,64 @@ CREATE INDEX IF NOT EXISTS idx_posts_author_created_at
 -- Index for category_id lookups (if filtering by category)
 -- Consider adding if category filtering is implemented
 CREATE INDEX IF NOT EXISTS idx_posts_category_id ON posts(category_id);
+```
+
+### Comments Counter Migration
+
+To keep `posts.comments` fast and accurate in production, run the following SQL in Supabase:
+
+```sql
+-- Backfill comments count from existing comments data
+UPDATE public.posts p
+SET comments = COALESCE(c.comment_count, 0)
+FROM (
+  SELECT post_id, COUNT(*)::INTEGER AS comment_count
+  FROM public.comments
+  GROUP BY post_id
+) c
+WHERE p.id = c.post_id;
+
+-- Keep posts.comments in sync with comments changes
+CREATE OR REPLACE FUNCTION public.sync_post_comments_count()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.posts
+    SET comments = comments + 1
+    WHERE id = NEW.post_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.posts
+    SET comments = GREATEST(comments - 1, 0)
+    WHERE id = OLD.post_id;
+    RETURN OLD;
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF NEW.post_id IS DISTINCT FROM OLD.post_id THEN
+      UPDATE public.posts
+      SET comments = GREATEST(comments - 1, 0)
+      WHERE id = OLD.post_id;
+
+      UPDATE public.posts
+      SET comments = comments + 1
+      WHERE id = NEW.post_id;
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_sync_post_comments_count ON public.comments;
+
+CREATE TRIGGER trg_sync_post_comments_count
+AFTER INSERT OR UPDATE OR DELETE ON public.comments
+FOR EACH ROW
+EXECUTE FUNCTION public.sync_post_comments_count();
+
+CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
 ```
 
 ## Design System (NEVER CHANGE)
@@ -704,7 +762,7 @@ className="text-lg md:text-base sm:text-sm"
 ### Tables Structure
 ```sql
 -- users: User profiles
--- posts: Blog posts with views/likes
+-- posts: Blog posts with views/likes/comments
 -- comments: Nested comments on posts
 -- categories: Post categories
 -- tags: Post tags

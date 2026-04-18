@@ -121,7 +121,7 @@ border: '#E2E8F0'       // Gray
 
 ## Database Tables
 - `users` - User profiles (with avatar_url)
-- `posts` - Blog posts (with views, likes, featured_image)
+- `posts` - Blog posts (with views, likes, comments, featured_image)
 - `comments` - Nested comments (with parent_id)
 - `categories` - Post categories
 - `tags` - Post tags
@@ -139,6 +139,64 @@ increment_post_views(p_post_id UUID)
 
 -- Toggle like (add/remove)
 toggle_post_like(p_post_id UUID)
+```
+
+## Comments Counter Migration
+
+Use this SQL in Supabase to keep `posts.comments` updated automatically:
+
+```sql
+-- Backfill comments count from existing comments data
+UPDATE public.posts p
+SET comments = COALESCE(c.comment_count, 0)
+FROM (
+  SELECT post_id, COUNT(*)::INTEGER AS comment_count
+  FROM public.comments
+  GROUP BY post_id
+) c
+WHERE p.id = c.post_id;
+
+-- Keep posts.comments in sync with comments changes
+CREATE OR REPLACE FUNCTION public.sync_post_comments_count()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.posts
+    SET comments = comments + 1
+    WHERE id = NEW.post_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.posts
+    SET comments = GREATEST(comments - 1, 0)
+    WHERE id = OLD.post_id;
+    RETURN OLD;
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF NEW.post_id IS DISTINCT FROM OLD.post_id THEN
+      UPDATE public.posts
+      SET comments = GREATEST(comments - 1, 0)
+      WHERE id = OLD.post_id;
+
+      UPDATE public.posts
+      SET comments = comments + 1
+      WHERE id = NEW.post_id;
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_sync_post_comments_count ON public.comments;
+
+CREATE TRIGGER trg_sync_post_comments_count
+AFTER INSERT OR UPDATE OR DELETE ON public.comments
+FOR EACH ROW
+EXECUTE FUNCTION public.sync_post_comments_count();
+
+CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
 ```
 
 ## Common Patterns

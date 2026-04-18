@@ -15,7 +15,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Form Validation**: Robust validation with React Hook Form and Zod
 - **Comments System**: Nested comments on blog posts with full CRUD operations and row-level security
 - **Like System**: Post likes with real-time tracking and user engagement
-- **Analytics Dashboard**: Track views, likes, and engagement
+- **Analytics Dashboard**: Track views, likes, comments, and engagement
 - **Post Search**: Medium-style debounced search on blog list with Load More compatibility
 - **Reusable Virtualized Grid**: Efficient rendering for large collections using the shared VirtualizedGrid component
 - **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
@@ -129,6 +129,7 @@ The application features a comprehensive nested comments system on blog posts:
   - Beautiful comment threads with proper indentation
   - Toast notifications for all comment actions
 - **Bilingual Support**: Available in English and Bengali
+- **Post Card Metric**: Card UI uses `post.comments` from the `posts` table (maintained automatically by a database trigger on the `comments` table)
 - **Database Table**: `comments` with fields:
   - `id` (UUID primary key)
   - `post_id` (reference to posts table)
@@ -318,6 +319,7 @@ CREATE TABLE posts (
   published_at TIMESTAMP WITH TIME ZONE,
   views INTEGER DEFAULT 0,
   likes INTEGER DEFAULT 0,
+  comments INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -332,6 +334,62 @@ CREATE TABLE comments (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- ============================================
+-- Comments Counter Setup for Posts
+-- ============================================
+
+-- Backfill comments count from existing comments data
+UPDATE public.posts p
+SET comments = COALESCE(c.comment_count, 0)
+FROM (
+  SELECT post_id, COUNT(*)::INTEGER AS comment_count
+  FROM public.comments
+  GROUP BY post_id
+) c
+WHERE p.id = c.post_id;
+
+-- Keep posts.comments in sync with comments changes
+CREATE OR REPLACE FUNCTION public.sync_post_comments_count()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.posts
+    SET comments = comments + 1
+    WHERE id = NEW.post_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.posts
+    SET comments = GREATEST(comments - 1, 0)
+    WHERE id = OLD.post_id;
+    RETURN OLD;
+  ELSIF TG_OP = 'UPDATE' THEN
+    IF NEW.post_id IS DISTINCT FROM OLD.post_id THEN
+      UPDATE public.posts
+      SET comments = GREATEST(comments - 1, 0)
+      WHERE id = OLD.post_id;
+
+      UPDATE public.posts
+      SET comments = comments + 1
+      WHERE id = NEW.post_id;
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_sync_post_comments_count ON public.comments;
+
+CREATE TRIGGER trg_sync_post_comments_count
+AFTER INSERT OR UPDATE OR DELETE ON public.comments
+FOR EACH ROW
+EXECUTE FUNCTION public.sync_post_comments_count();
+
+CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
 
 -- Post Tags junction table
 CREATE TABLE post_tags (
@@ -493,6 +551,10 @@ CREATE INDEX IF NOT EXISTS idx_posts_author_created_at
 -- Consider adding if category filtering is implemented
 CREATE INDEX IF NOT EXISTS idx_posts_category_id ON posts(category_id);
 ```
+
+> Notes for existing databases:
+> 1. Ensure `posts.comments` exists before running the backfill/trigger statements.
+> 2. If your `comments` column already exists and data is live, run only the backfill + trigger + index statements.
 
 5. **Set up Supabase Storage** (for avatar uploads)
 
