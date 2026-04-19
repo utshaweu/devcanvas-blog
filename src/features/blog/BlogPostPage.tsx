@@ -1,15 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
+import { cn, formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import { Eye, Heart, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { CommentsSection } from '../comments/CommentsSection';
+
+const CONTENT_PREVIEW_MAX_HEIGHT = 620;
+const CONTENT_PREVIEW_FADE_HEIGHT = 340;
 
 export const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -19,6 +22,9 @@ export const BlogPostPage: React.FC = () => {
   const { warning: toastWarning } = useGlobalToast();
   const { currentPost, isLoading, fetchPostBySlug, incrementViews, toggleLike } = useBlogStore();
   const viewCountedRef = useRef<string | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const [shouldShowSeeMore, setShouldShowSeeMore] = useState(false);
 
   const handleFeaturedImageError: React.ReactEventHandler<HTMLImageElement> = (event) => {
     event.currentTarget.onerror = null;
@@ -41,6 +47,30 @@ export const BlogPostPage: React.FC = () => {
       fetchPostBySlug(slug);
     }
   }, [slug, fetchPostBySlug]);
+
+  useEffect(() => {
+    setIsContentExpanded(false);
+  }, [currentPost?.id]);
+
+  useEffect(() => {
+    const contentElement = contentRef.current;
+
+    if (!contentElement) {
+      setShouldShowSeeMore(false);
+      return;
+    }
+
+    const checkOverflow = () => {
+      setShouldShowSeeMore(contentElement.scrollHeight > CONTENT_PREVIEW_MAX_HEIGHT + 8);
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+
+    return () => {
+      window.removeEventListener('resize', checkOverflow);
+    };
+  }, [currentPost?.id]);
 
   useEffect(() => {
     // Only increment views once per post ID, and only when post is loaded
@@ -123,10 +153,37 @@ export const BlogPostPage: React.FC = () => {
           />
         </header>
 
-        <div 
-          className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none"
-          dangerouslySetInnerHTML={{ __html: currentPost.content }}
-        />
+        <div className="relative">
+          <div
+            ref={contentRef}
+            className={cn(
+              'prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none',
+              !isContentExpanded && 'overflow-hidden'
+            )}
+            style={!isContentExpanded ? { maxHeight: `${CONTENT_PREVIEW_MAX_HEIGHT}px` } : undefined}
+            dangerouslySetInnerHTML={{ __html: currentPost.content }}
+          />
+
+          {!isContentExpanded && shouldShowSeeMore && (
+            <>
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/95 to-transparent"
+                style={{ height: `${CONTENT_PREVIEW_FADE_HEIGHT}px` }}
+              />
+              <div className="absolute inset-x-0 bottom-6 flex justify-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsContentExpanded(true)}
+                  className="h-auto bg-transparent px-2 py-1 text-base font-semibold shadow-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                    {t(TranslationKey.SEE_MORE)}
+                  </span>
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
 
         <CommentsSection postId={currentPost.id} />
       </div>
