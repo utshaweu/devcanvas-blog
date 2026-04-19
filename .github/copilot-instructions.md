@@ -11,6 +11,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Comments System**: Nested comments on blog posts
 - **Like System**: Post likes with real-time tracking
 - **Rich Text Editor**: Tiptap with full formatting support
+- **Reusable Emoji Picker**: Shared emoji picker for editor and comments
 - **Analytics**: Dashboard with views, likes, comments, and engagement metrics
 
 ## Tech Stack (DO NOT SUGGEST ALTERNATIVES)
@@ -31,6 +32,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Shadcn/ui (Radix UI primitives)
 - Lucide React (icons)
 - Tiptap 2.x (rich text editor)
+- Emoji-mart (shared emoji picker data + UI)
 - Custom FileUpload component (with progress tracking)
 - Custom PasswordInput component (with visibility toggle)
 - VirtualizedGrid component (react-virtuoso powered)
@@ -390,6 +392,28 @@ export const MyDialog: React.FC<DialogProps> = ({ open, onOpenChange }) => {
 - Call `reset()` when modal closes (`!open`) to clear all validation errors
 - Reset other local state (password visibility, selected colors, etc.)
 - Include `reset` in dependency array to avoid stale closures
+
+### 8.1 Emoji Picker Pattern
+```typescript
+import { EmojiPicker } from '@/components/common/EmojiPicker';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
+
+const { t } = useTranslation();
+
+<EmojiPicker
+  buttonLabel={t(TranslationKey.INSERT_EMOJI)}
+  onEmojiSelect={(emoji) => {
+    // Insert at cursor for textarea inputs
+    // Insert via editor chain for rich text editors
+  }}
+/>
+```
+
+**Rules:**
+- Reuse `EmojiPicker` instead of duplicating emoji panel logic
+- Always use `TranslationKey.INSERT_EMOJI` for label/title text
+- Keep emoji insertion logic in the parent surface (`textarea`, `tiptap`, etc.)
 
 ### 9. Pagination Pattern (Load More)
 ```typescript

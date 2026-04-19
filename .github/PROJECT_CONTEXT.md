@@ -13,6 +13,7 @@ Full-stack blog platform with:
 - Comments system (nested)
 - Like system (toggle with RPC)
 - Rich text editor (Tiptap)
+- Reusable emoji picker (shared in editor and comments)
 - 404 error page (beautiful, animated)
 
 ## Key Technologies
@@ -20,6 +21,7 @@ Full-stack blog platform with:
 - **State:** Zustand (global) + React Hook Form (forms) + Toast Context
 - **Validation:** Zod schemas
 - **UI:** Shadcn/ui components (Radix UI)
+- **Emoji:** emoji-mart with shared `EmojiPicker` component
 - **Virtualization:** react-virtuoso (`VirtualizedGrid`)
 - **Backend:** Supabase (PostgreSQL + Auth + Storage)
 - **Editor:** Tiptap for rich text
@@ -330,6 +332,27 @@ const { control, formState: { errors } } = useForm();
   )}
 />
 ```
+
+### EmojiPicker Component
+```typescript
+import { EmojiPicker } from '@/components/common/EmojiPicker';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
+
+const { t } = useTranslation();
+
+<EmojiPicker
+  buttonLabel={t(TranslationKey.INSERT_EMOJI)}
+  onEmojiSelect={(emoji) => {
+    // Handle insertion for textarea or editor
+  }}
+/>
+```
+
+Rules:
+- Use this shared component instead of custom emoji picker logic in each feature.
+- Keep insertion behavior in parent component (cursor-aware for textarea).
+- Use translation key `INSERT_EMOJI` for user-facing label/title.
 
 ### Dialog Form Reset
 ```typescript
