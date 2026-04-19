@@ -31,11 +31,13 @@ import { cn } from '@/utils/helpers';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RichTextEditorProps } from '@/types';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
-  placeholder = 'Start writing your post...',
+  placeholder,
   className,
   editable = true,
   label,
@@ -43,9 +45,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   containerClassName,
   labelClassName,
 }) => {
+  const { t } = useTranslation();
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-
+  const placeholderText = placeholder || t(TranslationKey.START_WRITING_PLACEHOLDER);
 
   const editor = useEditor({
     extensions: [
@@ -57,7 +60,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       TextStyle,
       Color,
       Placeholder.configure({
-        placeholder,
+        placeholder: placeholderText,
       }),
       Typography,
       Link.configure({
@@ -85,6 +88,20 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       editor.commands.setContent(content);
     }
   }, [content, editor]);
+
+  // Update placeholder when language changes
+  useEffect(() => {
+    if (editor) {
+      const placeholderExt = editor.extensionManager.extensions.find(
+        (ext) => ext.name === 'placeholder'
+      );
+      if (placeholderExt) {
+        placeholderExt.options.placeholder = placeholderText;
+        // Dispatch an empty transaction to force ProseMirror to recompute decorations
+        editor.view.dispatch(editor.state.tr.setMeta('placeholderChange', true));
+      }
+    }
+  }, [placeholderText, editor]);
 
   if (!editor) {
     return null;
