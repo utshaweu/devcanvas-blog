@@ -409,6 +409,23 @@ export interface SearchBarProps {
   className?: string;
 }
 
+export interface EmojiPickerProps {
+  onEmojiSelect: (emoji: string) => void;
+  buttonLabel: string;
+  className?: string;
+  buttonClassName?: string;
+  pickerClassName?: string;
+  buttonVariant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'custom';
+  buttonSize?: 'default' | 'sm' | 'lg' | 'icon';
+  buttonContent?: React.ReactNode;
+  disabled?: boolean;
+  preferredWidth?: number;
+  maxHeight?: number;
+  viewportPadding?: number;
+  mobileBreakpoint?: number;
+  mobileCentered?: boolean;
+}
+
 export interface VirtualizedGridProps<T> {
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;

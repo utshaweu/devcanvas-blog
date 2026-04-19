@@ -51,6 +51,7 @@ The repository is compatible with several AI models to assist developers:
 - **Extract script:** `npm run extract:i18n` scans components for used keys and reports missing/unused entries.
 - Add new keys by updating `TranslationKey` and dictionaries in `src/i18n.ts`.
 - **Translation keys for FileUpload:** UPLOAD_AVATAR, UPLOADING, UPLOAD_SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, INVALID_FILE_TYPE, CHANGE_IMAGE, REMOVE_IMAGE
+- **Translation keys for Emoji Picker:** INSERT_EMOJI
 
 ### Form & Validation
 - **Forms:** React Hook Form with Controller for custom components
@@ -62,6 +63,7 @@ The repository is compatible with several AI models to assist developers:
 - **Primitives:** Radix UI for accessibility
 - **Icons:** Lucide React
 - **Rich Text:** Tiptap 2.x with StarterKit
+- **Emoji Picker:** Reusable `EmojiPicker` component (emoji-mart based)
 - **Search UI:** Reusable `SearchBar` component for blog listing search
 - **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
   - Used by UpdatePasswordDialog for secure password changes
@@ -128,6 +130,7 @@ src/
 │   │   ├── toast.tsx        # Toast notifications
 │   │   └── dropdown-menu.tsx # Dropdown menu
 │   ├── common/              # Reusable composed components
+│   │   ├── EmojiPicker.tsx      # Shared emoji picker with viewport-aware placement
 │   │   ├── RichTextEditor.tsx   # Tiptap editor wrapper
 │   │   ├── LoadingSpinner.tsx   # Loading states
 │   │   ├── NotFound.tsx         # 404 Error page
@@ -521,6 +524,36 @@ const { control, formState: { errors } } = useForm<FormData>({
 **Used in:**
 - PostForm - Blog post creation (with label/error)
 - PostDetailPage - View-only mode (editable={false})
+
+### 7.1 EmojiPicker Component Pattern
+
+Use the shared `EmojiPicker` component from `src/components/common/EmojiPicker.tsx` when adding emoji support to editable surfaces.
+
+```typescript
+import { EmojiPicker } from '@/components/common/EmojiPicker';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
+
+const { t } = useTranslation();
+
+<EmojiPicker
+  buttonLabel={t(TranslationKey.INSERT_EMOJI)}
+  onEmojiSelect={(emoji) => {
+    // Insert emoji at cursor or append, based on surface type
+  }}
+/>
+```
+
+**Key Features:**
+- Viewport-aware floating panel (prevents overflow/clipping)
+- Mobile-friendly placement and width behavior
+- Click-outside and Escape-to-close support
+- Uses app theme (`light`/`dark`) automatically
+
+**Usage Rules:**
+- Prefer this shared component over creating new emoji picker logic
+- Use `TranslationKey.INSERT_EMOJI` for button label/title
+- For textarea inputs, insert at cursor position when possible
 
 ### 8. Blog Search Pattern
 

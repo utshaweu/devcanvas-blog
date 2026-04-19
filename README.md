@@ -7,6 +7,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Authentication & Authorization**: Secure user authentication with Supabase
 - **Password Management**: Secure password update dialog in user profile dropdown
 - **Rich Text Editor**: Powerful content creation with Tiptap
+- **Reusable Emoji Picker**: Shared emoji picker for rich text and comment composition
 - **File Upload System**: Beautiful file upload with progress tracking for avatars
 - **Supabase Storage**: Integrated cloud storage for user avatars and images
 - **Modern UI**: Beautiful interface using Shadcn/ui components
@@ -636,8 +637,32 @@ error('Error!', 'Something went wrong');
    - `file-upload.tsx` - File upload with progress bar and preview
    - `button.tsx`, `card.tsx` - Base UI elements
 2. **Common Components** (`components/common/`): Composed, reusable business components
+   - `EmojiPicker.tsx` - Reusable emoji picker with viewport-aware placement
 3. **Feature Components** (`features/*/`): Feature-specific components
 4. **Layout Components** (`components/layout/`): Page layout components
+
+### Emoji Picker Component
+
+The app includes a reusable `EmojiPicker` component for any text input surface:
+
+- **Shared Usage** across `RichTextEditor` and `CommentComposer`
+- **Viewport-aware placement** to avoid clipping and overflow
+- **Mobile-friendly behavior** with responsive width and position
+- **Keyboard support** (`Escape` closes the picker)
+- **Dark mode aware** using app theme context
+
+Usage example:
+```tsx
+import { EmojiPicker } from '@/components/common/EmojiPicker';
+
+<EmojiPicker
+  buttonLabel={t(TranslationKey.INSERT_EMOJI)}
+  onEmojiSelect={(emoji) => setValue((previous) => `${previous}${emoji}`)}
+/>
+```
+
+Translation key:
+- `INSERT_EMOJI`
 
 ### Password Input Component
 

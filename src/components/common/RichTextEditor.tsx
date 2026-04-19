@@ -17,7 +17,6 @@ import {
   Heading1, 
   Heading2, 
   Heading3,
-  Heading4,
   List, 
   ListOrdered,
   Quote,
@@ -25,17 +24,21 @@ import {
   Undo,
   Redo,
   Link as LinkIcon,
-  ImageIcon,
+  ImageIcon
 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { EmojiPicker } from '@/components/common/EmojiPicker';
 import { RichTextEditorProps } from '@/types';
+import { useTranslation } from '@/hooks/useTranslation';
+import { TranslationKey } from '@/i18n';
+
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   content,
   onChange,
-  placeholder = 'Start writing your post...',
+  placeholder,
   className,
   editable = true,
   label,
@@ -43,21 +46,22 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   containerClassName,
   labelClassName,
 }) => {
+  const { t } = useTranslation();
   const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
-
+  const placeholderText = placeholder || t(TranslationKey.START_WRITING_PLACEHOLDER);
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3, 4],
+          levels: [1, 2, 3],
         },
       }),
       TextStyle,
       Color,
       Placeholder.configure({
-        placeholder,
+        placeholder: placeholderText,
       }),
       Typography,
       Link.configure({
@@ -86,19 +90,33 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [content, editor]);
 
+  // Update placeholder when language changes
+  useEffect(() => {
+    if (editor) {
+      const placeholderExt = editor.extensionManager.extensions.find(
+        (ext) => ext.name === 'placeholder'
+      );
+      if (placeholderExt) {
+        placeholderExt.options.placeholder = placeholderText;
+        // Dispatch an empty transaction to force ProseMirror to recompute decorations
+        editor.view.dispatch(editor.state.tr.setMeta('placeholderChange', true));
+      }
+    }
+  }, [placeholderText, editor]);
+
   if (!editor) {
     return null;
   }
 
   const addLink = () => {
-    const url = window.prompt('Enter URL:');
+    const url = window.prompt(t(TranslationKey.RTE_ENTER_URL_PROMPT));
     if (url) {
       editor.chain().focus().setLink({ href: url }).run();
     }
   };
 
   const addImage = () => {
-    const url = window.prompt('Enter image URL:');
+    const url = window.prompt(t(TranslationKey.RTE_ENTER_IMAGE_URL_PROMPT));
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
@@ -136,7 +154,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={editor.isActive('bold') ? 'bg-muted' : ''}
-            title='Bold'
+            title={t(TranslationKey.RTE_BOLD)}
           >
             <Bold className="h-4 w-4" />
           </Button>
@@ -146,7 +164,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleItalic().run()}
             className={editor.isActive('italic') ? 'bg-muted' : ''}
-            title='Italic'
+            title={t(TranslationKey.RTE_ITALIC)}
           >
             <Italic className="h-4 w-4" />
           </Button>
@@ -156,7 +174,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleStrike().run()}
             className={editor.isActive('strike') ? 'bg-muted' : ''}
-            title='Strikethrough'
+            title={t(TranslationKey.RTE_STRIKETHROUGH)}
           >
             <Strikethrough className="h-4 w-4" />
           </Button>
@@ -166,7 +184,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleCode().run()}
             className={editor.isActive('code') ? 'bg-muted' : ''}
-            title="Inline Code"
+            title={t(TranslationKey.RTE_INLINE_CODE)}
           >
             <Code className="h-4 w-4" />
           </Button>
@@ -176,7 +194,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
             className={editor.isActive('codeBlock') ? 'bg-muted' : ''}
-            title="Code Block"
+            title={t(TranslationKey.RTE_CODE_BLOCK)}
           >
             <FileCode className="h-4 w-4" />
           </Button>
@@ -189,7 +207,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
             className={editor.isActive('heading', { level: 1 }) ? 'bg-muted' : ''}
-            title='Heading 1'
+            title={t(TranslationKey.RTE_HEADING_1)}
           >
             <Heading1 className="h-4 w-4" />
           </Button>
@@ -199,7 +217,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
             className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
-            title='Heading 2'
+            title={t(TranslationKey.RTE_HEADING_2)}
           >
             <Heading2 className="h-4 w-4" />
           </Button>
@@ -209,20 +227,19 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
             className={editor.isActive('heading', { level: 3 }) ? 'bg-muted' : ''}
-            title='Heading 3'
+            title={t(TranslationKey.RTE_HEADING_3)}
           >
             <Heading3 className="h-4 w-4" />
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-            className={editor.isActive('heading', { level: 4 }) ? 'bg-muted' : ''}
-            title='Heading 4'
-          >
-            <Heading4 className="h-4 w-4" />
-          </Button>
+          <EmojiPicker
+            buttonLabel={t(TranslationKey.INSERT_EMOJI)}
+            buttonVariant="ghost"
+            buttonSize="sm"
+            mobileCentered={false}
+            onEmojiSelect={(emoji) => {
+              editor.chain().focus().insertContent(emoji).run();
+            }}
+          />
 
           <div className="w-px h-6 bg-border mx-1" />
 
@@ -232,7 +249,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             className={editor.isActive('bulletList') ? 'bg-muted' : ''}
-            title='Bullet List'
+            title={t(TranslationKey.RTE_BULLET_LIST)}
           >
             <List className="h-4 w-4" />
           </Button>
@@ -242,7 +259,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             className={editor.isActive('orderedList') ? 'bg-muted' : ''}
-            title='Ordered List'
+            title={t(TranslationKey.RTE_ORDERED_LIST)}
           >
             <ListOrdered className="h-4 w-4" />
           </Button>
@@ -252,7 +269,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             className={editor.isActive('blockquote') ? 'bg-muted' : ''}
-            title='Block Quote'
+            title={t(TranslationKey.RTE_BLOCK_QUOTE)}
           >
             <Quote className="h-4 w-4" />
           </Button>
@@ -264,7 +281,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             size="sm"
             variant="ghost"
             onClick={addLink}
-            title='Add Link'
+            title={t(TranslationKey.RTE_ADD_LINK)}
           >
             <LinkIcon className="h-4 w-4" />
           </Button>
@@ -273,7 +290,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             size="sm"
             variant="ghost"
             onClick={addImage}
-            title='Add Image'
+            title={t(TranslationKey.RTE_ADD_IMAGE)}
           >
             <ImageIcon className="h-4 w-4" />
           </Button>
@@ -282,7 +299,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             size="sm"
             variant="ghost"
             onClick={() => setShowColorPicker((previous) => !previous)}
-            title="Text Color"
+            title={t(TranslationKey.RTE_TEXT_COLOR)}
           >
             <Palette className="h-4 w-4" />
           </Button>
@@ -310,7 +327,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 value={selectedColor || '#3b82f6'}
                 onChange={(event) => applyTextColor(event.target.value)}
                 className="h-6 w-8 cursor-pointer rounded border border-border bg-background p-0"
-                title="Custom Color"
+                title={t(TranslationKey.RTE_CUSTOM_COLOR)}
               />
               <Button
                 type="button"
@@ -322,9 +339,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
                   setShowColorPicker(false);
                 }}
                 className="h-6 px-2 text-xs"
-                title="Clear Color"
+                title={t(TranslationKey.RTE_CLEAR_COLOR)}
               >
-                Clear
+                {t(TranslationKey.RTE_CLEAR)}
               </Button>
             </div>
           )}
@@ -337,7 +354,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
-            title='Undo'
+            title={t(TranslationKey.RTE_UNDO)}
           >
             <Undo className="h-4 w-4" />
           </Button>
@@ -347,7 +364,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
             variant="ghost"
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
-            title='Redo'
+            title={t(TranslationKey.RTE_REDO)}
           >
             <Redo className="h-4 w-4" />
           </Button>
