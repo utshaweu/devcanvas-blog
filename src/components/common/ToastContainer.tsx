@@ -7,7 +7,7 @@ export const ToastContainer: React.FC = () => {
 
   return (
     <>
-      <ToastViewport className="toast-viewport w-auto sm:right-4 sm:bottom-6 sm:top-auto" />
+      <ToastViewport className="toast-viewport w-auto right-4 bottom-6 top-auto" />
       {toasts.map((toast) => (
         <Toast
           key={toast.id}
