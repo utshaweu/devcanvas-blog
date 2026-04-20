@@ -156,8 +156,9 @@ const colors = {
 ```
 
 ### Typography
-- Font: Inter (Google Fonts) - ONLY this font
-- No Arial, Roboto, or system fonts
+- Font: Inter (Google Fonts) as primary
+- Optional alternate font: Acme (toggle from header)
+- Do not introduce additional font families beyond Inter and Acme
 
 ## Code Patterns
 
@@ -308,6 +309,23 @@ const { theme, setTheme } = useTheme();
 - Stored in localStorage as `devcanvas-theme`
 - CSS variables in globals.css handle colors
 - .dark class toggles on <html>
+
+### 6.1 Font Family Pattern
+```typescript
+import { useFontFamily } from '@/hooks/useFontFamily';
+
+const { fontFamily, toggleFontFamily } = useFontFamily();
+
+<button onClick={toggleFontFamily}>
+  {fontFamily === 'inter' ? 'Acme' : 'Inter'}
+</button>
+```
+
+**Rules:**
+- Supported fonts: `'inter' | 'acme'`
+- Persist preference in localStorage as `devcanvas-font-family`
+- Toggle `font-acme` class on `<html>` for global activation
+- Keep logic inside `useFontFamily` instead of duplicating in layout components
 
 ### 7. RichTextEditor Pattern
 ```typescript

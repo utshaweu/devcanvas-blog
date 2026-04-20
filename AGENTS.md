@@ -104,7 +104,7 @@ const colors = {
 ```
 
 ### Typography
-- **Font Family:** Inter (Google Fonts)
+- **Font Family:** Inter (primary) with optional Acme via header toggle
 - **Weights:** 300, 400, 500, 600, 700, 800, 900
 - **Font Features:** cv02, cv03, cv04, cv11 enabled
 - **Usage:** System font stack with Inter as primary
@@ -154,7 +154,8 @@ src/
 ├── hooks/                  # Custom React hooks
 │   ├── useAuth.ts          # Authentication hook
 │   ├── useToast.ts         # Toast notifications
-│   └── useDebounce.ts      # Debounce values
+│   ├── useDebounce.ts      # Debounce values
+│   └── useFontFamily.ts    # Global font family preference (Inter/Acme)
 ├── stores/                 # Zustand stores
 │   ├── authStore.ts        # Auth state
 │   ├── blogStore.ts        # Blog posts state
@@ -581,6 +582,26 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
 - Debounce query updates before calling store fetch methods
 - Preserve existing pagination and load-more behavior for active queries
 - Use translation keys for all search-related UI text
+
+### 8.1 Font Family Toggle Pattern
+
+Use a shared `useFontFamily` hook for font preference toggling from the header.
+
+```typescript
+import { useFontFamily } from '@/hooks/useFontFamily';
+
+const { fontFamily, toggleFontFamily } = useFontFamily();
+
+<Button onClick={toggleFontFamily}>
+  {fontFamily === 'inter' ? 'Acme' : 'Inter'}
+</Button>
+```
+
+**Rules:**
+- Keep font state in `useFontFamily` (avoid duplicating local state in components)
+- Persist preference in `localStorage` with key `devcanvas-font-family`
+- Apply global class on `<html>` (`font-acme`) and style via `globals.css`
+- Supported font values: `'inter' | 'acme'`
 
 ### 9. Protected Routes Pattern
 

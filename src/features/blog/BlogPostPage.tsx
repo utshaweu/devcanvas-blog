@@ -142,6 +142,10 @@ export const BlogPostPage: React.FC = () => {
             </Button>
           </div>
 
+          {currentPost.excerpt && (
+            <p className="text-lg leading-relaxed text-primary-foreground font-medium">{currentPost.excerpt}</p>
+          )}
+
           <img
             src={currentPost.featured_image || DEFAULT_FEATURED_IMAGE}
             alt={currentPost.title}
@@ -149,7 +153,7 @@ export const BlogPostPage: React.FC = () => {
             fetchPriority="high"
             decoding="async"
             onError={handleFeaturedImageError}
-            className="w-full h-96 object-cover rounded-lg"
+            className="w-full h-auto object-cover rounded-lg"
           />
         </header>
 

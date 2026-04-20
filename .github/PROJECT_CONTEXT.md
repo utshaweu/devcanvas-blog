@@ -15,6 +15,7 @@ Full-stack blog platform with:
 - Rich text editor (Tiptap)
 - Reusable emoji picker (shared in editor and comments)
 - 404 error page (beautiful, animated)
+- Header font family toggle (Inter/Acme with persistence)
 
 ## Key Technologies
 - **Frontend:** React 18 + TypeScript + Vite (port 3012) + Tailwind CSS
@@ -112,7 +113,8 @@ border: '#E2E8F0'       // Gray
 ```
 
 ## Font
-- **Inter only** - No other fonts
+- **Inter primary with optional Acme**
+- Use shared hook `useFontFamily` and localStorage key `devcanvas-font-family`
 
 ## Import Aliases
 - `@/components` → `src/components`

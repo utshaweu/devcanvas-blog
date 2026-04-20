@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PenSquare, User, LogOut, BarChart3, Key } from 'lucide-react';
+import { PenSquare, User, LogOut, BarChart3, Key, Type, ALargeSmall } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useFontFamily } from '@/hooks/useFontFamily';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { UpdatePasswordDialog } from '@/features/auth/UpdatePasswordDialog';
@@ -25,6 +26,7 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const { success: toastSuccess } = useGlobalToast();
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const { fontFamily, toggleFontFamily } = useFontFamily();
 
   const handleLogout = async () => {
     await logout();
@@ -34,6 +36,15 @@ export const Header: React.FC = () => {
     );
     navigate('/');
   };
+
+  const handleFontFamilyToggle = () => {
+    toggleFontFamily();
+  };
+
+  const fontToggleLabel =
+    fontFamily === 'inter'
+      ? t(TranslationKey.SWITCH_TO_ACME_FONT)
+      : t(TranslationKey.SWITCH_TO_INTER_FONT);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -62,6 +73,19 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleFontFamilyToggle}
+            aria-label={fontToggleLabel}
+            title={fontToggleLabel}
+          >
+            {fontFamily === 'inter' ? (
+              <Type className="h-4 w-4" />
+            ) : (
+              <ALargeSmall className="h-4 w-4" />
+            )}
+          </Button>
           <ThemeToggle />
           {/* language selector */}
           <DropdownMenu>

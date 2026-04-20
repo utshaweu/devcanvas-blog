@@ -22,6 +22,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
 - **Responsive Design**: Mobile-first, works on all devices
 - **Multilingual**: English and Bangla support with runtime switching
+- **Font Family Toggle**: Switch between Inter and Acme from the header
 - **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
 - **Testing Ready**: Jest and React Testing Library configured
 
@@ -108,7 +109,7 @@ devcanvas-blog/
 
 ### Typography
 
-- **Font Family**: Inter (Google Fonts)
+- **Font Family**: Inter (primary) with optional Acme toggle from header
 - **Features**: Variable font with multiple weights (300-900)
 - **Font Features**: CV02, CV03, CV04, CV11 for improved readability
 
@@ -238,6 +239,14 @@ npm run extract:i18n
 The output reports missing or unused translation entries so you can clean up or add new strings.
 
 A language selector appears in the header next to theme toggle and stores the choice in `localStorage` under `devcanvas-language`.
+
+### Font Family Preference
+
+The header includes a font toggle that switches between Inter and Acme.
+
+- Persistence: selected font family is stored in `localStorage` under `devcanvas-font-family`.
+- Implementation: shared custom hook `src/hooks/useFontFamily.ts` manages preference + HTML class toggling.
+- Styling: `html.font-acme` in `src/styles/globals.css` applies Acme globally.
 
 ---
 

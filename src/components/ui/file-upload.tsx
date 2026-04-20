@@ -23,15 +23,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragCounterRef = useRef(0);
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(value || null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const processFileUpload = async (file: File) => {
     if (!file) return;
 
     // Reset states
@@ -144,6 +145,69 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await processFileUpload(file);
+  };
+
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (disabled || uploading) {
+      return;
+    }
+
+    dragCounterRef.current += 1;
+    setIsDragActive(true);
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (disabled || uploading) {
+      return;
+    }
+
+    event.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (disabled || uploading) {
+      return;
+    }
+
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0;
+      setIsDragActive(false);
+    }
+  };
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (disabled || uploading) {
+      return;
+    }
+
+    dragCounterRef.current = 0;
+    setIsDragActive(false);
+
+    const file = event.dataTransfer.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    await processFileUpload(file);
+  };
+
   const handleRemove = async () => {
     setRemoving(true);
     
@@ -195,9 +259,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       {/* Upload Area */}
       <div
         onClick={handleClick}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={cn(
           'relative border-2 border-dashed rounded-lg transition-all duration-200',
           'hover:border-accent hover:bg-accent/5',
+          isDragActive && 'border-accent bg-accent/10',
           uploading && 'border-accent bg-accent/5',
           error && 'border-destructive bg-destructive/5',
           uploadSuccess && 'border-green-500 bg-green-50/50',
