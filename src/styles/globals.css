@@ -158,6 +158,15 @@
   .animate-in {
     animation: slide-in 0.4s ease-out;
   }
+
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Toast custom styles */
