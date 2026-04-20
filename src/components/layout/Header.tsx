@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PenSquare, User, LogOut, BarChart3, Key, Type, ALargeSmall } from 'lucide-react';
+import { PenSquare, User, LogOut, BarChart3, Key, Type, ALargeSmall, LineChart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/ui/button';
@@ -63,6 +63,9 @@ export const Header: React.FC = () => {
               <>
                 <Link to="/dashboard" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
                   {t(TranslationKey.DASHBOARD)}
+                </Link>
+                <Link to="/analytics" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+                  {t(TranslationKey.ANALYTICS)}
                 </Link>
                 <Link to="/create" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
                   {t(TranslationKey.CREATE_POST)}
@@ -129,6 +132,10 @@ export const Header: React.FC = () => {
                 <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                   <BarChart3 className="mr-2 h-4 w-4" />
                   <span>{t(TranslationKey.DASHBOARD)}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/analytics')}>
+                  <LineChart className="mr-2 h-4 w-4" />
+                  <span>{t(TranslationKey.ANALYTICS)}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <User className="mr-2 h-4 w-4" />

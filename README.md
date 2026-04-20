@@ -17,6 +17,8 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Comments System**: Nested comments on blog posts with full CRUD operations and row-level security
 - **Like System**: Post likes with real-time tracking and user engagement
 - **Analytics Dashboard**: Track views, likes, comments, and engagement
+- **Analytics Page**: Dedicated responsive Recharts dashboard with 4 charts (monthly trends, top posts, publish status, category split)
+- **Reusable Chart Components**: Shared line, bar, and pie chart wrappers for analytics surfaces
 - **Post Search**: Medium-style debounced search on blog list with Load More compatibility
 - **Reusable Virtualized Grid**: Efficient rendering for large collections using the shared VirtualizedGrid component
 - **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
@@ -84,8 +86,10 @@ devcanvas-blog/
 │   │   │   └── UpdatePasswordDialog.tsx  # Password update modal
 │   │   ├── blog/          # Blog post features
 │   │   ├── dashboard/     # Dashboard features
+│   │   ├── analytics/     # Analytics features
+│   │   │   └── AnalyticsPage.tsx
 │   │   ├── profile/       # User profile with avatar upload
-│   │   └── analytics/     # Analytics features
+│   │   └── comments/      # Nested comments feature
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Third-party library configurations
 │   ├── stores/            # Zustand state stores
@@ -158,6 +162,25 @@ Post engagement tracking with real-time likes:
 - **Database Table**: `post_likes` with:
   - Composite primary key (user_id, post_id)
   - Foreign key constraints for data integrity
+
+## 📊 Analytics Page
+
+The application now includes a dedicated analytics screen for authenticated users:
+
+- **Route**: `/analytics` (protected)
+- **Navigation**: Available in header navigation and user dropdown menu
+- **Charts (Recharts, responsive)**:
+  - Monthly performance line chart (views, likes, comments)
+  - Top posts by weighted engagement score
+  - Publish status pie chart (published vs draft)
+  - Category distribution donut chart
+- **Reusable Chart Components**:
+  - `src/components/common/LineChartView.tsx`
+  - `src/components/common/BarChartView.tsx`
+  - `src/components/common/PieChartView.tsx`
+- **Analytics Interfaces**: Centralized in `src/types/index.ts` for page/component reuse
+- **Data Source**: Existing `fetchUserPostsStats` from the blog store (no schema changes)
+- **Location**: `src/features/analytics/AnalyticsPage.tsx`
 
 ## 🔐 Password Management
 

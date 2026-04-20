@@ -36,6 +36,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Custom FileUpload component (with progress tracking)
 - Custom PasswordInput component (with visibility toggle)
 - VirtualizedGrid component (react-virtuoso powered)
+- Reusable chart wrappers: `LineChartView`, `BarChartView`, `PieChartView`
 
 ### Backend & Storage
 - Supabase (PostgreSQL + Auth + Storage)
@@ -486,6 +487,20 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
 - Keep search text readable in dark mode with explicit foreground classes
 - Keep load-more behavior in sync with the active search query
 - All visible search text must use translation keys
+
+### 10.1 Analytics Chart Pattern
+```typescript
+import { LineChartView } from '@/components/common/LineChartView';
+import { BarChartView } from '@/components/common/BarChartView';
+import { PieChartView } from '@/components/common/PieChartView';
+import type { AnalyticsMonthlyDataPoint } from '@/types';
+```
+
+**Rules:**
+- Use shared chart wrappers for analytics pages instead of duplicating Recharts setup
+- Keep analytics interfaces in `src/types/index.ts` and import where needed
+- Use tooltip styles that remain readable in both light and dark mode
+- Avoid dense rotated X-axis labels in narrow cards; hide or simplify labels when needed
 
 ### 10. Zustand Store Pattern
 ```typescript

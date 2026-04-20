@@ -124,6 +124,65 @@ export interface ViewData {
   likes: number;
 }
 
+export interface AnalyticsMonthlyDataPoint {
+  key: string;
+  month: string;
+  views: number;
+  likes: number;
+  comments: number;
+  posts: number;
+}
+
+export interface AnalyticsTopPostDataPoint {
+  title: string;
+  fullTitle: string;
+  views: number;
+  likes: number;
+  comments: number;
+  engagementScore: number;
+}
+
+export interface AnalyticsDistributionDataPoint {
+  name: string;
+  value: number;
+}
+
+export interface ReusableLineChartSeries {
+  dataKey: string;
+  name: string;
+  stroke: string;
+  strokeWidth?: number;
+}
+
+export interface ReusableLineChartProps<TData extends object = Record<string, unknown>> {
+  data: TData[];
+  xDataKey: keyof TData & string;
+  series: ReusableLineChartSeries[];
+  className?: string;
+  yAxisAllowDecimals?: boolean;
+}
+
+export interface ReusableBarChartProps<TData extends object = Record<string, unknown>> {
+  data: TData[];
+  xDataKey: keyof TData & string;
+  barDataKey: keyof TData & string;
+  barName: string;
+  barColor?: string;
+  className?: string;
+  yAxisAllowDecimals?: boolean;
+  showXAxisLabels?: boolean;
+  tooltipLabelKey?: keyof TData & string;
+}
+
+export interface ReusablePieChartProps {
+  data: AnalyticsDistributionDataPoint[];
+  colors: string[];
+  className?: string;
+  innerRadius?: number;
+  outerRadius?: number;
+  showLabel?: boolean;
+}
+
 // Pagination Types
 export interface PaginationParams {
   page: number;

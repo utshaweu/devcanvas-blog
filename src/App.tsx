@@ -6,6 +6,7 @@ import { SignupPage } from '@/features/auth/SignupPage';
 import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { AnalyticsPage } from '@/features/analytics/AnalyticsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
 import { BlogListPage } from '@/features/blog/BlogListPage';
 import { BlogPostPage } from '@/features/blog/BlogPostPage';
@@ -118,6 +119,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ProfilePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/analytics"
+                  element={
+                    <ProtectedRoute>
+                      <AnalyticsPage />
                     </ProtectedRoute>
                   }
                 />

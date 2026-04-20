@@ -150,7 +150,9 @@ src/
 │   │   └── CreatePostPage.tsx
 │   ├── dashboard/          # Dashboard
 │   │   └── DashboardPage.tsx
-│   └── analytics/          # Analytics (future)
+│   ├── analytics/          # Analytics
+│   │   └── AnalyticsPage.tsx
+│   └── profile/            # Profile
 ├── hooks/                  # Custom React hooks
 │   ├── useAuth.ts          # Authentication hook
 │   ├── useToast.ts         # Toast notifications
@@ -582,6 +584,30 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
 - Debounce query updates before calling store fetch methods
 - Preserve existing pagination and load-more behavior for active queries
 - Use translation keys for all search-related UI text
+
+### 8.2 Analytics Page Pattern
+
+Use `src/features/analytics/AnalyticsPage.tsx` for user-level analytics visualizations.
+
+**Rules:**
+- Use Recharts `ResponsiveContainer` for every chart (mobile + desktop friendly)
+- Reuse `fetchUserPostsStats(userId)` from `blogStore` as the data source
+- Keep all visible labels in `TranslationKey` (`src/i18n.ts`)
+- Prefer compositional cards (`Card`, `StatCard`) and avoid ad-hoc chart wrappers
+- Keep analytics route protected (`/analytics` in `App.tsx`)
+
+### 8.3 Reusable Chart Components Pattern
+
+When building chart-heavy UI, reuse shared chart wrappers in `src/components/common/`:
+
+- `LineChartView.tsx` for multi-series trend lines
+- `BarChartView.tsx` for ranked comparisons
+- `PieChartView.tsx` for distributions
+
+**Rules:**
+- Keep chart data interfaces in `src/types/index.ts` and import into pages/components
+- Use dark-mode-safe tooltip styles so labels remain readable in both themes
+- Hide or simplify dense X-axis labels when they overflow in compact cards
 
 ### 8.1 Font Family Toggle Pattern
 

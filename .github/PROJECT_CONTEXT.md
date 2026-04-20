@@ -32,7 +32,8 @@ Full-stack blog platform with:
 Micro-frontend with feature-based modules:
 - `features/auth` - Authentication
 - `features/blog` - Blog posts
-- `features/dashboard` - Analytics
+- `features/dashboard` - Dashboard and post management
+- `features/analytics` - Dedicated analytics charts
 - `features/profile` - User profile with avatar
 - `features/comments` - Comment system
 
@@ -204,6 +205,19 @@ CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
 ```
 
 ## Common Patterns
+
+### Reusable Analytics Charts
+Use shared chart wrappers from `components/common` to avoid repeating Recharts setup:
+
+- `LineChartView.tsx`
+- `BarChartView.tsx`
+- `PieChartView.tsx`
+
+Analytics chart interfaces should be centralized in `src/types/index.ts` and imported by pages/components.
+
+Rules:
+- Ensure tooltip contrast works in both light and dark themes
+- Avoid overflowing X-axis labels in compact chart cards
 
 ### SearchBar Component
 ```typescript
