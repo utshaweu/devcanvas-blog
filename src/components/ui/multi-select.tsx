@@ -10,6 +10,7 @@ const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
     const [highlightedIndex, setHighlightedIndex] = React.useState(-1);
     const dropdownRef = React.useRef<HTMLDivElement>(null);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
+    const optionRefs = React.useRef<Array<HTMLDivElement | null>>([]);
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -153,6 +154,13 @@ const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
       }
     }, [filteredOptions.length, highlightedIndex, isOpen]);
 
+    React.useEffect(() => {
+      if (!isOpen || highlightedIndex < 0) return;
+
+      const highlightedOption = optionRefs.current[highlightedIndex];
+      highlightedOption?.scrollIntoView({ block: 'nearest' });
+    }, [highlightedIndex, isOpen]);
+
     const selectedLabels = options
       .filter(opt => value.includes(opt.value))
       .map(opt => opt.label)
@@ -238,6 +246,9 @@ const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
                   return (
                     <div
                       key={option.value}
+                      ref={(node) => {
+                        optionRefs.current[index] = node;
+                      }}
                       onMouseDown={(event) => event.preventDefault()}
                       onMouseEnter={() => setHighlightedIndex(index)}
                       onClick={() => handleToggle(option.value)}

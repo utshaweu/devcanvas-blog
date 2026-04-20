@@ -36,6 +36,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Custom FileUpload component (with progress tracking)
 - Custom PasswordInput component (with visibility toggle)
 - VirtualizedGrid component (react-virtuoso powered)
+- Reusable chart wrappers: `LineChartView`, `BarChartView`, `PieChartView`
 
 ### Backend & Storage
 - Supabase (PostgreSQL + Auth + Storage)
@@ -156,8 +157,9 @@ const colors = {
 ```
 
 ### Typography
-- Font: Inter (Google Fonts) - ONLY this font
-- No Arial, Roboto, or system fonts
+- Font: Inter (Google Fonts) as primary
+- Optional alternate font: Acme (toggle from header)
+- Do not introduce additional font families beyond Inter and Acme
 
 ## Code Patterns
 
@@ -308,6 +310,23 @@ const { theme, setTheme } = useTheme();
 - Stored in localStorage as `devcanvas-theme`
 - CSS variables in globals.css handle colors
 - .dark class toggles on <html>
+
+### 6.1 Font Family Pattern
+```typescript
+import { useFontFamily } from '@/hooks/useFontFamily';
+
+const { fontFamily, toggleFontFamily } = useFontFamily();
+
+<button onClick={toggleFontFamily}>
+  {fontFamily === 'inter' ? 'Acme' : 'Inter'}
+</button>
+```
+
+**Rules:**
+- Supported fonts: `'inter' | 'acme'`
+- Persist preference in localStorage as `devcanvas-font-family`
+- Toggle `font-acme` class on `<html>` for global activation
+- Keep logic inside `useFontFamily` instead of duplicating in layout components
 
 ### 7. RichTextEditor Pattern
 ```typescript
@@ -468,6 +487,20 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
 - Keep search text readable in dark mode with explicit foreground classes
 - Keep load-more behavior in sync with the active search query
 - All visible search text must use translation keys
+
+### 10.1 Analytics Chart Pattern
+```typescript
+import { LineChartView } from '@/components/common/LineChartView';
+import { BarChartView } from '@/components/common/BarChartView';
+import { PieChartView } from '@/components/common/PieChartView';
+import type { AnalyticsMonthlyDataPoint } from '@/types';
+```
+
+**Rules:**
+- Use shared chart wrappers for analytics pages instead of duplicating Recharts setup
+- Keep analytics interfaces in `src/types/index.ts` and import where needed
+- Use tooltip styles that remain readable in both light and dark mode
+- Avoid dense rotated X-axis labels in narrow cards; hide or simplify labels when needed
 
 ### 10. Zustand Store Pattern
 ```typescript

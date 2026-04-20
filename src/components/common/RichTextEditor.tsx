@@ -373,7 +373,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       
       <EditorContent 
         editor={editor} 
-        className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none p-4 min-h-[300px] focus:outline-none"
+        className="prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none p-4 min-h-[300px] max-h-[60vh] overflow-y-auto scrollbar-hidden focus:outline-none"
       />
       </div>
 

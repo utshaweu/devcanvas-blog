@@ -104,7 +104,7 @@ const colors = {
 ```
 
 ### Typography
-- **Font Family:** Inter (Google Fonts)
+- **Font Family:** Inter (primary) with optional Acme via header toggle
 - **Weights:** 300, 400, 500, 600, 700, 800, 900
 - **Font Features:** cv02, cv03, cv04, cv11 enabled
 - **Usage:** System font stack with Inter as primary
@@ -150,11 +150,14 @@ src/
 │   │   └── CreatePostPage.tsx
 │   ├── dashboard/          # Dashboard
 │   │   └── DashboardPage.tsx
-│   └── analytics/          # Analytics (future)
+│   ├── analytics/          # Analytics
+│   │   └── AnalyticsPage.tsx
+│   └── profile/            # Profile
 ├── hooks/                  # Custom React hooks
 │   ├── useAuth.ts          # Authentication hook
 │   ├── useToast.ts         # Toast notifications
-│   └── useDebounce.ts      # Debounce values
+│   ├── useDebounce.ts      # Debounce values
+│   └── useFontFamily.ts    # Global font family preference (Inter/Acme)
 ├── stores/                 # Zustand stores
 │   ├── authStore.ts        # Auth state
 │   ├── blogStore.ts        # Blog posts state
@@ -581,6 +584,50 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
 - Debounce query updates before calling store fetch methods
 - Preserve existing pagination and load-more behavior for active queries
 - Use translation keys for all search-related UI text
+
+### 8.2 Analytics Page Pattern
+
+Use `src/features/analytics/AnalyticsPage.tsx` for user-level analytics visualizations.
+
+**Rules:**
+- Use Recharts `ResponsiveContainer` for every chart (mobile + desktop friendly)
+- Reuse `fetchUserPostsStats(userId)` from `blogStore` as the data source
+- Keep all visible labels in `TranslationKey` (`src/i18n.ts`)
+- Prefer compositional cards (`Card`, `StatCard`) and avoid ad-hoc chart wrappers
+- Keep analytics route protected (`/analytics` in `App.tsx`)
+
+### 8.3 Reusable Chart Components Pattern
+
+When building chart-heavy UI, reuse shared chart wrappers in `src/components/common/`:
+
+- `LineChartView.tsx` for multi-series trend lines
+- `BarChartView.tsx` for ranked comparisons
+- `PieChartView.tsx` for distributions
+
+**Rules:**
+- Keep chart data interfaces in `src/types/index.ts` and import into pages/components
+- Use dark-mode-safe tooltip styles so labels remain readable in both themes
+- Hide or simplify dense X-axis labels when they overflow in compact cards
+
+### 8.1 Font Family Toggle Pattern
+
+Use a shared `useFontFamily` hook for font preference toggling from the header.
+
+```typescript
+import { useFontFamily } from '@/hooks/useFontFamily';
+
+const { fontFamily, toggleFontFamily } = useFontFamily();
+
+<Button onClick={toggleFontFamily}>
+  {fontFamily === 'inter' ? 'Acme' : 'Inter'}
+</Button>
+```
+
+**Rules:**
+- Keep font state in `useFontFamily` (avoid duplicating local state in components)
+- Persist preference in `localStorage` with key `devcanvas-font-family`
+- Apply global class on `<html>` (`font-acme`) and style via `globals.css`
+- Supported font values: `'inter' | 'acme'`
 
 ### 9. Protected Routes Pattern
 

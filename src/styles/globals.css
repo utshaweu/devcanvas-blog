@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Acme&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -93,6 +94,11 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  html.font-acme body {
+    font-family: 'Acme', 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: normal;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold text-secondary;
   }
@@ -151,6 +157,15 @@
 
   .animate-in {
     animation: slide-in 0.4s ease-out;
+  }
+
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
   }
 }
 
