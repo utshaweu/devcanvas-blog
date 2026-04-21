@@ -19,6 +19,7 @@ import { GlobalToastProvider } from '@/contexts/ToastContext';
 import { ToastProvider } from '@/components/ui/toast';
 import { ToastContainer } from '@/components/common/ToastContainer';
 import { NotFound } from '@/components/common/NotFound';
+import { ChatBot } from '@/components/common/ChatBot';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 
@@ -152,6 +153,7 @@ function App() {
               </Routes>
             </main>
             <ToastContainer />
+            <ChatBot />
           </div>
         </BrowserRouter>
         </GlobalToastProvider>

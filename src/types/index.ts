@@ -496,3 +496,41 @@ export interface VirtualizedGridProps<T> {
 }
 
 export type VirtualizedGridComponent = <T,>(props: VirtualizedGridProps<T>) => JSX.Element;
+
+export interface McpError {
+  code: number;
+  message: string;
+}
+
+export interface McpMessage {
+  jsonrpc: '2.0';
+  id?: string | number;
+  method?: string;
+  params?: Record<string, unknown>;
+  result?: unknown;
+  error?: McpError;
+}
+
+export interface PendingRequest {
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+  timeoutId: ReturnType<typeof setTimeout>;
+}
+
+export interface ChatBotHook {
+  sendMessage: (message: string) => Promise<string>;
+  isConnected: boolean;
+  connectionStatus: 'connecting' | 'connected' | 'disconnected' | 'error';
+}
+
+export interface McpContentPart {
+  type: string;
+  text?: string;
+}
+
+export interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}

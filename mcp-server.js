@@ -1,0 +1,328 @@
+#!/usr/bin/env node
+
+/**
+ * DevCanvas Blog MCP Server
+ *
+ * A Model Context Protocol server that provides blog statistics,
+ * post information, and analytics through MCP tools.
+ */
+
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createClient } from '@supabase/supabase-js';
+import process from 'node:process';
+import { z } from 'zod';
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Error: Missing Supabase environment variables');
+  console.error('Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const server = new McpServer({
+  name: 'devcanvas-blog-server',
+  version: '1.0.0',
+  description: 'DevCanvas Blog MCP Server - blog statistics and analytics tools',
+});
+
+function asTextResponse(text) {
+  return {
+    content: [
+      {
+        type: 'text',
+        text,
+      },
+    ],
+  };
+}
+
+server.tool(
+  'get_posts_today',
+  'Get the number of blog posts published today',
+  {},
+  async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const { count, error } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('published', true)
+      .gte('published_at', today.toISOString());
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    const postCount = count || 0;
+
+    if (postCount === 0) {
+      return asTextResponse('No posts have been published today yet.');
+    }
+
+    if (postCount === 1) {
+      return asTextResponse('1 post has been published today.');
+    }
+
+    return asTextResponse(`${postCount} posts have been published today.`);
+  }
+);
+
+server.tool(
+  'get_total_posts',
+  'Get the total number of blog posts',
+  {},
+  async () => {
+    const { count, error } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    return asTextResponse(`There are ${count || 0} total posts on DevCanvas Blog.`);
+  }
+);
+
+server.tool(
+  'get_published_posts',
+  'Get the number of published blog posts',
+  {},
+  async () => {
+    const { count, error } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('published', true);
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    return asTextResponse(`There are ${count || 0} published posts available to read.`);
+  }
+);
+
+server.tool(
+  'get_total_views',
+  'Get the total number of views across all posts',
+  {},
+  async () => {
+    const { data, error } = await supabase.from('posts').select('views');
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    const totalViews = data?.reduce((sum, post) => sum + (post.views || 0), 0) || 0;
+
+    return asTextResponse(`DevCanvas posts have ${totalViews.toLocaleString()} total views.`);
+  }
+);
+
+server.tool(
+  'get_total_likes',
+  'Get the total number of likes across all posts',
+  {},
+  async () => {
+    const { data, error } = await supabase.from('posts').select('likes');
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    const totalLikes = data?.reduce((sum, post) => sum + (post.likes || 0), 0) || 0;
+
+    return asTextResponse(`DevCanvas posts have received ${totalLikes.toLocaleString()} total likes.`);
+  }
+);
+
+server.tool(
+  'get_popular_posts',
+  'Get the most popular blog posts by views',
+  {
+    limit: z.number().optional().default(5).describe('Number of posts to return (default: 5)'),
+  },
+  async (args) => {
+    const limit = args.limit || 5;
+
+    const { data, error } = await supabase
+      .from('posts')
+      .select('title, views, likes')
+      .eq('published', true)
+      .order('views', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      return asTextResponse('No posts found yet.');
+    }
+
+    let response = 'Most Popular Posts:\n\n';
+    data.forEach((post, index) => {
+      response += `${index + 1}. ${post.title}\n   ${post.views} views | ${post.likes} likes\n\n`;
+    });
+
+    return asTextResponse(response.trim());
+  }
+);
+
+server.tool(
+  'get_recent_posts',
+  'Get the most recent blog posts',
+  {
+    limit: z.number().optional().default(5).describe('Number of posts to return (default: 5)'),
+  },
+  async (args) => {
+    const limit = args.limit || 5;
+
+    const { data, error } = await supabase
+      .from('posts')
+      .select(
+        `
+        title,
+        published_at,
+        author:users(name)
+      `
+      )
+      .eq('published', true)
+      .order('published_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      return asTextResponse('No posts found yet.');
+    }
+
+    let response = 'Recent Posts:\n\n';
+    data.forEach((post, index) => {
+      const date = post.published_at ? new Date(post.published_at).toLocaleDateString() : 'N/A';
+      const authorName = post.author && typeof post.author === 'object' && 'name' in post.author ? post.author.name : 'Unknown';
+      response += `${index + 1}. ${post.title}\n   By ${authorName || 'Unknown'} | ${date}\n\n`;
+    });
+
+    return asTextResponse(response.trim());
+  }
+);
+
+server.tool('get_categories', 'Get all blog categories with post counts', {}, async () => {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('name, post_count')
+    .order('post_count', { ascending: false });
+
+  if (error) {
+    return asTextResponse(`Error: ${error.message}`);
+  }
+
+  if (!data || data.length === 0) {
+    return asTextResponse('No categories available yet.');
+  }
+
+  let response = 'Available Categories:\n\n';
+  data.forEach((category) => {
+    response += `- ${category.name} (${category.post_count} posts)\n`;
+  });
+
+  return asTextResponse(response.trim());
+});
+
+server.tool(
+  'get_tags',
+  'Get popular blog tags',
+  {
+    limit: z.number().optional().default(10).describe('Number of tags to return (default: 10)'),
+  },
+  async (args) => {
+    const limit = args.limit || 10;
+
+    const { data, error } = await supabase
+      .from('tags')
+      .select('name, post_count')
+      .order('post_count', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      return asTextResponse(`Error: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      return asTextResponse('No tags available yet.');
+    }
+
+    let response = 'Popular Tags:\n\n';
+    data.forEach((tag) => {
+      response += `- ${tag.name} (${tag.post_count} posts)\n`;
+    });
+
+    return asTextResponse(response.trim());
+  }
+);
+
+server.tool('get_comment_stats', 'Get total number of comments', {}, async () => {
+  const { count, error } = await supabase
+    .from('comments')
+    .select('*', { count: 'exact', head: true });
+
+  if (error) {
+    return asTextResponse(`Error: ${error.message}`);
+  }
+
+  return asTextResponse(`There are ${count || 0} total comments across all posts.`);
+});
+
+server.resource('blog://stats', 'Overall blog statistics', 'application/json', async () => {
+  const [postsResult, viewsResult, likesResult, commentsResult] = await Promise.all([
+    supabase.from('posts').select('*', { count: 'exact', head: true }),
+    supabase.from('posts').select('views'),
+    supabase.from('posts').select('likes'),
+    supabase.from('comments').select('*', { count: 'exact', head: true }),
+  ]);
+
+  const totalPosts = postsResult.count || 0;
+  const totalViews =
+    viewsResult.data?.reduce((sum, post) => sum + (post.views || 0), 0) || 0;
+  const totalLikes =
+    likesResult.data?.reduce((sum, post) => sum + (post.likes || 0), 0) || 0;
+  const totalComments = commentsResult.count || 0;
+
+  const stats = {
+    totalPosts,
+    totalViews,
+    totalLikes,
+    totalComments,
+    timestamp: new Date().toISOString(),
+  };
+
+  return {
+    contents: [
+      {
+        uri: 'blog://stats',
+        mimeType: 'application/json',
+        text: JSON.stringify(stats, null, 2),
+      },
+    ],
+  };
+});
+
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error('DevCanvas Blog MCP Server running on stdio');
+}
+
+main().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});
