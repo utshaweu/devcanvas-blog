@@ -305,6 +305,22 @@ export function useChatBot(): ChatBotHook {
         }
 
         if (
+          lowerMessage.includes('create') ||
+          lowerMessage.includes('write') ||
+          lowerMessage.includes('publish') ||
+          lowerMessage.includes('guide') ||
+          lowerMessage.includes('how') ||
+          lowerMessage.includes('post') ||
+          lowerMessage.includes('তৈরি') ||
+          lowerMessage.includes('লেখ') ||
+          lowerMessage.includes('প্রকাশ') ||
+          lowerMessage.includes('গাইড') ||
+          lowerMessage.includes('কিভাবে')
+        ) {
+          return await callTool('get_create_post_guide');
+        }
+
+        if (
           lowerMessage.includes('help') ||
           lowerMessage.includes('what can you') ||
           lowerMessage.includes('command') ||
