@@ -64,7 +64,27 @@ export const ChatBot: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const response = await sendMessage(userMessage.content);
+      // Check if user is asking about creating posts and is not authenticated
+      const lowerMessage = userMessage.content.toLowerCase();
+      const isCreatePostQuery = 
+            lowerMessage.includes('create') ||
+            lowerMessage.includes('write') ||
+            lowerMessage.includes('publish') ||
+            lowerMessage.includes('guide') ||
+            lowerMessage.includes('how') ||
+            lowerMessage.includes('post') ||
+            lowerMessage.includes('তৈরি') ||
+            lowerMessage.includes('লেখ') ||
+            lowerMessage.includes('প্রকাশ') ||
+            lowerMessage.includes('গাইড') ||
+            lowerMessage.includes('কিভাবে');
+
+      let response = await sendMessage(userMessage.content);
+
+      // If user is not authenticated and asking about creating posts, prepend login message
+      if (isCreatePostQuery && !isAuthenticated) {
+        response = `${t(TranslationKey.CHATBOT_CREATE_POST_LOGIN_REQUIRED)}\n\n${t(TranslationKey.CHATBOT_CREATE_POST_LOGIN_MESSAGE)}\n\n---\n\n${response}`;
+      }
 
       const assistantMessage: Message = {
         id: `${Date.now()}-assistant`,

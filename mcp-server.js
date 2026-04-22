@@ -325,6 +325,52 @@ server.tool('get_comment_stats', 'Get total number of comments', {}, async () =>
   return asTextResponse(`There are ${count || 0} total comments across all posts.`);
 });
 
+server.tool('get_create_post_guide', 'Get step-by-step guide for creating a post', {}, async () => {
+  const guide = `📝 **Creating a Post on DevCanvas**
+
+Here's how to create and publish your post:
+
+**Step 1: Add a Title**
+- Click "Create New Post" from the dashboard
+- Enter a compelling title (required)
+- Add a short excerpt to give readers a preview (optional)
+
+**Step 2: Write Your Content**
+- Use the rich text editor with formatting options
+- Add bold, italics, headings, lists, code blocks, quotes, etc.
+- Insert links and images to enhance your post
+- You can add emojis to make it more engaging!
+
+**Step 3: Organize Your Post**
+- Select a category to organize your content
+- Add relevant tags to help readers find your post
+- Featured image: Upload an eye-catching cover image (optional)
+
+**Step 4: Add a Featured Image**
+- Upload an image that represents your post
+- This image will appear as the post thumbnail
+- Recommended size: at least 400x300 pixels
+- File size limit: 100KB
+
+**Step 5: Publish or Save as Draft**
+- Click "Save as Draft" to save your work without publishing
+- Click "Publish" to make your post live and visible to readers
+- You can edit published posts anytime
+- Drafts remain private until you publish them
+
+**Pro Tips:**
+✨ Write engaging titles (40-60 characters work best)
+✨ Use clear headings to organize your content
+✨ Include relevant tags for better discoverability
+✨ Add a featured image for visual appeal
+✨ Save as draft frequently to avoid losing work
+✨ Review before publishing - you can always edit!
+
+Ready to create your first post? Head to the Create Post page now! 🚀`;
+
+  return asTextResponse(guide);
+});
+
 server.resource('blog://stats', 'Overall blog statistics', 'application/json', async () => {
   const [postsResult, viewsResult, likesResult, commentsResult] = await Promise.all([
     supabase.from('posts').select('*', { count: 'exact', head: true }),
