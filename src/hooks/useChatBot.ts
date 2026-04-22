@@ -292,7 +292,7 @@ export function useChatBot(): ChatBotHook {
           return await callTool('get_recent_posts', { limit: 5 });
         }
 
-        if (lowerMessage.includes('categor') || lowerMessage.includes('ক্যাটাগরি')) {
+        if (lowerMessage.includes('category') || lowerMessage.includes('ক্যাটাগরি')) {
           return await callTool('get_categories');
         }
 

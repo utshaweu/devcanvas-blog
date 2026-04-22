@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, MessageCircle, Send, UserRound, X } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { useChatBot } from '@/hooks/useChatBot';
+import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { Message } from '@/types';
@@ -18,6 +19,7 @@ export const ChatBot: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { sendMessage, isConnected } = useChatBot();
+  const { user, isAuthenticated } = useAuth();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -85,6 +87,9 @@ export const ChatBot: React.FC = () => {
       ]);
     } finally {
       setIsTyping(false);
+
+      // Keep keyboard flow smooth after sending a message.
+      inputRef.current?.focus();
     }
   };
 
@@ -180,7 +185,21 @@ export const ChatBot: React.FC = () => {
 
               {message.role === 'user' && (
                 <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
-                  <UserRound className="h-4 w-4" />
+                  {isAuthenticated ? (
+                    user?.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt={user.name}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xs font-semibold uppercase">
+                        {user?.name?.charAt(0) || 'U'}
+                      </span>
+                    )
+                  ) : (
+                    <UserRound className="h-4 w-4" />
+                  )}
                 </div>
               )}
             </div>
@@ -215,7 +234,7 @@ export const ChatBot: React.FC = () => {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               placeholder={t(TranslationKey.CHATBOT_PLACEHOLDER)}
-              disabled={!isConnected || isTyping}
+              disabled={!isConnected}
               className={cn(
                 'flex-1 rounded-full border border-border bg-background px-4 py-2',
                 'placeholder:text-muted-foreground',
@@ -225,6 +244,7 @@ export const ChatBot: React.FC = () => {
             />
             <button
               type="submit"
+              onMouseDown={(event) => event.preventDefault()}
               disabled={!input.trim() || !isConnected || isTyping}
               className={cn(
                 'rounded-full bg-accent p-2 text-accent-foreground transition-colors',
