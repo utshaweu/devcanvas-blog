@@ -44,6 +44,27 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
   - `avatars` (500KB limit, public)
   - `featured-images` (500KB limit, public)
 
+### MCP & Environment Variables
+- Frontend MCP endpoint is configured via `VITE_MCP_WS_URL`
+  - local development: set in `.env.local` (e.g., `http://localhost:8080`)
+  - production: set in `.env.production` (deployed bridge URL)
+- MCP server should read Supabase URL from `VITE_SUPABASE_URL` or `SUPABASE_URL`
+- MCP server should prefer `SUPABASE_SERVICE_ROLE_KEY` when available, then fall back to anon key
+- Keep `SUPABASE_SERVICE_ROLE_KEY` server-side only (deployment/runtime secret), not exposed in client bundles
+
+### MCP Chatbot Implementation (Actual Repo)
+- Frontend integration:
+  - `src/components/common/ChatBot.tsx`
+  - `src/hooks/useChatBot.ts`
+  - `useChatBot` sends MCP `initialize` and routes natural-language prompts to `tools/call` based on keyword intent.
+- Bridge implementation:
+  - `mcp-websocket-bridge.js`
+  - Runs HTTP + WebSocket server and spawns `mcp-server.js` using stdio transport.
+- MCP tools are implemented in:
+  - `mcp-server.js`
+  - Includes tools for posts, views, likes, comments, categories, and tags, plus `blog://stats` resource.
+- Category/tag counts in MCP should be treated as relation-derived values (from `posts.category_id` and `post_tags`), not as authoritative `post_count` columns.
+
 ## Database Optimization
 
 ### Posts Table Indexes

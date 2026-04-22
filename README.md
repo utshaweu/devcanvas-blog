@@ -26,6 +26,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Multilingual**: English and Bangla support with runtime switching
 - **Font Family Toggle**: Switch between Inter and Acme from the header
 - **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
+- **MCP Chatbot**: WebSocket chatbot connected to a local/deployed MCP bridge and Supabase-backed MCP tools
 - **Testing Ready**: Jest and React Testing Library configured
 
 ## 🛠️ Tech Stack
@@ -301,6 +302,18 @@ Edit `.env` and add your Supabase credentials:
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+# Optional: only needed by MCP server for elevated server-side queries
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+For environment-specific MCP URLs, use Vite mode files:
+
+```env
+# .env.local (local development)
+VITE_MCP_WS_URL=http://localhost:8080
+
+# .env.production (production build)
+VITE_MCP_WS_URL=https://devcanvas-blog-production.up.railway.app
 ```
 
 4. **Set up Supabase Database**
@@ -619,11 +632,41 @@ The application will be available at `http://localhost:3012`
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
+- `npm run mcp:server` - Run MCP stdio server
+- `npm run mcp:bridge` - Run WebSocket bridge for frontend chatbot
+- `npm run mcp:dev` - Run Vite + MCP bridge together
 - `npm run lint` - Run ESLint
 - `npm run test` - Run tests
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:coverage` - Generate test coverage report
 - `npm run extract:i18n` - Extract and verify translation keys
+
+## 🤖 MCP Chatbot Implementation (Actual Project Flow)
+
+This project uses a three-layer MCP chatbot pipeline:
+
+1. **Frontend chat UI + routing**
+   - `src/components/common/ChatBot.tsx`
+   - `src/hooks/useChatBot.ts`
+   - `useChatBot` resolves `VITE_MCP_WS_URL`, opens a WebSocket, sends MCP `initialize`, then routes user messages by keyword to tool calls.
+
+2. **WebSocket bridge**
+   - `mcp-websocket-bridge.js`
+   - Accepts WebSocket JSON-RPC from frontend, spawns `mcp-server.js`, forwards messages over stdio, returns parsed JSON back to client.
+
+3. **MCP server tools**
+   - `mcp-server.js`
+   - Registers tools like: `get_posts_today`, `get_total_posts`, `get_published_posts`, `get_total_views`, `get_total_likes`, `get_popular_posts`, `get_recent_posts`, `get_categories`, `get_tags`, `get_comment_stats`.
+   - Also exposes `blog://stats` resource.
+
+### Runtime env precedence used by MCP server
+
+- Supabase URL: `VITE_SUPABASE_URL` -> `SUPABASE_URL`
+- Supabase key: `SUPABASE_SERVICE_ROLE_KEY` -> `VITE_SUPABASE_ANON_KEY` -> `SUPABASE_ANON_KEY`
+
+### Notes on category/tag counts
+
+- `get_categories` and `get_tags` compute counts from live relations (`posts.category_id`, `post_tags`) instead of relying on stored `post_count` columns.
 
 ## 🏗️ Architecture
 
@@ -1043,8 +1086,15 @@ Make sure to set these environment variables in your deployment platform:
 ```
 VITE_SUPABASE_URL=your_production_supabase_url
 VITE_SUPABASE_ANON_KEY=your_production_anon_key
+VITE_MCP_WS_URL=https://devcanvas-blog-production.up.railway.app
 VITE_APP_NAME=DevCanvas Blog
 VITE_APP_URL=https://your-domain.com
+```
+
+For MCP backend deployments (bridge/server), set this as a server-side secret:
+
+```
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
 ## 📚 Key Libraries & Documentation

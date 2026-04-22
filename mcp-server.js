@@ -14,11 +14,14 @@ import process from 'node:process';
 import { z } from 'zod';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('Error: Missing Supabase environment variables');
-  console.error('Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+  console.error('Set VITE_SUPABASE_URL and one of: SUPABASE_SERVICE_ROLE_KEY, VITE_SUPABASE_ANON_KEY');
   process.exit(1);
 }
 
@@ -217,21 +220,43 @@ server.tool(
 );
 
 server.tool('get_categories', 'Get all blog categories with post counts', {}, async () => {
-  const { data, error } = await supabase
-    .from('categories')
-    .select('name, post_count')
-    .order('post_count', { ascending: false });
+  const [categoriesResult, postsResult] = await Promise.all([
+    supabase.from('categories').select('id, name'),
+    supabase.from('posts').select('category_id').not('category_id', 'is', null),
+  ]);
 
-  if (error) {
-    return asTextResponse(`Error: ${error.message}`);
+  if (categoriesResult.error) {
+    return asTextResponse(`Error: ${categoriesResult.error.message}`);
   }
 
-  if (!data || data.length === 0) {
+  if (postsResult.error) {
+    return asTextResponse(`Error: ${postsResult.error.message}`);
+  }
+
+  const categories = categoriesResult.data || [];
+  if (categories.length === 0) {
     return asTextResponse('No categories available yet.');
   }
 
+  const categoryCounts = new Map();
+  (postsResult.data || []).forEach((post) => {
+    if (!post.category_id) {
+      return;
+    }
+
+    const currentCount = categoryCounts.get(post.category_id) || 0;
+    categoryCounts.set(post.category_id, currentCount + 1);
+  });
+
+  const categoriesWithCounts = categories
+    .map((category) => ({
+      name: category.name,
+      post_count: categoryCounts.get(category.id) || 0,
+    }))
+    .sort((a, b) => b.post_count - a.post_count || a.name.localeCompare(b.name));
+
   let response = 'Available Categories:\n\n';
-  data.forEach((category) => {
+  categoriesWithCounts.forEach((category) => {
     response += `- ${category.name} (${category.post_count} posts)\n`;
   });
 
@@ -247,22 +272,40 @@ server.tool(
   async (args) => {
     const limit = args.limit || 10;
 
-    const { data, error } = await supabase
-      .from('tags')
-      .select('name, post_count')
-      .order('post_count', { ascending: false })
-      .limit(limit);
+    const [tagsResult, postTagsResult] = await Promise.all([
+      supabase.from('tags').select('id, name'),
+      supabase.from('post_tags').select('tag_id'),
+    ]);
 
-    if (error) {
-      return asTextResponse(`Error: ${error.message}`);
+    if (tagsResult.error) {
+      return asTextResponse(`Error: ${tagsResult.error.message}`);
     }
 
-    if (!data || data.length === 0) {
+    if (postTagsResult.error) {
+      return asTextResponse(`Error: ${postTagsResult.error.message}`);
+    }
+
+    const tags = tagsResult.data || [];
+    if (tags.length === 0) {
       return asTextResponse('No tags available yet.');
     }
 
+    const tagCounts = new Map();
+    (postTagsResult.data || []).forEach((postTag) => {
+      const currentCount = tagCounts.get(postTag.tag_id) || 0;
+      tagCounts.set(postTag.tag_id, currentCount + 1);
+    });
+
+    const tagsWithCounts = tags
+      .map((tag) => ({
+        name: tag.name,
+        post_count: tagCounts.get(tag.id) || 0,
+      }))
+      .sort((a, b) => b.post_count - a.post_count || a.name.localeCompare(b.name))
+      .slice(0, limit);
+
     let response = 'Popular Tags:\n\n';
-    data.forEach((tag) => {
+    tagsWithCounts.forEach((tag) => {
       response += `- ${tag.name} (${tag.post_count} posts)\n`;
     });
 

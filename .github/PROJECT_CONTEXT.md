@@ -516,7 +516,27 @@ if (error) throw error;
 ```
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
+VITE_MCP_WS_URL
+SUPABASE_SERVICE_ROLE_KEY
 ```
+
+Notes:
+- `VITE_MCP_WS_URL` should be environment-specific:
+  - local: `.env.local` -> `http://localhost:8080`
+  - production: `.env.production` -> your deployed bridge URL
+- `SUPABASE_SERVICE_ROLE_KEY` is server-side only (MCP server/bridge runtime), not a client-side Vite variable.
+
+## MCP Chatbot Architecture (Actual)
+- Frontend: `src/components/common/ChatBot.tsx` + `src/hooks/useChatBot.ts`
+  - `useChatBot` resolves `VITE_MCP_WS_URL`, opens WebSocket, sends MCP `initialize`, then calls tools based on keyword intent.
+- Bridge: `mcp-websocket-bridge.js`
+  - Bridges WebSocket JSON-RPC <-> MCP stdio, spawns `mcp-server.js` per client.
+- Server: `mcp-server.js`
+  - Supabase env precedence:
+    - URL: `VITE_SUPABASE_URL` -> `SUPABASE_URL`
+    - key: `SUPABASE_SERVICE_ROLE_KEY` -> `VITE_SUPABASE_ANON_KEY` -> `SUPABASE_ANON_KEY`
+  - Implements tools: `get_posts_today`, `get_total_posts`, `get_published_posts`, `get_total_views`, `get_total_likes`, `get_popular_posts`, `get_recent_posts`, `get_categories`, `get_tags`, `get_comment_stats`.
+  - Category/tag MCP counts are computed from live relations (`posts.category_id`, `post_tags`).
 
 ## Common Commands
 ```bash

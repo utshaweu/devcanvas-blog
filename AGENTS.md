@@ -1847,6 +1847,32 @@ describe('Button', () => {
 
 ---
 
+## 🤖 MCP Chatbot Implementation (Repository-Accurate)
+
+The chatbot is implemented with a frontend hook, a WebSocket bridge, and an MCP stdio server:
+
+1. **Frontend integration**
+   - `src/components/common/ChatBot.tsx`
+   - `src/hooks/useChatBot.ts`
+   - `useChatBot` resolves `VITE_MCP_WS_URL`, connects via WebSocket, sends MCP `initialize`, then maps user intent keywords to `tools/call`.
+
+2. **Bridge layer**
+   - `mcp-websocket-bridge.js`
+   - Spawns `mcp-server.js` per client connection and forwards JSON-RPC between WebSocket and stdio.
+
+3. **MCP server layer**
+   - `mcp-server.js`
+   - Supabase env resolution:
+     - URL: `VITE_SUPABASE_URL` -> `SUPABASE_URL`
+     - Key: `SUPABASE_SERVICE_ROLE_KEY` -> `VITE_SUPABASE_ANON_KEY` -> `SUPABASE_ANON_KEY`
+   - Exposes tools: `get_posts_today`, `get_total_posts`, `get_published_posts`, `get_total_views`, `get_total_likes`, `get_popular_posts`, `get_recent_posts`, `get_categories`, `get_tags`, `get_comment_stats`.
+   - Exposes resource: `blog://stats`.
+
+Implementation detail:
+- Category/tag counts in MCP are computed from live table relations (`posts.category_id`, `post_tags`) rather than trusting `categories.post_count` / `tags.post_count`.
+
+---
+
 ## 🚨 Common Issues & Solutions
 
 ### Issue: "Module not found" errors
@@ -1863,6 +1889,8 @@ npm install
 **Solution:**
 - Check `.env` file exists with correct variables
 - Verify `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+- For MCP server/bridge flows, verify `SUPABASE_SERVICE_ROLE_KEY` is set in runtime env
+- If MCP answers look stale/wrong, verify `VITE_MCP_WS_URL` points to the intended bridge (`.env.local` for local, `.env.production` for live)
 - Restart dev server after changing env variables
 
 ### Issue: TypeScript errors on Shadcn components
@@ -1985,6 +2013,12 @@ cp .env.example .env
 
 # 3. Start development server
 npm run dev
+
+# 4. (Optional for chatbot/MCP features) Start MCP bridge
+npm run mcp:bridge
+
+# 5. (Optional) Run MCP stdio server directly
+npm run mcp:server
 ```
 
 ### Making Changes
@@ -2174,6 +2208,8 @@ When stuck or uncertain:
 
 3. **Verify Environment:**
    - Check .env variables
+   - Verify `.env.local` / `.env.production` for `VITE_MCP_WS_URL`
+   - Ensure MCP backend has `SUPABASE_SERVICE_ROLE_KEY` in its runtime environment
    - Verify dependencies installed
    - Confirm Supabase connection
 
@@ -2219,6 +2255,9 @@ When stuck or uncertain:
 npm run dev              # Start dev server
 npm run build           # Build for production
 npm run preview         # Preview production build
+npm run mcp:server      # Run MCP stdio server
+npm run mcp:bridge      # Run MCP WebSocket bridge
+npm run mcp:dev         # Run Vite + MCP bridge together
 
 # Testing
 npm run test            # Run all tests
