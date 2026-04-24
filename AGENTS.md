@@ -609,6 +609,45 @@ When building chart-heavy UI, reuse shared chart wrappers in `src/components/com
 - Use dark-mode-safe tooltip styles so labels remain readable in both themes
 - Hide or simplify dense X-axis labels when they overflow in compact cards
 
+### 8.2 Spotlight Search Pattern
+
+Use the `SpotlightSearch` component from `src/components/common/SpotlightSearch.tsx` for keyboard-first global post search.
+
+```typescript
+import { SpotlightSearch } from '@/components/common/SpotlightSearch';
+
+// Default usage (used in Header — Ctrl+K opens it globally)
+<SpotlightSearch />
+
+// With custom result limit and navigation override
+<SpotlightSearch
+  resultsLimit={5}
+  onResultNavigate={(result) => {
+    // result: { id, title, slug, excerpt }
+    navigate(`/preview/${result.slug}`);
+  }}
+/>
+```
+
+**Key Features:**
+- `Ctrl+K` / `Cmd+K` global shortcut opens/toggles the dialog from anywhere in the app
+- Trigger button tooltip shows "Search posts (Ctrl+K)" automatically
+- Arrow key navigation through results with scroll-into-view
+- `Enter` opens the active result; `Esc` closes the dialog
+- `resultsLimit` prop overrides the default limit of 8 results
+- `onResultNavigate` overrides the default `/blog/:slug` navigation
+- Keyboard hint footer uses `SPOTLIGHT_HINT_NAVIGATE`, `SPOTLIGHT_HINT_OPEN`, `SPOTLIGHT_HINT_CLOSE` translation keys (bilingual EN/BN)
+- Searches `title`, `excerpt`, and `content` via Supabase `ilike`
+
+**Translation Keys (SpotlightSearch-specific):**
+- `SEARCH_POSTS_LABEL` — trigger button aria-label + dialog title
+- `SEARCH_POSTS_PLACEHOLDER` — input placeholder
+- `SEARCH_POSTS_HELPER` — helper text shown before typing
+- `NO_SEARCH_RESULTS` — empty results message
+- `SPOTLIGHT_HINT_NAVIGATE` — "to navigate" (keyboard footer)
+- `SPOTLIGHT_HINT_OPEN` — "to open" (keyboard footer)
+- `SPOTLIGHT_HINT_CLOSE` — "to close" (keyboard footer)
+
 ### 8.1 Font Family Toggle Pattern
 
 Use a shared `useFontFamily` hook for font preference toggling from the header.

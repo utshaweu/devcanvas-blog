@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { cn, formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
-import { Eye, Heart, ArrowLeft } from 'lucide-react';
+import { cn, formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE, calculateReadingTime } from '@/utils/helpers';
+import { Eye, Heart, ArrowLeft, Clock } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { useAuth } from '@/hooks/useAuth';
@@ -130,6 +130,10 @@ export const BlogPostPage: React.FC = () => {
             <span className="flex items-center gap-1">
               <Eye className="h-4 w-4" />
               {currentPost.views} {t(TranslationKey.VIEWS)}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              {calculateReadingTime(currentPost.content)} min read
             </span>
             <Button
               variant="ghost"

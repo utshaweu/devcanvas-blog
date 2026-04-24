@@ -20,7 +20,11 @@ const cleanExcerpt = (excerpt: string | null | undefined): string => {
   return excerpt.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 };
 
-export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) => {
+export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({
+  className,
+  resultsLimit = RESULTS_LIMIT,
+  onResultNavigate,
+}) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -57,6 +61,18 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
     }
   }, [open]);
 
+  // ─── Ctrl+K / Cmd+K global shortcut ──────────────────────────────────────
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
   // ─── Reset active index when results change ───────────────────────────────
   useEffect(() => {
     setActiveIndex(-1);
@@ -83,7 +99,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
         .eq('published', true)
         .or(`title.ilike.${pattern},excerpt.ilike.${pattern},content.ilike.${pattern}`)
         .order('published_at', { ascending: false })
-        .limit(RESULTS_LIMIT);
+        .limit(resultsLimit);
 
       if (!isMounted) return;
 
@@ -103,7 +119,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
     return () => {
       isMounted = false;
     };
-  }, [normalizedQuery, open]);
+  }, [normalizedQuery, open, resultsLimit]);
 
   // ─── Scroll active item into view ────────────────────────────────────────
   useEffect(() => {
@@ -117,11 +133,15 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
 
   // ─── Navigate to result ───────────────────────────────────────────────────
   const handleResultClick = useCallback(
-    (slug: string) => {
-      navigate(`/blog/${slug}`);
+    (result: SpotlightSearchResult) => {
+      if (onResultNavigate) {
+        onResultNavigate(result);
+      } else {
+        navigate(`/blog/${result.slug}`);
+      }
       setOpen(false);
     },
-    [navigate]
+    [navigate, onResultNavigate]
   );
 
   // ─── Keyboard handler on the input ───────────────────────────────────────
@@ -145,7 +165,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
         case 'Enter': {
           e.preventDefault();
           if (activeIndex >= 0 && results[activeIndex]) {
-            handleResultClick(results[activeIndex].slug);
+            handleResultClick(results[activeIndex]);
           }
           break;
         }
@@ -164,6 +184,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
 
   const hasQuery = normalizedQuery.length >= MIN_QUERY_LENGTH;
   const openLabel = t(TranslationKey.SEARCH_POSTS_LABEL);
+  const openTitle = `${openLabel} (Ctrl+K)`;
 
   return (
     <>
@@ -173,7 +194,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
         size="icon"
         onClick={() => setOpen(true)}
         aria-label={openLabel}
-        title={openLabel}
+        title={openTitle}
         className={className}
       >
         <TextSearch className="h-4 w-4" />
@@ -240,7 +261,7 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
                           itemRefs.current[index] = el;
                         }}
                         type="button"
-                        onClick={() => handleResultClick(result.slug)}
+                        onClick={() => handleResultClick(result)}
                         onMouseEnter={() => setActiveIndex(index)}
                         onMouseLeave={() => setActiveIndex(-1)}
                         className={cn(
@@ -302,21 +323,21 @@ export const SpotlightSearch: React.FC<SpotlightSearchProps> = ({ className }) =
                 <kbd className="inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 font-mono text-[10px]">
                   <ArrowDown className="h-2.5 w-2.5" />
                 </kbd>
-                to navigate
+                {t(TranslationKey.SPOTLIGHT_HINT_NAVIGATE)}
               </span>
 
               <span className="flex items-center gap-1">
                 <kbd className="inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 font-mono text-[10px]">
                   <CornerDownLeft className="h-2.5 w-2.5" />
                 </kbd>
-                to open
+                {t(TranslationKey.SPOTLIGHT_HINT_OPEN)}
               </span>
 
               <span className="flex items-center gap-1">
                 <kbd className="inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 font-mono text-[10px] leading-none">
                   Esc
                 </kbd>
-                to close
+                {t(TranslationKey.SPOTLIGHT_HINT_CLOSE)}
               </span>
             </div>
           )}

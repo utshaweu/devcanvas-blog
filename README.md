@@ -20,6 +20,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Analytics Page**: Dedicated responsive Recharts dashboard with 4 charts (monthly trends, top posts, publish status, category split)
 - **Reusable Chart Components**: Shared line, bar, and pie chart wrappers for analytics surfaces
 - **Post Search**: Medium-style debounced search on blog list with Load More compatibility
+- **Spotlight Search**: Keyboard-first instant post search dialog (`Ctrl+K` / `Cmd+K`) with arrow-key navigation, accessible results list, and Bangla/English translations
 - **Reusable Virtualized Grid**: Efficient rendering for large collections using the shared VirtualizedGrid component
 - **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
 - **Responsive Design**: Mobile-first, works on all devices

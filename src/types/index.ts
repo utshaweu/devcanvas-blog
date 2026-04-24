@@ -544,4 +544,6 @@ export interface SpotlightSearchResult {
 
 export interface SpotlightSearchProps {
   className?: string;
+  resultsLimit?: number;
+  onResultNavigate?: (result: SpotlightSearchResult) => void;
 }
