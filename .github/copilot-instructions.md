@@ -6,6 +6,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Infinite Scroll**: Load More pagination (9 posts per page)
 - **Virtualized Grid Rendering**: Windowed rendering for large post collections
 - **Post Search**: Debounced, Medium-style search on blog list with pagination support
+- **Spotlight Search**: Keyboard-first instant post search (`Ctrl+K` / `Cmd+K`) with arrow-key navigation, reusable `resultsLimit` and `onResultNavigate` props, and full bilingual support
 - **Multilingual**: English and Bangla support with runtime switching
 - **Dark Mode**: Light/Dark/System theme with persistence
 - **Comments System**: Nested comments on blog posts

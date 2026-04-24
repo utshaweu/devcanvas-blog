@@ -8,6 +8,7 @@ Full-stack blog platform with:
 - Infinite scroll pagination (Load More)
 - Virtualized post grid rendering for large lists
 - Post search (debounced, Medium-style search bar)
+- Spotlight search (Ctrl+K dialog with keyboard navigation, reusable `resultsLimit` + `onResultNavigate` props)
 - Multilingual support (EN/BN)
 - Dark mode (Light/Dark/System)
 - Comments system (nested)

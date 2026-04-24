@@ -9,6 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useFontFamily } from '@/hooks/useFontFamily';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
+import { SpotlightSearch } from '@/components/common/SpotlightSearch';
 import { UpdatePasswordDialog } from '@/features/auth/UpdatePasswordDialog';
 import {
   DropdownMenu,
@@ -76,6 +77,7 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <SpotlightSearch />
           <Button
             variant="ghost"
             size="icon"

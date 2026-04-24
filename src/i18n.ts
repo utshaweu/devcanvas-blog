@@ -262,6 +262,9 @@ export enum TranslationKey {
   CHATBOT_CREATE_POST_PUBLISH_STEP = 'chatbotCreatePostPublishStep',
   CHATBOT_CREATE_POST_TIPS = 'chatbotCreatePostTips',
   CHATBOT_CREATE_POST_FOLLOW_UP = 'chatbotCreatePostFollowUp',
+  SPOTLIGHT_HINT_NAVIGATE = 'spotlightHintNavigate',
+  SPOTLIGHT_HINT_OPEN = 'spotlightHintOpen',
+  SPOTLIGHT_HINT_CLOSE = 'spotlightHintClose',
 }
 
 export type LanguageKey = TranslationKey;
@@ -529,6 +532,9 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.CHATBOT_CREATE_POST_PUBLISH_STEP]: 'Step 5: Publish or Save as Draft\n- Click "Save as Draft" to save your work without publishing\n- Click "Publish" to make your post live and visible to readers\n- You can edit published posts anytime\n- Drafts remain private until you publish them',
     [TranslationKey.CHATBOT_CREATE_POST_TIPS]: 'Pro Tips:\n✨ Write engaging titles (40-60 characters work best)\n✨ Use clear headings to organize your content\n✨ Include relevant tags for better discoverability\n✨ Add a featured image for visual appeal\n✨ Save as draft frequently to avoid losing work\n✨ Review before publishing - you can always edit!',
     [TranslationKey.CHATBOT_CREATE_POST_FOLLOW_UP]: 'Would you like to go to the Create Post page now, or do you have any other questions about creating posts?',
+    [TranslationKey.SPOTLIGHT_HINT_NAVIGATE]: 'to navigate',
+    [TranslationKey.SPOTLIGHT_HINT_OPEN]: 'to open',
+    [TranslationKey.SPOTLIGHT_HINT_CLOSE]: 'to close',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -792,6 +798,9 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.CHATBOT_CREATE_POST_PUBLISH_STEP]: 'ধাপ ৫: প্রকাশ করুন বা খসড়া হিসেবে সংরক্ষণ করুন\n- প্রকাশ ছাড়াই আপনার কাজ সংরক্ষণ করতে "খসড়া হিসেবে সংরক্ষণ করুন" ক্লিক করুন\n- আপনার পোস্ট লাইভ এবং পাঠকদের দৃশ্যমান করতে "প্রকাশ করুন" ক্লিক করুন\n- আপনি যেকোনো সময় প্রকাশিত পোস্ট সম্পাদনা করতে পারেন\n- খসড়াগুলি প্রকাশিত না হওয়া পর্যন্ত ব্যক্তিগত থাকে',
     [TranslationKey.CHATBOT_CREATE_POST_TIPS]: 'প্রো টিপস:\n✨ আকর্ষণীয় শিরোনাম লিখুন (৪০-৬০ অক্ষর সবচেয়ে ভালো কাজ করে)\n✨ আপনার বিষয়বস্তু সংগঠিত করতে পরিষ্কার হেডিং ব্যবহার করুন\n✨ আরও ভালো আবিষ্কারযোগ্যতার জন্য প্রাসঙ্গিক ট্যাগ অন্তর্ভুক্ত করুন\n✨ ভিজ্যুয়াল আবেদনের জন্য একটি ফিচার্ড ইমেজ যোগ করুন\n✨ কাজ হারানোর জন্য খসড়া সংরক্ষণ করুন\n✨ প্রকাশের আগে পর্যালোচনা করুন - আপনি সবসময় সম্পাদনা করতে পারেন!',
     [TranslationKey.CHATBOT_CREATE_POST_FOLLOW_UP]: 'আপনি এখন পোস্ট তৈরি পৃষ্ঠায় যেতে চান, নাকি পোস্ট তৈরি সম্পর্কে আপনার অন্য কোনো প্রশ্ন আছে?',
+    [TranslationKey.SPOTLIGHT_HINT_NAVIGATE]: 'নেভিগেট করতে',
+    [TranslationKey.SPOTLIGHT_HINT_OPEN]: 'খুলতে',
+    [TranslationKey.SPOTLIGHT_HINT_CLOSE]: 'বন্ধ করতে',
   },
 };
 
