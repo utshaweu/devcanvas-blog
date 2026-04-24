@@ -534,3 +534,14 @@ export interface Message {
   content: string;
   timestamp: Date;
 }
+
+export interface SpotlightSearchResult {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+}
+
+export interface SpotlightSearchProps {
+  className?: string;
+}
