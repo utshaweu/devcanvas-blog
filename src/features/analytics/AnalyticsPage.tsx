@@ -179,13 +179,25 @@ export const AnalyticsPage: React.FC = () => {
   if (!posts.length) {
     return (
       <div className="container-custom py-12">
-        <Card className="mx-auto max-w-2xl">
-          <CardHeader className="text-center">
-            <CardTitle>{t(TranslationKey.ANALYTICS_EMPTY_TITLE)}</CardTitle>
-            <CardDescription>{t(TranslationKey.ANALYTICS_EMPTY_DESCRIPTION)}</CardDescription>
+        <Card className="relative mx-auto max-w-3xl overflow-hidden border-accent/20 bg-gradient-to-br from-accent/10 via-background to-primary/70">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-accent/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+          <CardHeader className="relative items-center text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent">
+              <FileText className="h-7 w-7" />
+            </div>
+            <CardTitle className="text-2xl sm:text-3xl">{t(TranslationKey.ANALYTICS_EMPTY_TITLE)}</CardTitle>
+            <CardDescription className="mx-auto max-w-xl text-base text-muted-foreground/90">
+              {t(TranslationKey.ANALYTICS_EMPTY_DESCRIPTION)}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-center">
-            <Button onClick={() => navigate('/create')}>{t(TranslationKey.CREATE_NEW_POST)}</Button>
+          <CardContent className="relative flex justify-center pb-8">
+            <Button
+              onClick={() => navigate('/create')}
+              className="bg-gradient-to-r from-accent to-accent/80 text-primary transition-all duration-200 hover:scale-[1.02] hover:from-accent/90 hover:to-accent"
+            >
+              {t(TranslationKey.CREATE_NEW_POST)}
+            </Button>
           </CardContent>
         </Card>
       </div>

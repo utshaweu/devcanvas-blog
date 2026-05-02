@@ -265,6 +265,10 @@ export enum TranslationKey {
   SPOTLIGHT_HINT_NAVIGATE = 'spotlightHintNavigate',
   SPOTLIGHT_HINT_OPEN = 'spotlightHintOpen',
   SPOTLIGHT_HINT_CLOSE = 'spotlightHintClose',
+  SIGNUP_SUCCESS_TITLE = 'signupSuccessTitle',
+  SIGNUP_SUCCESS_REDIRECT_MESSAGE = 'signupSuccessRedirectMessage',
+  SIGNUP_FAILED_TITLE = 'signupFailedTitle',
+  SIGNUP_FAILED_MESSAGE = 'signupFailedMessage',
 }
 
 export type LanguageKey = TranslationKey;
@@ -535,6 +539,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.SPOTLIGHT_HINT_NAVIGATE]: 'to navigate',
     [TranslationKey.SPOTLIGHT_HINT_OPEN]: 'to open',
     [TranslationKey.SPOTLIGHT_HINT_CLOSE]: 'to close',
+    [TranslationKey.SIGNUP_SUCCESS_TITLE]: 'Account created',
+    [TranslationKey.SIGNUP_SUCCESS_REDIRECT_MESSAGE]: 'Redirecting to login...',
+    [TranslationKey.SIGNUP_FAILED_TITLE]: 'Signup failed',
+    [TranslationKey.SIGNUP_FAILED_MESSAGE]: 'Failed to create account. Please try again.',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -801,6 +809,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.SPOTLIGHT_HINT_NAVIGATE]: 'নেভিগেট করতে',
     [TranslationKey.SPOTLIGHT_HINT_OPEN]: 'খুলতে',
     [TranslationKey.SPOTLIGHT_HINT_CLOSE]: 'বন্ধ করতে',
+    [TranslationKey.SIGNUP_SUCCESS_TITLE]: 'অ্যাকাউন্ট তৈরি হয়েছে',
+    [TranslationKey.SIGNUP_SUCCESS_REDIRECT_MESSAGE]: 'লগইনে পুনর্নির্দেশিত হচ্ছে...',
+    [TranslationKey.SIGNUP_FAILED_TITLE]: 'সাইন আপ ব্যর্থ',
+    [TranslationKey.SIGNUP_FAILED_MESSAGE]: 'অ্যাকাউন্ট তৈরি করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।',
   },
 };
 

@@ -547,3 +547,12 @@ export interface SpotlightSearchProps {
   resultsLimit?: number;
   onResultNavigate?: (result: SpotlightSearchResult) => void;
 }
+
+export interface AuthorHoverCardProps {
+  authorName?: string;
+  authorAvatarUrl?: string;
+  authorInitial: string;
+  totalPosts: number | null;
+  isLoading: boolean;
+  className?: string;
+}

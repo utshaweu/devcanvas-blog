@@ -65,6 +65,7 @@ The repository is compatible with several AI models to assist developers:
 - **Rich Text:** Tiptap 2.x with StarterKit
 - **Emoji Picker:** Reusable `EmojiPicker` component (emoji-mart based)
 - **Search UI:** Reusable `SearchBar` component for blog listing search
+- **Author Hover UI:** Reusable `AuthorHoverCard` component for post author preview panels
 - **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
   - Used by UpdatePasswordDialog for secure password changes
   - Supports animations and smooth transitions
@@ -584,6 +585,41 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
 - Debounce query updates before calling store fetch methods
 - Preserve existing pagination and load-more behavior for active queries
 - Use translation keys for all search-related UI text
+
+### 8.4 Author Hover Card Pattern
+
+Use the shared `AuthorHoverCard` component from `src/components/common/AuthorHoverCard.tsx` in post cards.
+
+```typescript
+import { AuthorHoverCard } from '@/components/common/AuthorHoverCard';
+import { useBlogStore } from '@/stores/blogStore';
+
+const { fetchAuthorPublishedPostCount } = useBlogStore();
+
+const handleAuthorHover = async () => {
+  if (!authorId || authorPostCount !== null || isAuthorPostCountLoading) return;
+  setIsAuthorPostCountLoading(true);
+  const count = await fetchAuthorPublishedPostCount(authorId);
+  setAuthorPostCount(count);
+  setIsAuthorPostCountLoading(false);
+};
+
+<div className="relative group/author" onMouseEnter={() => void handleAuthorHover()}>
+  <AuthorHoverCard
+    authorName={post.author?.name}
+    authorAvatarUrl={post.author?.avatar_url}
+    authorInitial={authorInitial}
+    totalPosts={authorPostCount}
+    isLoading={isAuthorPostCountLoading}
+  />
+</div>
+```
+
+**Rules:**
+- Reuse `AuthorHoverCard` instead of duplicating hover panel markup in card components
+- Keep author post count loading lazy on hover (`onMouseEnter`), not on mount
+- Use `fetchAuthorPublishedPostCount(authorId)` from `blogStore` for author totals
+- Keep fallback initial style aligned with header avatar pattern (`bg-accent`, `text-accent-foreground`)
 
 ### 8.2 Analytics Page Pattern
 
