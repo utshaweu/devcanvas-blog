@@ -1,13 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, Heart, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Badge } from './Badge';
+import { AuthorHoverCard } from './AuthorHoverCard';
 import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import type { BlogPostCardProps } from '@/types';
+import { useBlogStore } from '@/stores/blogStore';
 
 const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
   post,
@@ -17,9 +19,16 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
   isDeleting = false,
 }) => {
   const { t } = useTranslation();
+  const { fetchAuthorPublishedPostCount } = useBlogStore();
+  
   const isDashboard = variant === 'dashboard';
   const publishDate = post.published_at || post.created_at;
   const featuredImageSrc = post.featured_image || DEFAULT_FEATURED_IMAGE;
+  const authorId = post.author?.id;
+  const authorInitial = post.author?.name?.trim().charAt(0).toUpperCase() || 'U';
+  
+  const [authorPostCount, setAuthorPostCount] = useState<number | null>(null);
+  const [isAuthorPostCountLoading, setIsAuthorPostCountLoading] = useState(false);
 
   const handleImageError: React.ReactEventHandler<HTMLImageElement> = (event) => {
     event.currentTarget.onerror = null;
@@ -32,6 +41,31 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
     () => `${formatRelativeTime(publishDate)} • ${formatDate(publishDate)}`,
     [publishDate]
   );
+
+  useEffect(() => {
+    if (!authorId || authorPostCount !== null) {
+      return;
+    }
+    // Don't fetch on mount, only on hover
+  }, [authorId, authorPostCount]);
+
+  const handleAuthorHover = useCallback(async () => {
+    if (!authorId || authorPostCount !== null || isAuthorPostCountLoading) {
+      return;
+    }
+
+    setIsAuthorPostCountLoading(true);
+
+    try {
+      const count = await fetchAuthorPublishedPostCount(authorId);
+      setAuthorPostCount(count);
+    } catch (error) {
+      console.error('Failed to load author post count:', error);
+      setAuthorPostCount(0);
+    } finally {
+      setIsAuthorPostCountLoading(false);
+    }
+  }, [authorId, authorPostCount, isAuthorPostCountLoading, fetchAuthorPublishedPostCount]);
 
   return (
     <Card className="group h-full cursor-pointer flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -95,7 +129,19 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
           {/* Author and Date - Default view */}
           {!isDashboard && (
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span>{post.author?.name}</span>
+              <div className="relative group/author" onMouseEnter={() => void handleAuthorHover()}>
+                <span className="cursor-default transition-colors duration-200 group-hover/author:text-foreground">
+                  {post.author?.name}
+                </span>
+
+                <AuthorHoverCard
+                  authorName={post.author?.name}
+                  authorAvatarUrl={post.author?.avatar_url}
+                  authorInitial={authorInitial}
+                  totalPosts={authorPostCount}
+                  isLoading={isAuthorPostCountLoading}
+                />
+              </div>
               <span>•</span>
               <span>
                 {formattedPublishDate}

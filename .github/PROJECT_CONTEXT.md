@@ -8,6 +8,7 @@ Full-stack blog platform with:
 - Infinite scroll pagination (Load More)
 - Virtualized post grid rendering for large lists
 - Post search (debounced, Medium-style search bar)
+- Reusable author hover card (gradient panel with avatar fallback + lazy post count)
 - Spotlight search (Ctrl+K dialog with keyboard navigation, reusable `resultsLimit` + `onResultNavigate` props)
 - Multilingual support (EN/BN)
 - Dark mode (Light/Dark/System)
@@ -243,6 +244,29 @@ Rules:
 - Preserve load-more pagination behavior while searching
 - Ensure dark-mode readability for input text, placeholder, and helper text
 - Use translation keys for all search UI strings
+
+### AuthorHoverCard Component
+```typescript
+import { AuthorHoverCard } from '@/components/common/AuthorHoverCard';
+import { useBlogStore } from '@/stores/blogStore';
+
+const { fetchAuthorPublishedPostCount } = useBlogStore();
+
+<div className="relative group/author" onMouseEnter={() => void handleAuthorHover()}>
+  <AuthorHoverCard
+    authorName={post.author?.name}
+    authorAvatarUrl={post.author?.avatar_url}
+    authorInitial={authorInitial}
+    totalPosts={authorPostCount}
+    isLoading={isAuthorPostCountLoading}
+  />
+</div>
+```
+
+Rules:
+- Reuse this shared component in post-card surfaces instead of duplicating hover markup
+- Fetch author totals lazily on hover using `fetchAuthorPublishedPostCount(authorId)`
+- Keep fallback initial style aligned with header avatar fallback classes
 
 ### Input Component
 ```typescript

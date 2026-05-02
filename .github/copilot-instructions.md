@@ -6,6 +6,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Infinite Scroll**: Load More pagination (9 posts per page)
 - **Virtualized Grid Rendering**: Windowed rendering for large post collections
 - **Post Search**: Debounced, Medium-style search on blog list with pagination support
+- **Author Hover Card**: Reusable gradient author preview card with avatar fallback and lazy post-count loading
 - **Spotlight Search**: Keyboard-first instant post search (`Ctrl+K` / `Cmd+K`) with arrow-key navigation, reusable `resultsLimit` and `onResultNavigate` props, and full bilingual support
 - **Multilingual**: English and Bangla support with runtime switching
 - **Dark Mode**: Light/Dark/System theme with persistence
@@ -36,6 +37,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Emoji-mart (shared emoji picker data + UI)
 - Custom FileUpload component (with progress tracking)
 - Custom PasswordInput component (with visibility toggle)
+- Reusable `AuthorHoverCard` component (author preview on hover)
 - VirtualizedGrid component (react-virtuoso powered)
 - Reusable chart wrappers: `LineChartView`, `BarChartView`, `PieChartView`
 
@@ -510,7 +512,30 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
 - Keep load-more behavior in sync with the active search query
 - All visible search text must use translation keys
 
-### 10.1 Analytics Chart Pattern
+### 10.1 Author Hover Card Pattern
+```typescript
+import { AuthorHoverCard } from '@/components/common/AuthorHoverCard';
+import { useBlogStore } from '@/stores/blogStore';
+
+const { fetchAuthorPublishedPostCount } = useBlogStore();
+
+<div className="relative group/author" onMouseEnter={() => void handleAuthorHover()}>
+  <AuthorHoverCard
+    authorName={post.author?.name}
+    authorAvatarUrl={post.author?.avatar_url}
+    authorInitial={authorInitial}
+    totalPosts={authorPostCount}
+    isLoading={isAuthorPostCountLoading}
+  />
+</div>
+```
+
+**Rules:**
+- Reuse `AuthorHoverCard` for author hover previews instead of inline duplicated markup
+- Load author totals lazily on hover with `fetchAuthorPublishedPostCount(authorId)` from `blogStore`
+- Keep fallback initial style consistent with the header avatar fallback (`bg-accent`, `text-accent-foreground`)
+
+### 10.2 Analytics Chart Pattern
 ```typescript
 import { LineChartView } from '@/components/common/LineChartView';
 import { BarChartView } from '@/components/common/BarChartView';

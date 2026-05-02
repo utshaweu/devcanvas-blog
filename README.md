@@ -20,6 +20,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Analytics Page**: Dedicated responsive Recharts dashboard with 4 charts (monthly trends, top posts, publish status, category split)
 - **Reusable Chart Components**: Shared line, bar, and pie chart wrappers for analytics surfaces
 - **Post Search**: Medium-style debounced search on blog list with Load More compatibility
+- **Author Hover Card**: Reusable gradient hover profile card with avatar/initial fallback and lazy-loaded author post count
 - **Spotlight Search**: Keyboard-first instant post search dialog (`Ctrl+K` / `Cmd+K`) with arrow-key navigation, accessible results list, and Bangla/English translations
 - **Reusable Virtualized Grid**: Efficient rendering for large collections using the shared VirtualizedGrid component
 - **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
@@ -898,6 +899,35 @@ const debouncedSearchQuery = useDebounce(searchQuery, 400);
   clearButtonLabel={t(TranslationKey.CLEAR_SEARCH)}
   helperText={searchHelperText}
 />
+```
+
+### Author Hover Card Pattern
+
+The blog cards use a reusable author hover panel with consistent styling and lazy data loading:
+
+- **Component**: `AuthorHoverCard` in `src/components/common/AuthorHoverCard.tsx`
+- **Host usage**: `BlogPostCard` triggers loading with `onMouseEnter`
+- **Data source**: `useBlogStore().fetchAuthorPublishedPostCount(authorId)`
+- **Behavior**:
+  - Does not fetch on mount
+  - Fetches once on first hover
+  - Shows avatar image when available, otherwise accent initial fallback
+
+Example usage:
+
+```tsx
+import { AuthorHoverCard } from '@/components/common/AuthorHoverCard';
+
+<div className="relative group/author" onMouseEnter={() => void handleAuthorHover()}>
+  <span>{post.author?.name}</span>
+  <AuthorHoverCard
+    authorName={post.author?.name}
+    authorAvatarUrl={post.author?.avatar_url}
+    authorInitial={authorInitial}
+    totalPosts={authorPostCount}
+    isLoading={isAuthorPostCountLoading}
+  />
+</div>
 ```
 
 Example usage:

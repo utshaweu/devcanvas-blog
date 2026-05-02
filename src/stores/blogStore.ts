@@ -26,6 +26,7 @@ interface BlogState {
   fetchPostBySlug: (slug: string) => Promise<void>;
   fetchCategories: () => Promise<void>;
   fetchTags: () => Promise<void>;
+  fetchAuthorPublishedPostCount: (authorId: string) => Promise<number>;
   createPost: (data: CreatePostData) => Promise<BlogPost>;
   updatePost: (data: UpdatePostData) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
@@ -346,6 +347,23 @@ export const useBlogStore = create<BlogState>((set, get) => ({
       set({ tags: data || [] });
     } catch (error: unknown) {
       console.error('Failed to fetch tags:', error);
+    }
+  },
+
+  fetchAuthorPublishedPostCount: async (authorId: string) => {
+    try {
+      const { count, error } = await supabase
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('author_id', authorId)
+        .eq('published', true);
+
+      if (error) throw error;
+
+      return count ?? 0;
+    } catch (error: unknown) {
+      console.error('Failed to fetch author published post count:', error);
+      return 0;
     }
   },
 
