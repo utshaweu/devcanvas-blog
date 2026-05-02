@@ -49,12 +49,10 @@ export const SignupPage: React.FC = () => {
     setIsLoading(true);
     try {
       await signup(data);
-      toastSuccess(t(TranslationKey.CREATE_ACCOUNT), 'Redirecting to login...');
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      toastSuccess(t(TranslationKey.SIGNUP_SUCCESS_TITLE), t(TranslationKey.SIGNUP_SUCCESS_REDIRECT_MESSAGE));
+      navigate('/login');
     } catch (err: unknown) {
-      toastError('Signup failed', err instanceof Error ? err.message : 'Failed to create account. Please try again.');
+      toastError(t(TranslationKey.SIGNUP_FAILED_TITLE), t(TranslationKey.SIGNUP_FAILED_MESSAGE));
     } finally {
       setIsLoading(false);
     }

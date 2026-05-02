@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import type { User as SupabaseAuthUser } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import type { User, AuthSession, LoginCredentials, SignupCredentials } from '@/types';
 
@@ -26,6 +27,72 @@ interface AuthState {
   initialize: () => Promise<void>;
 }
 
+const getFallbackName = (email: string): string => {
+  const [localPart] = email.split('@');
+  return localPart || 'User';
+};
+
+const resolveProfileName = (authUser: SupabaseAuthUser, fallbackName?: string): string => {
+  const metadataName =
+    typeof authUser.user_metadata?.name === 'string' ? authUser.user_metadata.name.trim() : '';
+  if (metadataName) return metadataName;
+
+  const trimmedFallback = fallbackName?.trim();
+  if (trimmedFallback) return trimmedFallback;
+
+  if (authUser.email) {
+    return getFallbackName(authUser.email);
+  }
+
+  return 'User';
+};
+
+const getOrCreateUserProfile = async (
+  authUser: SupabaseAuthUser,
+  fallbackName?: string
+): Promise<User> => {
+  const { data: existingUser, error: fetchError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', authUser.id)
+    .maybeSingle();
+
+  if (fetchError) throw fetchError;
+  if (existingUser) return existingUser;
+
+  if (!authUser.email) {
+    throw new Error('Authenticated user email is missing.');
+  }
+
+  const { data: createdUser, error: insertError } = await supabase
+    .from('users')
+    .insert({
+      id: authUser.id,
+      email: authUser.email,
+      name: resolveProfileName(authUser, fallbackName),
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    // In parallel auth flows, another request may insert first.
+    if (insertError.code === '23505') {
+      const { data: raceWinnerUser, error: raceFetchError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (raceFetchError) throw raceFetchError;
+      return raceWinnerUser;
+    }
+
+    throw insertError;
+  }
+
+  return createdUser;
+};
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -47,13 +114,7 @@ export const useAuthStore = create<AuthState>()(
           if (error) throw error;
 
           if (data.user && data.session) {
-            const { data: userData, error: userError } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', data.user.id)
-              .single();
-
-            if (userError) throw userError;
+            const userData = await getOrCreateUserProfile(data.user);
 
             set({
               user: userData,
@@ -84,26 +145,23 @@ export const useAuthStore = create<AuthState>()(
           const { data, error } = await supabase.auth.signUp({
             email: credentials.email,
             password: credentials.password,
+            options: {
+              data: {
+                name: credentials.name,
+              },
+            },
           });
 
           if (error) throw error;
 
-          if (data.user) {
-            const { error: insertError } = await supabase
-              .from('users')
-              .insert({
-                id: data.user.id,
-                email: credentials.email,
-                name: credentials.name,
-              });
-
-            if (insertError) throw insertError;
-
-            set({
-              isLoading: false,
-              error: null,
-            });
+          if (data.user && data.session) {
+            await getOrCreateUserProfile(data.user, credentials.name);
           }
+
+          set({
+            isLoading: false,
+            error: null,
+          });
         } catch (error: unknown) {
           set({ 
             error: error instanceof Error ? error.message : 'Failed to signup',
@@ -142,13 +200,7 @@ export const useAuthStore = create<AuthState>()(
           if (error) throw error;
 
           if (data.session) {
-            const { data: userData, error: userError } = await supabase
-              .from('users')
-              .select('*')
-              .eq('id', data.session.user.id)
-              .single();
-
-            if (userError) throw userError;
+            const userData = await getOrCreateUserProfile(data.session.user);
 
             set({
               user: userData,
