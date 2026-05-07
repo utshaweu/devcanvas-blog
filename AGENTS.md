@@ -64,6 +64,7 @@ The repository is compatible with several AI models to assist developers:
 - **Icons:** Lucide React
 - **Rich Text:** Tiptap 2.x with StarterKit
 - **Emoji Picker:** Reusable `EmojiPicker` component (emoji-mart based)
+- **Unsaved Changes:** Reusable navigation blocker + confirmation dialog for dirty forms
 - **Search UI:** Reusable `SearchBar` component for blog listing search
 - **Author Hover UI:** Reusable `AuthorHoverCard` component for post author preview panels
 - **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
@@ -863,6 +864,40 @@ export const PasswordDialog: React.FC<DialogProps> = ({ open, onOpenChange }) =>
 **Used in:**
 - UpdatePasswordDialog - Clears all password fields and Zod validation errors
 - Any form-based dialog or modal component
+
+### 9.1 Unsaved Changes Protection Pattern
+
+Use the shared navigation blocker for form pages that should warn before leaving with unsaved changes.
+
+```typescript
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/common/UnsavedChangesDialog';
+
+const [formIsDirty, setFormIsDirty] = useState(false);
+const { showDialog, confirmNavigation, cancelNavigation, allowNavigation } =
+  useUnsavedChanges(formIsDirty && !isLoading);
+
+const onSubmit = async () => {
+  await saveAction();
+  allowNavigation();
+  navigate('/dashboard');
+};
+
+<PostForm onDirtyChange={setFormIsDirty} />
+<UnsavedChangesDialog
+  open={showDialog}
+  onConfirm={confirmNavigation}
+  onCancel={cancelNavigation}
+/>
+```
+
+**Key Points:**
+- Use `useBlocker` through `useUnsavedChanges` so header links, browser back/forward, and programmatic navigation are all intercepted
+- Call `allowNavigation()` immediately before any post-save `navigate()`
+- Prefer deriving dirty state from normalized form values instead of relying on editor-initialization side effects
+- Reuse `UnsavedChangesDialog` instead of creating page-specific confirm modals
 
 ### 10. Pagination Pattern (Load More Button)
 

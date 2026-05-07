@@ -269,6 +269,10 @@ export enum TranslationKey {
   SIGNUP_SUCCESS_REDIRECT_MESSAGE = 'signupSuccessRedirectMessage',
   SIGNUP_FAILED_TITLE = 'signupFailedTitle',
   SIGNUP_FAILED_MESSAGE = 'signupFailedMessage',
+  UNSAVED_CHANGES_TITLE = 'unsavedChangesTitle',
+  UNSAVED_CHANGES_DESCRIPTION = 'unsavedChangesDescription',
+  LEAVE_PAGE = 'leavePage',
+  STAY_ON_PAGE = 'stayOnPage',
 }
 
 export type LanguageKey = TranslationKey;
@@ -543,6 +547,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.SIGNUP_SUCCESS_REDIRECT_MESSAGE]: 'Redirecting to login...',
     [TranslationKey.SIGNUP_FAILED_TITLE]: 'Signup failed',
     [TranslationKey.SIGNUP_FAILED_MESSAGE]: 'Failed to create account. Please try again.',
+    [TranslationKey.UNSAVED_CHANGES_TITLE]: 'Unsaved Changes',
+    [TranslationKey.UNSAVED_CHANGES_DESCRIPTION]: 'You have unsaved changes. If you leave now, your changes will be lost.',
+    [TranslationKey.LEAVE_PAGE]: 'Leave Page',
+    [TranslationKey.STAY_ON_PAGE]: 'Stay on Page',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -813,6 +821,10 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.SIGNUP_SUCCESS_REDIRECT_MESSAGE]: 'লগইনে পুনর্নির্দেশিত হচ্ছে...',
     [TranslationKey.SIGNUP_FAILED_TITLE]: 'সাইন আপ ব্যর্থ',
     [TranslationKey.SIGNUP_FAILED_MESSAGE]: 'অ্যাকাউন্ট তৈরি করতে ব্যর্থ। অনুগ্রহ করে আবার চেষ্টা করুন।',
+    [TranslationKey.UNSAVED_CHANGES_TITLE]: 'অসংরক্ষিত পরিবর্তন',
+    [TranslationKey.UNSAVED_CHANGES_DESCRIPTION]: 'আপনার অসংরক্ষিত পরিবর্তন আছে। এখন চলে গেলে আপনার পরিবর্তনগুলো হারিয়ে যাবে।',
+    [TranslationKey.LEAVE_PAGE]: 'পৃষ্ঠা ছেড়ে যান',
+    [TranslationKey.STAY_ON_PAGE]: 'এই পৃষ্ঠায় থাকুন',
   },
 };
 

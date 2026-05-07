@@ -283,6 +283,8 @@ export interface PostFormProps {
     loading: string;
   };
   mode: 'create' | 'edit';
+  /** Called whenever the form's dirty state changes */
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
 export interface StatCardProps {

@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import React, { useEffect, useMemo } from 'react';
+import { useForm, Controller, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useBlogStore } from '@/stores/blogStore';
@@ -36,10 +36,21 @@ export const PostForm: React.FC<PostFormProps> = ({
   onCancel,
   submitButtonText,
   mode,
+  onDirtyChange,
 }) => {
   const { user } = useAuth();
   const { categories, tags, fetchCategories, fetchTags } = useBlogStore();
   const { t } = useTranslation();
+  const resolvedDefaultValues = useMemo<PostFormData>(() => ({
+    title: '',
+    content: '',
+    excerpt: '',
+    featured_image: '',
+    category_id: '',
+    tags: [],
+    published: false,
+    ...defaultValues,
+  }), [defaultValues]);
 
   // Fetch categories and tags when component mounts
   useEffect(() => {
@@ -55,13 +66,32 @@ export const PostForm: React.FC<PostFormProps> = ({
     formState: { errors },
   } = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
-    defaultValues: {
-      published: false,
-      category_id: '',
-      tags: [],
-      ...defaultValues,
-    },
+    defaultValues: resolvedDefaultValues,
   });
+
+  const watchedValues = useWatch({ control });
+
+  // Notify parent whenever the form dirty state changes
+  useEffect(() => {
+    const normalizeHtml = (value?: string) => {
+      const trimmedValue = value?.trim() ?? '';
+      return trimmedValue === '<p></p>' ? '' : trimmedValue;
+    };
+
+    const normalizeText = (value?: string) => value ?? '';
+    const normalizeTags = (value?: string[]) => value ?? [];
+
+    const hasChanges =
+      normalizeText(watchedValues.title) !== resolvedDefaultValues.title ||
+      normalizeHtml(watchedValues.content) !== normalizeHtml(resolvedDefaultValues.content) ||
+      normalizeText(watchedValues.excerpt) !== resolvedDefaultValues.excerpt ||
+      normalizeText(watchedValues.featured_image) !== resolvedDefaultValues.featured_image ||
+      normalizeText(watchedValues.category_id) !== resolvedDefaultValues.category_id ||
+      JSON.stringify(normalizeTags(watchedValues.tags)) !== JSON.stringify(resolvedDefaultValues.tags) ||
+      (watchedValues.published ?? false) !== resolvedDefaultValues.published;
+
+    onDirtyChange?.(hasChanges);
+  }, [onDirtyChange, resolvedDefaultValues, watchedValues]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -166,7 +196,7 @@ export const PostForm: React.FC<PostFormProps> = ({
             type="submit" 
             disabled={isLoading}
             onClick={() => {
-              setValue('published', false, { shouldDirty: true, shouldValidate: true });
+              setValue('published', false, { shouldDirty: false, shouldValidate: true });
             }}
             variant="custom"
           >
@@ -186,7 +216,7 @@ export const PostForm: React.FC<PostFormProps> = ({
             type="submit"
             disabled={isLoading}
             onClick={() => {
-              setValue('published', true, { shouldDirty: true, shouldValidate: true });
+              setValue('published', true, { shouldDirty: false, shouldValidate: true });
             }}
           >
             {isLoading ? (
@@ -206,7 +236,7 @@ export const PostForm: React.FC<PostFormProps> = ({
           variant="default"
           disabled={isLoading}
           onClick={() => {
-            setValue('published', defaultValues?.published ?? true, { shouldDirty: true, shouldValidate: true });
+            setValue('published', defaultValues?.published ?? true, { shouldDirty: false, shouldValidate: true });
           }}
         >
           {isLoading ? (

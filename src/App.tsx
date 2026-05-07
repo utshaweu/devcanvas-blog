@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { SignupPage } from '@/features/auth/SignupPage';
@@ -57,6 +57,47 @@ const GuestRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   return <>{children}</>;
 };
 
+// Root layout shared by all routes
+const RootLayout: React.FC = () => (
+  <div className="min-h-screen bg-background text-foreground">
+    <Header />
+    <main className="flex-1">
+      <Outlet />
+    </main>
+    <ToastContainer />
+    <ChatBot />
+  </div>
+);
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      // Public Routes
+      { index: true, element: <BlogListPage /> },
+      { path: 'blog', element: <BlogListPage /> },
+      { path: 'blog/:slug', element: <BlogPostPage /> },
+      { path: 'reset-password', element: <ResetPasswordPage /> },
+
+      // Guest Only Routes
+      { path: 'login', element: <GuestRoute><LoginPage /></GuestRoute> },
+      { path: 'signup', element: <GuestRoute><SignupPage /></GuestRoute> },
+      { path: 'forgot-password', element: <GuestRoute><ForgotPasswordPage /></GuestRoute> },
+
+      // Protected Routes
+      { path: 'dashboard', element: <ProtectedRoute><DashboardPage /></ProtectedRoute> },
+      { path: 'profile', element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
+      { path: 'analytics', element: <ProtectedRoute><AnalyticsPage /></ProtectedRoute> },
+      { path: 'create', element: <ProtectedRoute><CreatePostPage /></ProtectedRoute> },
+      { path: 'edit/:id', element: <ProtectedRoute><EditPostPage /></ProtectedRoute> },
+
+      // 404 Route
+      { path: '*', element: <NotFound /> },
+    ],
+  },
+]);
+
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
 
@@ -69,98 +110,13 @@ function App() {
       <LanguageProvider>
         <ToastProvider>
           <GlobalToastProvider>
-          <BrowserRouter>
-          <div className="min-h-screen bg-background text-foreground">
-            <Header />
-            <main className="flex-1">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<BlogListPage />} />
-                <Route path="/blog" element={<BlogListPage />} />
-                <Route path="/blog/:slug" element={<BlogPostPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-                {/* Guest Only Routes */}
-                <Route
-                  path="/login"
-                  element={
-                    <GuestRoute>
-                      <LoginPage />
-                    </GuestRoute>
-                  }
-                />
-                <Route
-                  path="/signup"
-                  element={
-                    <GuestRoute>
-                      <SignupPage />
-                    </GuestRoute>
-                  }
-                />
-                <Route
-                  path="/forgot-password"
-                  element={
-                    <GuestRoute>
-                      <ForgotPasswordPage />
-                    </GuestRoute>
-                  }
-                />
-
-                {/* Protected Routes */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <ProfilePage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/analytics"
-                  element={
-                    <ProtectedRoute>
-                      <AnalyticsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/create"
-                  element={
-                    <ProtectedRoute>
-                      <CreatePostPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/edit/:id"
-                  element={
-                    <ProtectedRoute>
-                      <EditPostPage />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* 404 Route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <ToastContainer />
-            <ChatBot />
-          </div>
-        </BrowserRouter>
-        </GlobalToastProvider>
-      </ToastProvider>
+            <RouterProvider router={router} />
+          </GlobalToastProvider>
+        </ToastProvider>
       </LanguageProvider>
     </ThemeProvider>
   );
 }
 
 export default App;
+

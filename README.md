@@ -8,6 +8,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Password Management**: Secure password update dialog in user profile dropdown
 - **Rich Text Editor**: Powerful content creation with Tiptap
 - **Reusable Emoji Picker**: Shared emoji picker for rich text and comment composition
+- **Unsaved Changes Protection**: Reusable leave-page confirmation for create and edit forms
 - **File Upload System**: Beautiful file upload with progress tracking for avatars
 - **Supabase Storage**: Integrated cloud storage for user avatars and images
 - **Modern UI**: Beautiful interface using Shadcn/ui components
@@ -998,6 +999,37 @@ const { control, formState: { errors } } = useForm();
 **Used in:**
 - PostForm - Blog post content creation
 - PostDetailPage - View-only mode (editable={false})
+
+### Unsaved Changes Protection
+
+The app includes a reusable unsaved-changes flow for form-heavy pages such as post creation and editing.
+
+- **Hook**: `src/hooks/useUnsavedChanges.ts`
+- **Dialog**: `src/components/common/UnsavedChangesDialog.tsx`
+- **Current usage**: `src/features/blog/CreatePostPage.tsx`, `src/features/blog/EditPostPage.tsx`
+- **Behavior**:
+  - Blocks React Router navigation (`Link`, `navigate`, browser back/forward) when there are unsaved changes
+  - Warns on browser reload or tab close via `beforeunload`
+  - Allows confirmed leave without saving, or cancel to stay on the current page
+  - Bypasses the blocker after a successful submit by calling `allowNavigation()` before `navigate()`
+- **Form integration**:
+  - `PostForm` exposes `onDirtyChange`
+  - Dirty state is derived from normalized form values so untouched rich-text forms do not trigger false positives
+
+Usage example:
+```tsx
+const [formIsDirty, setFormIsDirty] = useState(false);
+const { showDialog, confirmNavigation, cancelNavigation, allowNavigation } =
+  useUnsavedChanges(formIsDirty && !isLoading);
+
+<PostForm onDirtyChange={setFormIsDirty} />
+
+<UnsavedChangesDialog
+  open={showDialog}
+  onConfirm={confirmNavigation}
+  onCancel={cancelNavigation}
+/>
+```
 
 ### Dialog Form Reset Pattern
 

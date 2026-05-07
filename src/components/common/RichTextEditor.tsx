@@ -86,7 +86,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Update editor content when content prop changes (for edit mode)
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+      // Tiptap normalises an empty string to '<p></p>'.
+      // Treat both as equivalent so we don't fire onChange (and mark the
+      // RHF form as dirty) when the editor is just initialising on a blank form.
+      const isEmpty = (html: string | null | undefined) =>
+        !html || html === '<p></p>';
+      if (isEmpty(content) && isEmpty(editor.getHTML())) return;
+      editor.commands.setContent(content ?? '');
     }
   }, [content, editor]);
 

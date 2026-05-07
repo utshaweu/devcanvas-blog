@@ -14,6 +14,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Like System**: Post likes with real-time tracking
 - **Rich Text Editor**: Tiptap with full formatting support
 - **Reusable Emoji Picker**: Shared emoji picker for editor and comments
+- **Unsaved Changes Protection**: Reusable navigation blocker and confirmation dialog for dirty forms
 - **Analytics**: Dashboard with views, likes, comments, and engagement metrics
 
 ## Tech Stack (DO NOT SUGGEST ALTERNATIVES)
@@ -457,6 +458,35 @@ const { t } = useTranslation();
 - Reuse `EmojiPicker` instead of duplicating emoji panel logic
 - Always use `TranslationKey.INSERT_EMOJI` for label/title text
 - Keep emoji insertion logic in the parent surface (`textarea`, `tiptap`, etc.)
+
+### 8.2 Unsaved Changes Pattern
+```typescript
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/common/UnsavedChangesDialog';
+
+const [formIsDirty, setFormIsDirty] = useState(false);
+const { showDialog, confirmNavigation, cancelNavigation, allowNavigation } =
+  useUnsavedChanges(formIsDirty && !isLoading);
+
+// Before navigate after save
+allowNavigation();
+navigate('/dashboard');
+
+<PostForm onDirtyChange={setFormIsDirty} />
+<UnsavedChangesDialog
+  open={showDialog}
+  onConfirm={confirmNavigation}
+  onCancel={cancelNavigation}
+/>
+```
+
+**Rules:**
+- Reuse `useUnsavedChanges` for create/edit forms instead of page-local blockers
+- Reuse `UnsavedChangesDialog` instead of creating new confirmation modals
+- Feed the hook a stable dirty signal from normalized form values so untouched rich-text forms do not show false positives
+- Call `allowNavigation()` before successful programmatic navigation after save/publish
 
 ### 9. Pagination Pattern (Load More)
 ```typescript
