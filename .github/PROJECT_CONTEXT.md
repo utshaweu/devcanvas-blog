@@ -10,6 +10,7 @@ Full-stack blog platform with:
 - Post search (debounced, Medium-style search bar)
 - Reusable author hover card (gradient panel with avatar fallback + lazy post count)
 - Spotlight search (Ctrl+K dialog with keyboard navigation, reusable `resultsLimit` + `onResultNavigate` props)
+- Reusable unsaved-changes protection for dirty form navigation
 - Multilingual support (EN/BN)
 - Dark mode (Light/Dark/System)
 - Comments system (nested)
@@ -207,6 +208,13 @@ CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
 ```
 
 ## Common Patterns
+
+### Unsaved Changes Protection
+- Shared hook: `src/hooks/useUnsavedChanges.ts`
+- Shared dialog: `src/components/common/UnsavedChangesDialog.tsx`
+- Current usage: `CreatePostPage.tsx`, `EditPostPage.tsx`
+- For submit success, call `allowNavigation()` before `navigate()`
+- Prefer normalized value comparison for dirty state instead of relying only on React Hook Form `isDirty`
 
 ### Reusable Analytics Charts
 Use shared chart wrappers from `components/common` to avoid repeating Recharts setup:

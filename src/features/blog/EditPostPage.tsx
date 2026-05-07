@@ -10,6 +10,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { PostForm, PostFormData } from './PostForm';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/common/UnsavedChangesDialog';
 
 export const EditPostPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,9 @@ export const EditPostPage: React.FC = () => {
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [formIsDirty, setFormIsDirty] = useState(false);
+  const { showDialog, confirmNavigation, cancelNavigation, allowNavigation } =
+    useUnsavedChanges(formIsDirty && !isSubmitting);
 
   // Fetch the post to edit
   useEffect(() => {
@@ -52,6 +57,8 @@ export const EditPostPage: React.FC = () => {
       await updatePost(postData);
 
       toastSuccess(t(TranslationKey.POST_UPDATED_TITLE), t(TranslationKey.POST_UPDATED_MESSAGE));
+
+      allowNavigation();
       
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -112,6 +119,7 @@ export const EditPostPage: React.FC = () => {
                 published: currentPost.published,
               }}
               onCancel={() => navigate('/dashboard')}
+              onDirtyChange={setFormIsDirty}
               submitButtonText={{
                 primary: t(TranslationKey.UPDATE_POST),
                 loading: t(TranslationKey.UPDATING),
@@ -121,6 +129,12 @@ export const EditPostPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onConfirm={confirmNavigation}
+        onCancel={cancelNavigation}
+      />
     </div>
   );
 };

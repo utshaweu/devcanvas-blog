@@ -48,7 +48,6 @@ export const ProfilePage: React.FC = () => {
   const onSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
     try {
-      // Remove email from updates as it shouldn't be updated, and add updated_at
       const { ...updates } = data;
       await updateProfile({ ...updates, updated_at: new Date().toISOString() });
       toastSuccess(
@@ -176,7 +175,7 @@ export const ProfilePage: React.FC = () => {
                       bucket="avatars"
                       path={user?.id}
                       accept="image/*"
-                      maxSize={0.1}
+                      maxSize={0.15}
                       disabled={isLoading}
                       label={t(TranslationKey.UPLOAD_AVATAR)}
                       showPreview={true}

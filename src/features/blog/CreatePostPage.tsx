@@ -8,6 +8,8 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { PostForm, PostFormData } from './PostForm';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/common/UnsavedChangesDialog';
 
 export const CreatePostPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +18,12 @@ export const CreatePostPage: React.FC = () => {
   const { t } = useTranslation();
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [formIsDirty, setFormIsDirty] = useState(false);
+
+  // Block ALL navigation (Link clicks, back button, navigate()) when the form
+  // has unsaved changes. isLoading acts as a natural bypass while submitting.
+  const { showDialog, confirmNavigation, cancelNavigation, allowNavigation } =
+    useUnsavedChanges(formIsDirty && !isLoading);
 
   const onSubmit = async (data: PostFormData) => {
     if (!user) {
@@ -30,12 +38,14 @@ export const CreatePostPage: React.FC = () => {
         ...data,
         author_id: user.id,
       };
-      
+
       const post = await createPost(postData);
 
       toastSuccess(t(TranslationKey.POST_CREATED_TITLE), t(TranslationKey.POST_CREATED_MESSAGE));
-      
-      // Navigate based on publish status
+
+      // Allow the programmatic navigate() calls below to bypass the blocker.
+      allowNavigation();
+
       if (data.published) {
         navigate(`/blog/${post.slug}`);
       } else {
@@ -63,6 +73,7 @@ export const CreatePostPage: React.FC = () => {
               onSubmit={onSubmit}
               isLoading={isLoading}
               onCancel={() => navigate('/dashboard')}
+              onDirtyChange={setFormIsDirty}
               submitButtonText={{
                 primary: t(TranslationKey.PUBLISH),
                 secondary: t(TranslationKey.SAVE_AS_DRAFT),
@@ -73,6 +84,12 @@ export const CreatePostPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onConfirm={confirmNavigation}
+        onCancel={cancelNavigation}
+      />
     </div>
   );
 };
