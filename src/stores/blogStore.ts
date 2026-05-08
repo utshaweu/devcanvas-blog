@@ -3,6 +3,19 @@ import { supabase } from '@/lib/supabase';
 import type { BlogPost, CreatePostData, UpdatePostData, Category, Tag } from '@/types';
 import { generateUniqueSlug } from '@/utils/helpers';
 
+const mapPostRecord = (post: unknown): BlogPost => {
+  const postData = post as Record<string, unknown>;
+
+  return {
+    ...postData,
+    content: typeof postData.content === 'string' ? postData.content : '',
+    comments: typeof postData.comments === 'number' ? postData.comments : 0,
+    tags: Array.isArray(postData.tags)
+      ? postData.tags.map((tag: unknown) => (tag as Record<string, unknown>).tag as Tag)
+      : [],
+  } as BlogPost;
+};
+
 interface BlogState {
   posts: BlogPost[];
   currentPost: BlogPost | null;
@@ -101,16 +114,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
-      const posts = (data?.map((post: unknown) => {
-        const postData = post as Record<string, unknown>;
-        return {
-          ...postData,
-          content: typeof postData.content === 'string' ? postData.content : '',
-          tags: Array.isArray(postData.tags) 
-            ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
-            : [],
-        };
-      }) || []) as BlogPost[];
+      const posts = (data?.map(mapPostRecord) || []) as BlogPost[];
 
       set((state) => {
         const total = typeof count === 'number' ? count : state.pagination.total;
@@ -180,16 +184,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
-      const posts = (data?.map((post: unknown) => {
-        const postData = post as Record<string, unknown>;
-        return {
-          ...postData,
-          content: typeof postData.content === 'string' ? postData.content : '',
-          tags: Array.isArray(postData.tags) 
-            ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
-            : [],
-        };
-      }) || []) as BlogPost[];
+      const posts = (data?.map(mapPostRecord) || []) as BlogPost[];
 
       set((state) => {
         const total = typeof count === 'number' ? count : state.pagination.total;
@@ -228,15 +223,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
-      const posts = (data?.map((post: unknown) => {
-        const postData = post as Record<string, unknown>;
-        return {
-          ...postData,
-          tags: Array.isArray(postData.tags) 
-            ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
-            : [],
-        };
-      }) || []) as BlogPost[];
+      const posts = (data?.map(mapPostRecord) || []) as BlogPost[];
 
       return posts;
     } catch (error: unknown) {
@@ -262,13 +249,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
-      const postData = data as Record<string, unknown>;
-      const post = {
-        ...postData,
-        tags: Array.isArray(postData.tags) 
-          ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
-          : [],
-      } as BlogPost;
+      const post = mapPostRecord(data);
 
       set({
         currentPost: post,
@@ -300,13 +281,7 @@ export const useBlogStore = create<BlogState>((set, get) => ({
 
       if (error) throw error;
 
-      const postData = data as Record<string, unknown>;
-      const post = {
-        ...postData,
-        tags: Array.isArray(postData.tags) 
-          ? postData.tags.map((t: unknown) => (t as Record<string, unknown>).tag) 
-          : [],
-      } as BlogPost;
+      const post = mapPostRecord(data);
 
       set({
         currentPost: post,
