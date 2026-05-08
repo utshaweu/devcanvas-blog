@@ -126,10 +126,20 @@ FROM (
 ) c
 WHERE p.id = c.post_id;
 
+-- Ensure posts with no comments are explicitly reset to 0
+UPDATE public.posts
+SET comments = 0
+WHERE id NOT IN (
+  SELECT DISTINCT post_id
+  FROM public.comments
+  WHERE post_id IS NOT NULL
+);
+
 -- Keep posts.comments in sync with comments changes
 CREATE OR REPLACE FUNCTION public.sync_post_comments_count()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
@@ -167,6 +177,21 @@ FOR EACH ROW
 EXECUTE FUNCTION public.sync_post_comments_count();
 
 CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
+
+-- Verify stored counts match actual comments
+SELECT
+  p.id,
+  p.title,
+  p.comments AS stored_comments,
+  COALESCE(c.actual_comments, 0) AS actual_comments
+FROM public.posts p
+LEFT JOIN (
+  SELECT post_id, COUNT(*)::INTEGER AS actual_comments
+  FROM public.comments
+  GROUP BY post_id
+) c ON c.post_id = p.id
+WHERE p.comments <> COALESCE(c.actual_comments, 0)
+ORDER BY p.created_at DESC;
 ```
 
 ## Design System (NEVER CHANGE)

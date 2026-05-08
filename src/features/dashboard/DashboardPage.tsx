@@ -230,7 +230,7 @@ export const DashboardPage: React.FC = () => {
                     </Link>
                   )}
                 />
-                
+
                 <LoadMoreButton
                   isLoading={isLoading && posts.length > 0}
                   hasMore={pagination.page < pagination.totalPages}

@@ -33,7 +33,7 @@ export const AuthorHoverCard: React.FC<AuthorHoverCardProps> = ({
             decoding="async"
           />
         ) : (
-          <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-medium">
+          <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-medium">
             {authorInitial}
           </div>
         )}

@@ -495,6 +495,7 @@ export interface VirtualizedGridProps<T> {
   overscan?: number;
   useWindowScroll?: boolean;
   getItemKey?: (item: T, index: number) => string;
+  footer?: React.ReactNode;
 }
 
 export type VirtualizedGridComponent = <T,>(props: VirtualizedGridProps<T>) => JSX.Element;
@@ -556,5 +557,12 @@ export interface AuthorHoverCardProps {
   authorInitial: string;
   totalPosts: number | null;
   isLoading: boolean;
+  className?: string;
+}
+
+export interface UnsavedChangesDialogProps {
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
   className?: string;
 }

@@ -98,16 +98,15 @@ export const BlogListPage: React.FC = () => {
                 <BlogPostCard post={post} variant="default" />
               </Link>
             )}
-          />
-        )}
-
-        {posts.length > 0 && (
-          <LoadMoreButton
-            isLoading={loadingMore}
-            hasMore={hasMore}
-            onLoadMore={handleLoadMore}
-            currentCount={posts.length}
-            totalCount={pagination.total}
+            footer={(
+              <LoadMoreButton
+                isLoading={loadingMore}
+                hasMore={hasMore}
+                onLoadMore={handleLoadMore}
+                currentCount={posts.length}
+                totalCount={pagination.total}
+              />
+            )}
           />
         )}
       </div>

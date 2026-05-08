@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { PenSquare, User, LogOut, BarChart3, Key, Type, ALargeSmall, LineChart } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
@@ -28,6 +28,7 @@ export const Header: React.FC = () => {
   const { success: toastSuccess } = useGlobalToast();
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const { fontFamily, toggleFontFamily } = useFontFamily();
+  const { pathname } = useLocation();
 
   const handleLogout = async () => {
     await logout();
@@ -51,32 +52,40 @@ export const Header: React.FC = () => {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container-custom flex h-16 items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl text-secondary hover:text-accent transition-colors">
+          <NavLink to="/" className="flex items-center gap-2 font-bold text-xl text-secondary hover:text-accent transition-colors">
             <PenSquare className="h-6 w-6 text-accent" />
             <span className="hidden md:inline">DevCanvas</span>
-          </Link>
+          </NavLink>
 
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/blog" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-              {t(TranslationKey.BLOG)}
-            </Link>
-            {isAuthenticated && (
-              <>
-                <Link to="/dashboard" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-                  {t(TranslationKey.DASHBOARD)}
-                </Link>
-                <Link to="/analytics" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-                  {t(TranslationKey.ANALYTICS)}
-                </Link>
-                <Link to="/create" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
-                  {t(TranslationKey.CREATE_POST)}
-                </Link>
-              </>
-            )}
+            {([
+              { to: '/blog', label: t(TranslationKey.BLOG) },
+              ...(isAuthenticated
+                ? [
+                    { to: '/dashboard', label: t(TranslationKey.DASHBOARD) },
+                    { to: '/analytics', label: t(TranslationKey.ANALYTICS) },
+                    { to: '/create', label: t(TranslationKey.CREATE_POST) },
+                  ]
+                : []),
+            ] as { to: string; label: string }[]).map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-accent font-semibold'
+                      : 'text-foreground hover:text-accent'
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
           </nav>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
           <SpotlightSearch />
           <Button
             variant="ghost"
@@ -131,15 +140,15 @@ export const Header: React.FC = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                <DropdownMenuItem onClick={() => navigate('/dashboard')} className={pathname === '/dashboard' ? 'text-accent font-semibold' : ''}>
                   <BarChart3 className="mr-2 h-4 w-4" />
                   <span>{t(TranslationKey.DASHBOARD)}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/analytics')}>
+                <DropdownMenuItem onClick={() => navigate('/analytics')} className={pathname === '/analytics' ? 'text-accent font-semibold' : ''}>
                   <LineChart className="mr-2 h-4 w-4" />
                   <span>{t(TranslationKey.ANALYTICS)}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <DropdownMenuItem onClick={() => navigate('/profile')} className={pathname === '/profile' ? 'text-accent font-semibold' : ''}>
                   <User className="mr-2 h-4 w-4" />
                   <span>{t(TranslationKey.PROFILE)}</span>
                 </DropdownMenuItem>
@@ -155,11 +164,20 @@ export const Header: React.FC = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" onClick={() => navigate('/login')}>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="px-2 sm:px-4"
+                onClick={() => navigate('/login')}
+              >
                 {t(TranslationKey.LOG_IN_BUTTON)}
               </Button>
-              <Button onClick={() => navigate('/signup')}>
+              <Button
+                size="sm"
+                className="px-2 sm:px-4"
+                onClick={() => navigate('/signup')}
+              >
                 {t(TranslationKey.SIGN_UP_BUTTON)}
               </Button>
             </div>

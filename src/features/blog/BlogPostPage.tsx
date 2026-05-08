@@ -25,6 +25,9 @@ export const BlogPostPage: React.FC = () => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [shouldShowSeeMore, setShouldShowSeeMore] = useState(false);
+  const authorName = currentPost?.author?.name;
+  const authorAvatarUrl = currentPost?.author?.avatar_url;
+  const authorInitial = authorName?.charAt(0).toUpperCase();
 
   const handleFeaturedImageError: React.ReactEventHandler<HTMLImageElement> = (event) => {
     event.currentTarget.onerror = null;
@@ -116,11 +119,21 @@ export const BlogPostPage: React.FC = () => {
           
           <div className="flex items-center gap-4 text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-medium">
-                {currentPost.author?.name?.charAt(0).toUpperCase()}
-              </div>
+              {authorAvatarUrl ? (
+                <img
+                  src={authorAvatarUrl}
+                  alt={authorName ?? ''}
+                  className="h-10 w-10 rounded-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-medium text-accent-foreground">
+                  {authorInitial}
+                </div>
+              )}
               <div>
-                <p className="font-medium text-foreground">{currentPost.author?.name}</p>
+                <p className="font-medium text-foreground">{authorName}</p>
                 <p className="text-sm">{formatRelativeTime(currentPost.published_at || currentPost.created_at)} • {formatDate(currentPost.published_at || currentPost.created_at)}</p>
               </div>
             </div>
