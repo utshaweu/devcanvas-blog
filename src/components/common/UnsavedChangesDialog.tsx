@@ -10,13 +10,8 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import { cn } from '@/utils/helpers';
+import { UnsavedChangesDialogProps } from '@/types';
 
-interface UnsavedChangesDialogProps {
-  open: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-  className?: string;
-}
 
 export const UnsavedChangesDialog: React.FC<UnsavedChangesDialogProps> = ({
   open,
