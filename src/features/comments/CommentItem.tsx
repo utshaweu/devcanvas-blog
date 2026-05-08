@@ -88,12 +88,14 @@ export const CommentItem: React.FC<CommentItemProps> = ({
               className="h-9 w-9 rounded-full object-cover"
             />
           ) : (
-            <span>{comment.author?.name?.charAt(0).toUpperCase() || '?'}</span>
+            <span className="h-9 w-9 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-medium">
+              {comment.author?.name?.charAt(0).toUpperCase() || '?'}
+            </span>
           )}
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="rounded-2xl bg-muted/60 px-4 py-3">
+          <div className="rounded-2xl bg-muted/60 px-4 py-1">
             <div className="mb-1 flex items-center gap-2 text-sm">
               <span className="font-semibold text-foreground">
                 {comment.author?.name}
