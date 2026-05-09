@@ -30,6 +30,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Font Family Toggle**: Switch between Inter and Acme from the header
 - **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
 - **MCP Chatbot**: WebSocket chatbot connected to a local/deployed MCP bridge and Supabase-backed MCP tools
+- **Memory Safe**: Audited for timer/interval leaks, async unmount guards (`isMountedRef`), and bounded message arrays — no heap growth in long sessions
 - **Testing Ready**: Jest and React Testing Library configured
 
 ## 🛠️ Tech Stack
@@ -225,7 +226,38 @@ A beautiful and multilingual 404 page for graceful handling of non-existent rout
 - **Location**: `src/components/common/NotFound.tsx`
 - **Translation Keys**: `PAGE_NOT_FOUND`, `PAGE_NOT_FOUND_DESCRIPTION`, `PAGE_NOT_FOUND_MESSAGE`, `GO_HOME`, `GO_BACK`
 
-## 🚦 Getting Started
+## �️ Memory Safety
+
+The frontend has been audited for memory leaks. The following guards are in place and must not be regressed:
+
+| File | Protection |
+|---|---|
+| `src/hooks/useToast.ts` | `timerMapRef` tracks all auto-dismiss timers; `clearAll` cancels them |
+| `src/components/ui/file-upload.tsx` | `isMountedRef` + `progressIntervalRef` + `successTimerRef` |
+| `src/features/dashboard/DashboardPage.tsx` | `isMountedRef` guards all post-await `setState` calls |
+| `src/features/blog/EditPostPage.tsx` | `isMountedRef` in `fetchPostById.then()` callback |
+| `src/components/common/ChatBot.tsx` | `MAX_MESSAGES = 100` cap prevents unbounded heap growth |
+| `src/hooks/useChatBot.ts` | `isUnmountedRef`, pending-request cleanup, `ws.close()` on unmount |
+| `src/contexts/ThemeContext.tsx` | `matchMedia` listener removed in cleanup |
+| `src/components/common/EmojiPicker.tsx` | All DOM event listeners removed in cleanup |
+| `src/components/common/SpotlightSearch.tsx` | `isMounted` flag + `window.keydown` listener cleanup |
+| `src/hooks/useUnsavedChanges.ts` | `beforeunload` listener removed in cleanup |
+
+**When adding new async components**, follow this pattern:
+```typescript
+const isMountedRef = useRef(true);
+useEffect(() => { return () => { isMountedRef.current = false; }; }, []);
+
+const load = async () => {
+  const data = await fetchSomething();
+  if (!isMountedRef.current) return; // guard before every setState
+  setData(data);
+};
+```
+
+Zustand store actions are module-level singletons and do **not** need `isMountedRef` guards.
+
+## �🚦 Getting Started
 
 ## 🌓 Theme / Dark Mode
 

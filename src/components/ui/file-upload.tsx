@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { Button } from './button';
@@ -24,6 +24,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounterRef = useRef(0);
+  // Refs for active timers/intervals so they can be cancelled on unmount.
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -31,6 +35,23 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(value || null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  // Cancel any in-flight timers / intervals when the component unmounts so we
+  // never call setState on a component that is no longer in the tree.
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (progressIntervalRef.current !== null) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      if (successTimerRef.current !== null) {
+        clearTimeout(successTimerRef.current);
+        successTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const processFileUpload = async (file: File) => {
     if (!file) return;
@@ -82,7 +103,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          setPreviewUrl(e.target?.result as string);
+          if (isMountedRef.current) {
+            setPreviewUrl(e.target?.result as string);
+          }
         };
         reader.readAsDataURL(file);
       }
@@ -92,11 +115,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = path ? `${path}/${fileName}` : fileName;
 
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
+      // Simulate progress for better UX. Store the interval ID in a ref so
+      // the cleanup effect can cancel it if the component unmounts mid-upload.
+      progressIntervalRef.current = setInterval(() => {
+        if (!isMountedRef.current) {
+          clearInterval(progressIntervalRef.current!);
+          progressIntervalRef.current = null;
+          return;
+        }
         setProgress((prev) => {
           if (prev >= 90) {
-            clearInterval(progressInterval);
+            clearInterval(progressIntervalRef.current!);
+            progressIntervalRef.current = null;
             return 90;
           }
           return prev + 10;
@@ -111,7 +141,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           upsert: false,
         });
 
-      clearInterval(progressInterval);
+      // Always stop the progress interval after the upload settles.
+      if (progressIntervalRef.current !== null) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
 
       if (uploadError) {
         throw uploadError;
@@ -122,23 +156,32 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         .from(bucket)
         .getPublicUrl(data.path);
 
+      if (!isMountedRef.current) return;
+
       setProgress(100);
       setUploadSuccess(true);
       
       // Call onChange with the public URL
       onChange?.(publicUrl);
 
-      // Reset success indicator after 2 seconds
-      setTimeout(() => {
-        setUploadSuccess(false);
+      // Reset success indicator after 2 seconds. Track the timeout so the
+      // cleanup effect can cancel it if the component unmounts first.
+      successTimerRef.current = setTimeout(() => {
+        successTimerRef.current = null;
+        if (isMountedRef.current) {
+          setUploadSuccess(false);
+        }
       }, 2000);
 
     } catch (err) {
+      if (!isMountedRef.current) return;
       setError(err instanceof Error ? err.message : t(TranslationKey.UPLOAD_FAILED));
       setPreviewUrl(value || null);
     } finally {
-      setUploading(false);
-      // Reset file input
+      if (isMountedRef.current) {
+        setUploading(false);
+      }
+      // Reset file input regardless of mount state (DOM side-effect, safe).
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

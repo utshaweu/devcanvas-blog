@@ -325,6 +325,63 @@ error('Error!', 'Something went wrong');
 - Toast auto-dismisses after 5 seconds
 - Position: top-right
 
+### 4.1 Memory Safety Pattern
+
+**isMounted guard for async state updates:**
+```typescript
+import { useEffect, useRef } from 'react';
+
+const isMountedRef = useRef(true);
+
+useEffect(() => {
+  return () => { isMountedRef.current = false; };
+}, []);
+
+// In async callbacks, always check before setState
+const loadData = async () => {
+  const result = await fetchSomething();
+  if (!isMountedRef.current) return;
+  setData(result);
+};
+```
+
+**Required in:** any component that awaits async operations and then sets local state (e.g., `useState` for loading, error, or result values). Zustand store updates do NOT need this guard.
+
+**Timer / interval cleanup pattern:**
+```typescript
+const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+const timerRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
+
+useEffect(() => {
+  return () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (timerRef.current)    clearTimeout(timerRef.current);
+  };
+}, []);
+
+// Store IDs on the ref, not in a local variable
+intervalRef.current = setInterval(() => { ... }, 50);
+timerRef.current    = setTimeout(() => { ... }, 2000);
+```
+
+**Cap growing arrays in long-running components:**
+```typescript
+const MAX_ITEMS = 100;
+
+setItems(prev => {
+  const next = [...prev, newItem];
+  return next.length > MAX_ITEMS ? next.slice(next.length - MAX_ITEMS) : next;
+});
+```
+
+**Used in:** `ChatBot.tsx` — caps the `messages` array at 100 entries.
+
+**Rules:**
+- Always use `useRef` (not a local `const`) for timer IDs so the cleanup `useEffect` can cancel them
+- Never set state from `FileReader.onload`, `setTimeout`, or `setInterval` callbacks without an `isMountedRef` check
+- Dead-code `useEffect` hooks with no side effects must be removed entirely
+- Do NOT add these guards to Zustand store actions — stores are singletons outside React lifecycle
+
 ### 5. Internationalization Pattern
 ```typescript
 import { useTranslation } from '@/hooks/useTranslation';

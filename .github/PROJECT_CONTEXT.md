@@ -19,6 +19,7 @@ Full-stack blog platform with:
 - Reusable emoji picker (shared in editor and comments)
 - 404 error page (beautiful, animated)
 - Header font family toggle (Inter/Acme with persistence)
+- Memory-safe: audited for timer leaks, async unmount guards, and bounded arrays
 
 ## Key Technologies
 - **Frontend:** React 18 + TypeScript + Vite (port 3012) + Tailwind CSS
@@ -240,6 +241,56 @@ ORDER BY p.created_at DESC;
 - Current usage: `CreatePostPage.tsx`, `EditPostPage.tsx`
 - For submit success, call `allowNavigation()` before `navigate()`
 - Prefer normalized value comparison for dirty state instead of relying only on React Hook Form `isDirty`
+
+### Memory Safety Patterns
+
+**Rule:** Any component that awaits an async operation and then calls a local `setState` must guard with an `isMountedRef`.
+
+```typescript
+const isMountedRef = useRef(true);
+useEffect(() => { return () => { isMountedRef.current = false; }; }, []);
+
+// Guard all post-await setState calls
+const load = async () => {
+  const data = await fetchSomething();
+  if (!isMountedRef.current) return;
+  setData(data);
+};
+```
+
+**Timer/interval refs — always cancel on unmount:**
+```typescript
+const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+useEffect(() => {
+  return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+}, []);
+intervalRef.current = setInterval(() => { ... }, 50);
+```
+
+**Cap growing arrays in long-running components:**
+```typescript
+const MAX_ITEMS = 100;
+setItems(prev => {
+  const next = [...prev, newItem];
+  return next.length > MAX_ITEMS ? next.slice(next.length - MAX_ITEMS) : next;
+});
+```
+
+**What is already guarded (do not regress):**
+| File | Guard |
+|---|---|
+| `useToast.ts` | `timerMapRef` tracks all auto-dismiss IDs; `clearAll` cancels them |
+| `file-upload.tsx` | `isMountedRef` + `progressIntervalRef` + `successTimerRef` |
+| `DashboardPage.tsx` | `isMountedRef` on `refreshStats` / `handleDelete` |
+| `EditPostPage.tsx` | `isMountedRef` in `fetchPostById.then()` |
+| `ChatBot.tsx` | `MAX_MESSAGES = 100` cap on `messages` array |
+| `useChatBot.ts` | `isUnmountedRef`, `clearPendingRequests`, `ws.close()` in cleanup |
+| `ThemeContext.tsx` | `matchMedia` listener removed in cleanup |
+| `EmojiPicker.tsx` | All event listeners removed in cleanup |
+| `SpotlightSearch.tsx` | `isMounted` flag + `window.keydown` cleanup |
+| `useUnsavedChanges.ts` | `beforeunload` listener removed in cleanup |
+
+**Zustand stores** are module-level singletons — do NOT add `isMountedRef` guards inside store actions.
 
 ### Reusable Analytics Charts
 Use shared chart wrappers from `components/common` to avoid repeating Recharts setup:

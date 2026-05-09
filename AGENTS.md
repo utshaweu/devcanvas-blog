@@ -797,7 +797,80 @@ try {
 
 ```
 
-### 9. Dialog Form Reset Pattern
+### 9. Memory Safety Pattern
+
+Any component that starts an async operation and then updates local state **must** guard with `isMountedRef` to prevent setting state on an unmounted component.
+
+**isMounted guard for async state updates:**
+```typescript
+import { useEffect, useRef } from 'react';
+
+const isMountedRef = useRef(true);
+
+useEffect(() => {
+  return () => { isMountedRef.current = false; };
+}, []);
+
+// In async callbacks, always check before setState
+const loadData = async () => {
+  const result = await fetchSomething();
+  if (!isMountedRef.current) return;
+  setData(result);
+};
+```
+
+**Required in:** any component that awaits async operations and then sets local state (e.g., `useState` for loading, error, or result values). Zustand store updates do NOT need this guard.
+
+**Timer / interval cleanup pattern:**
+```typescript
+const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+const timerRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
+
+useEffect(() => {
+  return () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (timerRef.current)    clearTimeout(timerRef.current);
+  };
+}, []);
+
+// Store IDs on the ref, not in a local variable
+intervalRef.current = setInterval(() => { ... }, 50);
+timerRef.current    = setTimeout(() => { ... }, 2000);
+```
+
+**Cap growing arrays in long-running components:**
+```typescript
+const MAX_ITEMS = 100;
+
+setItems(prev => {
+  const next = [...prev, newItem];
+  return next.length > MAX_ITEMS ? next.slice(next.length - MAX_ITEMS) : next;
+});
+```
+
+**Used in:** `ChatBot.tsx` — caps the `messages` array at 100 entries.
+
+**Rules:**
+- Always use `useRef` (not a local `const`) for timer IDs so the cleanup `useEffect` can cancel them
+- Never set state from `FileReader.onload`, `setTimeout`, or `setInterval` callbacks without an `isMountedRef` check
+- Dead-code `useEffect` hooks with no side effects must be removed entirely
+- Do NOT add these guards to Zustand store actions — stores are singletons outside React lifecycle
+
+**What is already guarded (do not regress):**
+| File | Guard Applied |
+|---|---|
+| `src/hooks/useToast.ts` | `timerMapRef` tracks all auto-dismiss IDs; `removeToast`/`clearAll` cancel them |
+| `src/components/ui/file-upload.tsx` | `isMountedRef` + `progressIntervalRef` + `successTimerRef` |
+| `src/features/dashboard/DashboardPage.tsx` | `isMountedRef` in `refreshStats` / `handleDelete` |
+| `src/features/blog/EditPostPage.tsx` | `isMountedRef` in `fetchPostById.then()` |
+| `src/components/common/ChatBot.tsx` | `MAX_MESSAGES = 100` cap on `messages` array |
+| `src/hooks/useChatBot.ts` | `isUnmountedRef`, `clearPendingRequests`, `ws.close()` in cleanup |
+| `src/contexts/ThemeContext.tsx` | `matchMedia` listener removed in cleanup |
+| `src/components/common/EmojiPicker.tsx` | All event listeners removed in cleanup |
+| `src/components/common/SpotlightSearch.tsx` | `isMounted` flag + `window.keydown` cleanup |
+| `src/hooks/useUnsavedChanges.ts` | `beforeunload` listener removed in cleanup |
+
+### 10. Dialog Form Reset Pattern
 
 When closing a dialog/modal with a form, reset validation errors and field values:
 
@@ -865,7 +938,7 @@ export const PasswordDialog: React.FC<DialogProps> = ({ open, onOpenChange }) =>
 - UpdatePasswordDialog - Clears all password fields and Zod validation errors
 - Any form-based dialog or modal component
 
-### 9.1 Unsaved Changes Protection Pattern
+### 10.1 Unsaved Changes Protection Pattern
 
 Use the shared navigation blocker for form pages that should warn before leaving with unsaved changes.
 
@@ -899,7 +972,7 @@ const onSubmit = async () => {
 - Prefer deriving dirty state from normalized form values instead of relying on editor-initialization side effects
 - Reuse `UnsavedChangesDialog` instead of creating page-specific confirm modals
 
-### 10. Pagination Pattern (Load More Button)
+### 11. Pagination Pattern (Load More Button)
 
 **Overview:**  
 The blog uses a "Load More" pagination strategy similar to Facebook, Medium, and Twitter for seamless content browsing.
@@ -1005,7 +1078,7 @@ interface LoadMoreButtonProps {
 - Clean up on unmount to prevent state leaks
 - Use `append: true` for load more, `append: false` for initial/filter changes
 
-### 11. 404 Error Page Pattern
+### 12. 404 Error Page Pattern
 
 **Overview:**  
 A beautiful, multilingual 404 page that gracefully handles non-existent routes with smooth animations and clear navigation options.
@@ -2412,6 +2485,6 @@ npm run type-check      # Check TypeScript types
 
 **This AGENTS.md file should be your primary reference when working on the DevCanvas Blog project. Keep it updated as the project evolves!**
 
-**Last Updated:** 2026
+**Last Updated:** May 9, 2026
 **Version:** 1.0.0
 **Maintainer:** DevCanvas Team

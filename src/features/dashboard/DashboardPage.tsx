@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
@@ -33,6 +33,14 @@ export const DashboardPage: React.FC = () => {
     totalViews: 0,
     totalLikes: 0,
   });
+  // Used to skip state updates if the component unmounts during async work.
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Helper function to calculate stats from posts
   const calculateStats = (posts: BlogPost[]) => {
@@ -49,7 +57,9 @@ export const DashboardPage: React.FC = () => {
   const refreshStats = async () => {
     if (user?.id) {
       const allPosts = await fetchUserPostsStats(user.id);
-      setAllPostsStats(calculateStats(allPosts));
+      if (isMountedRef.current) {
+        setAllPostsStats(calculateStats(allPosts));
+      }
     }
   };
 
@@ -75,20 +85,24 @@ export const DashboardPage: React.FC = () => {
     setDeletingId(post.id);
     try {
       await deletePost(post.id);
+      if (!isMountedRef.current) return;
       toastSuccess(t(TranslationKey.POST_DELETED_SUCCESS), t(TranslationKey.POST_DELETED_MESSAGE));
       // Refresh both stats and filtered list
       await refreshStats();
-      if (user?.id) {
+      if (isMountedRef.current && user?.id) {
         resetPagination();
         fetchUserPosts(user.id, filter);
       }
     } catch (error) {
+      if (!isMountedRef.current) return;
       toastError(
         t(TranslationKey.POST_DELETE_FAILED),
         error instanceof Error ? error.message : t(TranslationKey.UNKNOWN_ERROR)
       );
     } finally {
-      setDeletingId(null);
+      if (isMountedRef.current) {
+        setDeletingId(null);
+      }
     }
   };
 
