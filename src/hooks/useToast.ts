@@ -1,9 +1,22 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { Toast, ToastType } from '@/types';
 import { generateId } from '@/utils/helpers';
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  // Track all pending auto-dismiss timers so they can be cancelled individually
+  // (removeToast) or all at once (clearAll), preventing stale state updates.
+  const timerMapRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const removeToast = useCallback((id: string) => {
+    // Cancel the auto-dismiss timer for this toast if it is still pending.
+    const timerId = timerMapRef.current.get(id);
+    if (timerId !== undefined) {
+      clearTimeout(timerId);
+      timerMapRef.current.delete(id);
+    }
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
 
   const addToast = useCallback((
     type: ToastType,
@@ -23,17 +36,15 @@ export function useToast() {
     setToasts(prev => [...prev, newToast]);
 
     if (duration > 0) {
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
+        timerMapRef.current.delete(id);
         removeToast(id);
       }, duration);
+      timerMapRef.current.set(id, timerId);
     }
 
     return id;
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  }, [removeToast]);
 
   const success = useCallback((title: string, description?: string, duration?: number) => {
     return addToast('success', title, description, duration);
@@ -52,6 +63,9 @@ export function useToast() {
   }, [addToast]);
 
   const clearAll = useCallback(() => {
+    // Cancel every pending auto-dismiss timer before clearing the list.
+    timerMapRef.current.forEach((timerId) => clearTimeout(timerId));
+    timerMapRef.current.clear();
     setToasts([]);
   }, []);
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useBlogStore } from '@/stores/blogStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -23,16 +23,24 @@ export const EditPostPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [formIsDirty, setFormIsDirty] = useState(false);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
   const { showDialog, confirmNavigation, cancelNavigation, allowNavigation } =
     useUnsavedChanges(formIsDirty && !isSubmitting);
 
   // Fetch the post to edit
   useEffect(() => {
-    if (id) {
-      fetchPostById(id).then(() => {
+    if (!id) return;
+    fetchPostById(id).then(() => {
+      if (isMountedRef.current) {
         setIsInitialLoading(false);
-      });
-    }
+      }
+    });
   }, [id, fetchPostById]);
 
   const onSubmit = async (data: PostFormData) => {

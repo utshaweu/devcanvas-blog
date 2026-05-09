@@ -22,6 +22,11 @@ export const ChatBot: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const { t } = useTranslation();
 
+  // Maximum number of messages kept in memory. Older messages are trimmed from
+  // the front of the list so the array never grows without bound during a long
+  // session (prevents heap pressure and slow re-renders).
+  const MAX_MESSAGES = 100;
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -59,7 +64,10 @@ export const ChatBot: React.FC = () => {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => {
+      const next = [...prev, userMessage];
+      return next.length > MAX_MESSAGES ? next.slice(next.length - MAX_MESSAGES) : next;
+    });
     setInput('');
     setIsTyping(true);
 
@@ -93,18 +101,22 @@ export const ChatBot: React.FC = () => {
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => {
+        const next = [...prev, assistantMessage];
+        return next.length > MAX_MESSAGES ? next.slice(next.length - MAX_MESSAGES) : next;
+      });
     } catch (error) {
       console.error('ChatBot send failed:', error);
-      setMessages((prev) => [
-        ...prev,
-        {
+      setMessages((prev) => {
+        const errMsg: Message = {
           id: `${Date.now()}-error`,
           role: 'assistant',
           content: t(TranslationKey.CHATBOT_ERROR),
           timestamp: new Date(),
-        },
-      ]);
+        };
+        const next = [...prev, errMsg];
+        return next.length > MAX_MESSAGES ? next.slice(next.length - MAX_MESSAGES) : next;
+      });
     } finally {
       setIsTyping(false);
 

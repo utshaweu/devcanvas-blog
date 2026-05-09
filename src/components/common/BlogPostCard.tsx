@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, Heart, MessageCircle, Edit, Trash2 } from 'lucide-react';
@@ -41,13 +41,6 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
     () => `${formatRelativeTime(publishDate)} • ${formatDate(publishDate)}`,
     [publishDate]
   );
-
-  useEffect(() => {
-    if (!authorId || authorPostCount !== null) {
-      return;
-    }
-    // Don't fetch on mount, only on hover
-  }, [authorId, authorPostCount]);
 
   const handleAuthorHover = useCallback(async () => {
     if (!authorId || authorPostCount !== null || isAuthorPostCountLoading) {
