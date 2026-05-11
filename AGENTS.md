@@ -67,6 +67,7 @@ The repository is compatible with several AI models to assist developers:
 - **Unsaved Changes:** Reusable navigation blocker + confirmation dialog for dirty forms
 - **Search UI:** Reusable `SearchBar` component for blog listing search
 - **Author Hover UI:** Reusable `AuthorHoverCard` component for post author preview panels
+- **Share UI:** Reusable `ShareButton` component (clipboard copy + Web Share API sheet)
 - **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
   - Used by UpdatePasswordDialog for secure password changes
   - Supports animations and smooth transitions
@@ -622,7 +623,57 @@ const handleAuthorHover = async () => {
 - Use `fetchAuthorPublishedPostCount(authorId)` from `blogStore` for author totals
 - Keep fallback initial style aligned with header avatar pattern (`bg-accent`, `text-accent-foreground`)
 
-### 8.2 Analytics Page Pattern
+### 8.5 Share Button Pattern
+
+Use the shared `ShareButton` component from `src/components/common/ShareButton.tsx` wherever a share / copy-link action is needed.
+
+```typescript
+import { ShareButton } from '@/components/common/ShareButton';
+
+// Minimal — shares the current page URL
+<ShareButton />
+
+// With explicit URL, title, and body text (e.g., on a post card)
+<ShareButton
+  url={`${window.location.origin}/blog/${post.slug}`}
+  title={post.title}
+  text={post.excerpt ?? post.title}
+  className="ml-auto"
+/>
+
+// Custom icon size
+<ShareButton
+  url={shareUrl}
+  title={title}
+  iconClassName="h-5 w-5"
+/>
+```
+
+**Props:**
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `url` | `string` | `window.location.href` | URL to copy / share |
+| `title` | `string` | — | Title for the Web Share sheet |
+| `text` | `string` | `title` | Body text for the Web Share sheet |
+| `className` | `string` | — | Extra classes on the `<button>` |
+| `iconClassName` | `string` | `h-3.5 w-3.5` | Classes for the `Share2` icon |
+
+**Behaviour:**
+1. Copies `url` to the clipboard and fires a *"Link copied!"* success toast immediately.
+2. If `navigator.share` is available (mobile / Windows 11 Chrome), also opens the native OS share sheet — WhatsApp, Telegram, Facebook, Gmail, etc.
+3. If the user cancels the share sheet (`AbortError`) it is silently ignored.
+4. If clipboard access fails, an error toast is shown instead.
+
+**Translation Keys (ShareButton-specific):**
+- `SHARE_POST` — button `aria-label` / `title`
+- `LINK_COPIED` — toast title after successful clipboard write
+- `LINK_COPIED_MESSAGE` — toast description
+- `COPY_LINK_FAILED` — toast shown on clipboard error
+
+**Rules:**
+- Reuse `ShareButton` instead of inlining `navigator.clipboard` / `navigator.share` logic
+- Always pass `url`, `title`, and `text` on post cards so the native sheet has meaningful content
+- Do not add extra toast calls around `<ShareButton>` — it handles its own feedback
 
 Use `src/features/analytics/AnalyticsPage.tsx` for user-level analytics visualizations.
 

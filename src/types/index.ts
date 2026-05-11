@@ -566,3 +566,11 @@ export interface UnsavedChangesDialogProps {
   onCancel: () => void;
   className?: string;
 }
+
+export interface ShareButtonProps {
+  url?: string;
+  title?: string;
+  text?: string;
+  className?: string;
+  iconClassName?: string;
+}
