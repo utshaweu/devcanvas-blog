@@ -5,6 +5,7 @@ import { Eye, Heart, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Badge } from './Badge';
 import { AuthorHoverCard } from './AuthorHoverCard';
+import { ShareButton } from './ShareButton';
 import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
@@ -142,7 +143,7 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
             </div>
           )}
 
-          {/* Views and Likes */}
+          {/* Views, Likes, Comments and Share */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Eye className="h-3 w-3" />
@@ -156,6 +157,12 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
               <MessageCircle className="h-3 w-3" />
               {post.comments}
             </span>
+            <ShareButton
+              url={`${window.location.origin}/blog/${post.slug}`}
+              title={post.title}
+              text={post.excerpt ?? post.title}
+              className="ml-auto"
+            />
           </div>
         </div>
 

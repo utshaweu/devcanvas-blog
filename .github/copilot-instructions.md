@@ -7,6 +7,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Virtualized Grid Rendering**: Windowed rendering for large post collections
 - **Post Search**: Debounced, Medium-style search on blog list with pagination support
 - **Author Hover Card**: Reusable gradient author preview card with avatar fallback and lazy post-count loading
+- **Share Button**: Reusable `ShareButton` component — clipboard copy + Web Share API sheet (WhatsApp, Telegram, Facebook, etc.)
 - **Spotlight Search**: Keyboard-first instant post search (`Ctrl+K` / `Cmd+K`) with arrow-key navigation, reusable `resultsLimit` and `onResultNavigate` props, and full bilingual support
 - **Multilingual**: English and Bangla support with runtime switching
 - **Dark Mode**: Light/Dark/System theme with persistence
@@ -39,6 +40,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Custom FileUpload component (with progress tracking)
 - Custom PasswordInput component (with visibility toggle)
 - Reusable `AuthorHoverCard` component (author preview on hover)
+- Reusable `ShareButton` component (clipboard copy + Web Share API)
 - VirtualizedGrid component (react-virtuoso powered)
 - Reusable chart wrappers: `LineChartView`, `BarChartView`, `PieChartView`
 

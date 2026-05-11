@@ -22,6 +22,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Reusable Chart Components**: Shared line, bar, and pie chart wrappers for analytics surfaces
 - **Post Search**: Medium-style debounced search on blog list with Load More compatibility
 - **Author Hover Card**: Reusable gradient hover profile card with avatar/initial fallback and lazy-loaded author post count
+- **Share Button**: Reusable `ShareButton` component — one-click clipboard copy with a toast and optional Web Share API sheet (WhatsApp, Telegram, Facebook, etc.)
 - **Spotlight Search**: Keyboard-first instant post search dialog (`Ctrl+K` / `Cmd+K`) with arrow-key navigation, accessible results list, and Bangla/English translations
 - **Reusable Virtualized Grid**: Efficient rendering for large collections using the shared VirtualizedGrid component
 - **404 Error Page**: Beautiful, multilingual 404 page with gradient animations and smooth navigation
