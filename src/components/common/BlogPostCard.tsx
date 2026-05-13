@@ -1,12 +1,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Heart, MessageCircle, Edit, Trash2 } from 'lucide-react';
+import { Eye, Heart, MessageCircle, Edit, Trash2, Clock } from 'lucide-react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Badge } from './Badge';
 import { AuthorHoverCard } from './AuthorHoverCard';
 import { ShareButton } from './ShareButton';
-import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE } from '@/utils/helpers';
+import { formatDate, formatRelativeTime, DEFAULT_FEATURED_IMAGE, calculateReadingTime } from '@/utils/helpers';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 import type { BlogPostCardProps } from '@/types';
@@ -42,6 +42,8 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
     () => `${formatRelativeTime(publishDate)} • ${formatDate(publishDate)}`,
     [publishDate]
   );
+
+  const readTime = useMemo(() => calculateReadingTime(post.content), [post.content]);
 
   const handleAuthorHover = useCallback(async () => {
     if (!authorId || authorPostCount !== null || isAuthorPostCountLoading) {
@@ -156,6 +158,10 @@ const BlogPostCardComponent: React.FC<BlogPostCardProps> = ({
             <span className="flex items-center gap-1">
               <MessageCircle className="h-3 w-3" />
               {post.comments}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {readTime} min
             </span>
             <ShareButton
               url={`${window.location.origin}/blog/${post.slug}`}

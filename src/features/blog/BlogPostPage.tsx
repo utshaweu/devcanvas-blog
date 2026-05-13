@@ -10,6 +10,7 @@ import { TranslationKey } from '@/i18n';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { CommentsSection } from '../comments/CommentsSection';
+import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
 
 const CONTENT_PREVIEW_MAX_HEIGHT = 620;
 const CONTENT_PREVIEW_FADE_HEIGHT = 340;
@@ -108,6 +109,7 @@ export const BlogPostPage: React.FC = () => {
 
   return (
     <article className="container-custom py-12">
+      <ReadingProgressBar />
       <div className="max-w-4xl mx-auto space-y-8">
         <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
