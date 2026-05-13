@@ -97,6 +97,27 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: contain;
+    position: relative;
+  }
+
+  /* Background image overlay — light mode */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url('/public/devcanvas-bg-image-light.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Background image overlay — dark mode */
+  .dark body::before {
+    background-image: url('/public/devcanvas-bg-image-dark.png');
+    opacity: 0.12;
   }
 
   html.font-acme body {
