@@ -8,6 +8,7 @@ import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { AnalyticsPage } from '@/features/analytics/AnalyticsPage';
 import { ProfilePage } from '@/features/profile/ProfilePage';
+import { ReadingListPage } from '@/features/reading-list/ReadingListPage';
 import { BlogListPage } from '@/features/blog/BlogListPage';
 import { BlogPostPage } from '@/features/blog/BlogPostPage';
 import { CreatePostPage } from '@/features/blog/CreatePostPage';
@@ -91,6 +92,7 @@ const router = createBrowserRouter([
       { path: 'analytics', element: <ProtectedRoute><AnalyticsPage /></ProtectedRoute> },
       { path: 'create', element: <ProtectedRoute><CreatePostPage /></ProtectedRoute> },
       { path: 'edit/:id', element: <ProtectedRoute><EditPostPage /></ProtectedRoute> },
+      { path: 'reading-list', element: <ProtectedRoute><ReadingListPage /></ProtectedRoute> },
 
       // 404 Route
       { path: '*', element: <NotFound /> },

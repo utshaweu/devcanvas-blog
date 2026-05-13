@@ -574,3 +574,8 @@ export interface ShareButtonProps {
   className?: string;
   iconClassName?: string;
 }
+
+export interface BookmarkButtonProps {
+  postId: string;
+  className?: string;
+}

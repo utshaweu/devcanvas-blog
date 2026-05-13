@@ -108,7 +108,9 @@ export function truncate(text: string, length: number): string {
  */
 export function calculateReadingTime(content: string): number {
   const wordsPerMinute = 200;
-  const wordCount = content.trim().split(/\s+/).length;
+  const text = (content ?? '').replace(/<[^>]*>/g, ' ').trim();
+  if (!text) return 1;
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
   return Math.ceil(wordCount / wordsPerMinute);
 }
 

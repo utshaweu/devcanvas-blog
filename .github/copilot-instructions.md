@@ -17,6 +17,9 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Reusable Emoji Picker**: Shared emoji picker for editor and comments
 - **Unsaved Changes Protection**: Reusable navigation blocker and confirmation dialog for dirty forms
 - **Analytics**: Dashboard with views, likes, comments, and engagement metrics
+- **Reading Progress Bar**: Fixed top bar showing scroll progress on blog post pages
+- **Estimated Read Time**: Calculated at 200 WPM, shown on post cards and post page
+- **Reading List**: Bookmark posts to a personal reading list stored in Supabase (`bookmarks` table with RLS); managed via `useBookmarkStore` (Zustand) with optimistic updates
 
 ## Tech Stack (DO NOT SUGGEST ALTERNATIVES)
 
