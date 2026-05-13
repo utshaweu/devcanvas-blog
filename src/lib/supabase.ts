@@ -146,6 +146,19 @@ export type Database = {
           parent_id?: string | null;
         };
       };
+      bookmarks: {
+        Row: {
+          id: string;
+          user_id: string;
+          post_id: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          post_id: string;
+        };
+        Update: Record<string, never>;
+      };
     };
   };
 };

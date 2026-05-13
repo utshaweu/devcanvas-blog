@@ -1516,6 +1516,19 @@ CREATE TABLE post_likes (
 );
 ```
 
+#### bookmarks
+```sql
+CREATE TABLE IF NOT EXISTS public.bookmarks (
+  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  post_id    UUID        NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, post_id)
+);
+CREATE INDEX IF NOT EXISTS bookmarks_user_id_idx ON public.bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS bookmarks_post_id_idx ON public.bookmarks(post_id);
+```
+
 ### Row Level Security (RLS) Policies
 
 ```sql
@@ -1609,6 +1622,12 @@ CREATE POLICY "Authenticated users can like posts" ON post_likes
 CREATE POLICY "Users can delete their own likes" ON post_likes
   FOR DELETE
   USING (user_id = auth.uid());
+
+-- Bookmarks RLS policies
+ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can view own bookmarks" ON public.bookmarks FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own bookmarks" ON public.bookmarks FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own bookmarks" ON public.bookmarks FOR DELETE USING (auth.uid() = user_id);
 ```
 
 ### Post Likes & Views Feature Setup

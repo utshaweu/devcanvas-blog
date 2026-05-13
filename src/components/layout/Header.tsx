@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { PenSquare, User, LogOut, BarChart3, Key, Type, ALargeSmall, LineChart } from 'lucide-react';
+import { PenSquare, User, LogOut, BarChart3, Key, Type, ALargeSmall, LineChart, Bookmark } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
+import { useBookmarkStore } from '@/stores/bookmarkStore';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -26,12 +27,14 @@ export const Header: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { success: toastSuccess } = useGlobalToast();
+  const { clearBookmarks } = useBookmarkStore();
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const { fontFamily, toggleFontFamily } = useFontFamily();
   const { pathname } = useLocation();
 
   const handleLogout = async () => {
     await logout();
+    clearBookmarks();
     toastSuccess(
       t(TranslationKey.LOGOUT_SUCCESS_TITLE),
       t(TranslationKey.LOGOUT_SUCCESS_MESSAGE)
@@ -151,6 +154,10 @@ export const Header: React.FC = () => {
                 <DropdownMenuItem onClick={() => navigate('/profile')} className={pathname === '/profile' ? 'text-accent font-semibold' : ''}>
                   <User className="mr-2 h-4 w-4" />
                   <span>{t(TranslationKey.PROFILE)}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/reading-list')} className={pathname === '/reading-list' ? 'text-accent font-semibold' : ''}>
+                  <Bookmark className="mr-2 h-4 w-4" />
+                  <span>{t(TranslationKey.READING_LIST)}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setPasswordDialogOpen(true)}>
                   <Key className="mr-2 h-4 w-4" />

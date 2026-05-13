@@ -11,6 +11,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useGlobalToast } from '@/contexts/ToastContext';
 import { CommentsSection } from '../comments/CommentsSection';
 import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
+import { BookmarkButton } from '@/components/common/BookmarkButton';
+import { useBookmarkStore } from '@/stores/bookmarkStore';
 
 const CONTENT_PREVIEW_MAX_HEIGHT = 620;
 const CONTENT_PREVIEW_FADE_HEIGHT = 340;
@@ -19,7 +21,8 @@ export const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { fetchBookmarkedIds } = useBookmarkStore();
   const { warning: toastWarning } = useGlobalToast();
   const { currentPost, isLoading, fetchPostBySlug, incrementViews, toggleLike } = useBlogStore();
   const viewCountedRef = useRef<string | null>(null);
@@ -84,6 +87,12 @@ export const BlogPostPage: React.FC = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPost?.id, incrementViews]);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.id) {
+      fetchBookmarkedIds(user.id);
+    }
+  }, [isAuthenticated, user?.id, fetchBookmarkedIds]);
 
   if (isLoading) {
     return (
@@ -159,6 +168,7 @@ export const BlogPostPage: React.FC = () => {
               <Heart className="h-4 w-4 fill-red-500 text-red-500" />
               {currentPost.likes}
             </Button>
+            <BookmarkButton postId={currentPost.id} />
           </div>
 
           {currentPost.excerpt && (

@@ -15,6 +15,9 @@ Full-stack blog platform with:
 - Dark mode (Light/Dark/System)
 - Comments system (nested)
 - Like system (toggle with RPC)
+- Reading Progress Bar (scroll-based, fixed top bar with gradient)
+- Estimated Read Time (200 WPM, displayed on post cards and post page)
+- Reading List / Bookmarks (save posts to personal list, stored in Supabase, Zustand store with optimistic updates)
 - Rich text editor (Tiptap)
 - Reusable emoji picker (shared in editor and comments)
 - 404 error page (beautiful, animated)
@@ -40,6 +43,7 @@ Micro-frontend with feature-based modules:
 - `features/analytics` - Dedicated analytics charts
 - `features/profile` - User profile with avatar
 - `features/comments` - Comment system
+- `features/reading-list` - Bookmark / reading list page (protected route)
 
 ## Component Conventions
 
@@ -136,6 +140,7 @@ border: '#E2E8F0'       // Gray
 - `tags` - Post tags
 - `post_tags` - Junction table
 - `post_likes` - User likes (unique constraint)
+- `bookmarks` - User bookmarks / reading list (unique user+post constraint, RLS)
 
 ## Storage Buckets
 - `avatars` - User avatars (500KB max, public)
