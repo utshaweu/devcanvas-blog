@@ -364,7 +364,113 @@
   border-left-color: #475569;
 }
 
-/* Custom Scrollbar */
+/* Ensure headings clear the fixed navbar when scrolled to via anchor */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  scroll-margin-top: 80px;
+}
+
+/* Syntax Highlighting (highlight.js tokens) */
+
+/* Reset hljs container so our custom pre background shows */
+.hljs {
+  background: transparent !important;
+  padding: 0 !important;
+  color: #24292e;
+}
+
+.dark .hljs {
+  color: #c9d1d9;
+}
+
+/* Keywords */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-link { color: #d73a49; }
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag,
+.dark .hljs-literal,
+.dark .hljs-section,
+.dark .hljs-link { color: #ff7b72; }
+
+/* Strings */
+.hljs-string,
+.hljs-title,
+.hljs-name,
+.hljs-type,
+.hljs-attribute,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition { color: #032f62; }
+
+.dark .hljs-string,
+.dark .hljs-title,
+.dark .hljs-name,
+.dark .hljs-type,
+.dark .hljs-attribute,
+.dark .hljs-symbol,
+.dark .hljs-bullet,
+.dark .hljs-addition { color: #a5d6ff; }
+
+/* Comments */
+.hljs-comment,
+.hljs-quote,
+.hljs-meta { color: #6a737d; font-style: italic; }
+
+.dark .hljs-comment,
+.dark .hljs-quote,
+.dark .hljs-meta { color: #8b949e; }
+
+/* Numbers & regex */
+.hljs-number,
+.hljs-regexp,
+.hljs-formula { color: #005cc5; }
+
+.dark .hljs-number,
+.dark .hljs-regexp,
+.dark .hljs-formula { color: #79c0ff; }
+
+/* Functions */
+.hljs-title.function_,
+.hljs-function .hljs-title { color: #6f42c1; }
+
+.dark .hljs-title.function_,
+.dark .hljs-function .hljs-title { color: #d2a8ff; }
+
+/* Classes */
+.hljs-title.class_,
+.hljs-class .hljs-title { color: #e36209; }
+
+.dark .hljs-title.class_,
+.dark .hljs-class .hljs-title { color: #ffa657; }
+
+/* Variables & built-ins */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-built_in,
+.hljs-selector-pseudo { color: #005cc5; }
+
+.dark .hljs-variable,
+.dark .hljs-template-variable,
+.dark .hljs-built_in,
+.dark .hljs-selector-pseudo { color: #79c0ff; }
+
+/* Attributes (HTML/XML) */
+.hljs-attr,
+.hljs-selector-attr { color: #6f42c1; }
+
+.dark .hljs-attr,
+.dark .hljs-selector-attr { color: #d2a8ff; }
+
+/* Deletions */
+.hljs-deletion { color: #b31d28; background: #ffeef0; }
+.dark .hljs-deletion { color: #ffdcd7; background: #4a1818; }
+
+/* Strong / emphasis */
+.hljs-strong { font-weight: bold; }
+.hljs-emphasis { font-style: italic; }
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

@@ -62,7 +62,8 @@ The repository is compatible with several AI models to assist developers:
 - **Base Library:** Shadcn/ui (copy-paste components)
 - **Primitives:** Radix UI for accessibility
 - **Icons:** Lucide React
-- **Rich Text:** Tiptap 2.x with StarterKit
+- **Rich Text:** Tiptap 2.x with StarterKit, `@tiptap/extension-code-block-lowlight@^2`, `lowlight@^2`
+- **Syntax Highlighting (viewer):** `highlight.js` — `hljs.highlightElement()` on `pre code` after post render
 - **Emoji Picker:** Reusable `EmojiPicker` component (emoji-mart based)
 - **Unsaved Changes:** Reusable navigation blocker + confirmation dialog for dirty forms
 - **Search UI:** Reusable `SearchBar` component for blog listing search
@@ -134,7 +135,8 @@ src/
 │   │   └── dropdown-menu.tsx # Dropdown menu
 │   ├── common/              # Reusable composed components
 │   │   ├── EmojiPicker.tsx      # Shared emoji picker with viewport-aware placement
-│   │   ├── RichTextEditor.tsx   # Tiptap editor wrapper
+│   │   ├── RichTextEditor.tsx   # Tiptap editor wrapper (CodeBlockLowlight + language selector)
+│   │   ├── TableOfContents.tsx  # Sticky TOC sidebar (desktop) + collapsible accordion (mobile)
 │   │   ├── LoadingSpinner.tsx   # Loading states
 │   │   ├── NotFound.tsx         # 404 Error page
 │   │   └── MultiSelect.tsx      # Multi-select with chips
@@ -160,6 +162,7 @@ src/
 │   ├── useAuth.ts          # Authentication hook
 │   ├── useToast.ts         # Toast notifications
 │   ├── useDebounce.ts      # Debounce values
+│   ├── useTableOfContents.ts # Parses h1/h2/h3 nodes from a content ref, injects IDs
 │   └── useFontFamily.ts    # Global font family preference (Inter/Acme)
 ├── stores/                 # Zustand stores
 │   ├── authStore.ts        # Auth state
@@ -848,6 +851,76 @@ try {
 
 ```
 
+### 8.6 Table of Contents Pattern
+
+`TableOfContents` (`src/components/common/TableOfContents.tsx`) renders a sticky sidebar on desktop (xl+) and a collapsible accordion on mobile. `useTableOfContents` (`src/hooks/useTableOfContents.ts`) parses heading nodes from a rendered HTML `div` and injects stable DOM IDs.
+
+```typescript
+import { TableOfContents } from '@/components/common/TableOfContents';
+import { useTableOfContents } from '@/hooks/useTableOfContents';
+
+const contentRef = useRef<HTMLDivElement | null>(null);
+const headings = useTableOfContents(contentRef, currentPost?.id); // dep re-runs on post change
+
+// Desktop sidebar (hidden below xl)
+<aside className="hidden xl:block">
+  <TableOfContents headings={headings} variant="desktop" onNavigate={() => setIsContentExpanded(true)} />
+</aside>
+
+// Mobile collapsible (hidden at xl+)
+<div className="xl:hidden">
+  <TableOfContents headings={headings} variant="mobile" onNavigate={() => setIsContentExpanded(true)} />
+</div>
+```
+
+**`TableOfContentsProps`** (defined in `src/types/index.ts`):
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `headings` | `TocHeading[]` | — | Array from `useTableOfContents` |
+| `variant` | `'mobile' \| 'desktop' \| 'both'` | `'both'` | Render mode |
+| `onNavigate` | `() => void` | — | Callback on TOC item click (e.g., expand collapsed content) |
+
+**Rules:**
+- Never use `variant="both"` on `BlogPostPage` — renders duplicate TOC in both breakpoints
+- The scroll listener tracks active heading; it is cleaned up on unmount — do not remove the `removeEventListener` return
+- Click handler offsets scroll by 80 px to clear the fixed navbar (`getBoundingClientRect().top + scrollY - 80`)
+- `scroll-margin-top: 80px` on `.prose h1–h4` in `globals.css` handles native anchor navigation
+
+### 8.7 Code Syntax Highlighting Pattern
+
+**Editor (Tiptap — `RichTextEditor.tsx`):**
+
+- `StarterKit` configured with `codeBlock: false` — the built-in code block is disabled
+- `CodeBlockLowlight.configure({ lowlight })` provides live syntax highlighting in the editor
+- A language `<select>` in the toolbar appears when `editor.isActive('codeBlock')` and uses `updateAttributes('codeBlock', { language })`
+
+```typescript
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { lowlight } from 'lowlight';
+// In extensions array:
+StarterKit.configure({ heading: { levels: [1, 2, 3] }, codeBlock: false }),
+CodeBlockLowlight.configure({ lowlight }),
+```
+
+**Viewer (BlogPostPage — `hljs`):**
+
+```typescript
+import hljs from 'highlight.js';
+
+useEffect(() => {
+  const el = contentRef.current;
+  if (!el) return;
+  el.querySelectorAll<HTMLElement>('pre code').forEach((block) => {
+    hljs.highlightElement(block);
+  });
+}, [currentPost?.id]);
+```
+
+**Rules:**
+- Pin `@tiptap/extension-code-block-lowlight` to `^2.x` — v3 requires `@tiptap/core@3.x` and is **incompatible** with this project's Tiptap v2
+- hljs token CSS lives in `globals.css` (GitHub-inspired palette, light + dark); do **not** add a separate hljs theme stylesheet
+- `.hljs { background: transparent !important; }` lets the custom `pre` gradient background show through
+
 ### 9. Memory Safety Pattern
 
 Any component that starts an async operation and then updates local state **must** guard with `isMountedRef` to prevent setting state on an unmounted component.
@@ -920,6 +993,7 @@ setItems(prev => {
 | `src/components/common/EmojiPicker.tsx` | All event listeners removed in cleanup |
 | `src/components/common/SpotlightSearch.tsx` | `isMounted` flag + `window.keydown` cleanup |
 | `src/hooks/useUnsavedChanges.ts` | `beforeunload` listener removed in cleanup |
+| `src/components/common/TableOfContents.tsx` | `scroll` event listener removed on unmount |
 
 ### 10. Dialog Form Reset Pattern
 

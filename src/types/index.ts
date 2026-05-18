@@ -579,3 +579,22 @@ export interface BookmarkButtonProps {
   postId: string;
   className?: string;
 }
+
+export interface UseUnsavedChangesReturn {
+  showDialog: boolean;
+  confirmNavigation: () => void;
+  cancelNavigation: () => void;
+  allowNavigation: () => void;
+}
+
+export interface TocHeading {
+  id: string;
+  text: string;
+  level: number;
+}
+
+export interface TableOfContentsProps {
+  headings: TocHeading[];
+  onNavigate?: () => void;
+  variant?: 'mobile' | 'desktop' | 'both';
+}
