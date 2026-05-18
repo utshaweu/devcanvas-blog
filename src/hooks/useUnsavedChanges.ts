@@ -1,31 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { UseUnsavedChangesReturn } from '@/types';
 import { useBlocker } from 'react-router-dom';
 import type { Location } from 'react-router-dom';
 
-interface UseUnsavedChangesReturn {
-  /** Whether the confirmation dialog should be shown */
-  showDialog: boolean;
-  /** Call to allow the blocked navigation to proceed */
-  confirmNavigation: () => void;
-  /** Call to cancel the blocked navigation and stay on the page */
-  cancelNavigation: () => void;
-  /**
-   * Call this synchronously before any programmatic navigation that should
-   * bypass the dirty check (e.g. right after a successful form submit).
-   */
-  allowNavigation: () => void;
-}
 
-/**
- * Reusable hook that blocks ALL in-app navigation (Link clicks, navigate(),
- * browser back/forward) and browser close/reload when there are unsaved changes.
- *
- * Requires a data router (createBrowserRouter / RouterProvider).
- *
- * Usage:
- *   const { showDialog, confirmNavigation, cancelNavigation, allowNavigation } =
- *     useUnsavedChanges(isDirty);
- */
 export function useUnsavedChanges(isDirty: boolean): UseUnsavedChangesReturn {
   const isDirtyRef = useRef(isDirty);
   isDirtyRef.current = isDirty;

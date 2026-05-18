@@ -7,24 +7,27 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import TextStyle from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { lowlight } from 'lowlight';
 import { 
-  Bold, 
-  Italic, 
-  Strikethrough, 
+  Bold,
+  Italic,
+  Strikethrough,
   Palette,
-  Code, 
+  Code,
   FileCode,
-  Heading1, 
-  Heading2, 
+  Heading1,
+  Heading2,
   Heading3,
-  List, 
+  List,
   ListOrdered,
   Quote,
   Check,
   Undo,
   Redo,
   Link as LinkIcon,
-  ImageIcon
+  ImageIcon,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
 import { Button } from '@/components/ui/button';
@@ -54,10 +57,10 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
+        heading: { levels: [1, 2, 3] },
+        codeBlock: false,
       }),
+      CodeBlockLowlight.configure({ lowlight }),
       TextStyle,
       Color,
       Placeholder.configure({
@@ -204,6 +207,35 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           >
             <FileCode className="h-4 w-4" />
           </Button>
+          {editor.isActive('codeBlock') && (
+            <div className="relative flex items-center">
+              <Code className="pointer-events-none absolute left-2 z-10 h-3 w-3 text-accent" />
+              <select
+                value={editor.getAttributes('codeBlock').language ?? ''}
+                onChange={(e) =>
+                  editor.chain().focus().updateAttributes('codeBlock', {
+                    language: e.target.value || null,
+                  }).run()
+                }
+                className="h-7 appearance-none rounded-md border border-accent/40 bg-accent/5 pl-6 pr-6 font-mono text-xs font-medium text-foreground transition-colors hover:border-accent hover:bg-accent/10 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer"
+              >
+                <option value="">Auto</option>
+                <option value="javascript">JavaScript</option>
+                <option value="typescript">TypeScript</option>
+                <option value="python">Python</option>
+                <option value="html">HTML</option>
+                <option value="css">CSS</option>
+                <option value="bash">Bash</option>
+                <option value="json">JSON</option>
+                <option value="sql">SQL</option>
+                <option value="go">Go</option>
+                <option value="rust">Rust</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-1.5 h-3 w-3 text-muted-foreground" />
+            </div>
+          )}
 
           <div className="w-px h-6 bg-border mx-1" />
 

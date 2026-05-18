@@ -31,6 +31,8 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Font Family Toggle**: Switch between Inter and Acme from the header
 - **Infinite Scroll Pagination**: Load More button for seamless content browsing (9 posts per page)
 - **MCP Chatbot**: WebSocket chatbot connected to a local/deployed MCP bridge and Supabase-backed MCP tools
+- **Table of Contents**: Auto-generated sticky sidebar (desktop) + collapsible accordion (mobile) from post headings; scroll-listener active tracking with navbar offset
+- **Code Syntax Highlighting**: Live `CodeBlockLowlight` + `lowlight` in editor with language selector; `highlight.js` GitHub-inspired palette on published posts
 - **Memory Safe**: Audited for timer/interval leaks, async unmount guards (`isMountedRef`), and bounded message arrays — no heap growth in long sessions
 - **Testing Ready**: Jest and React Testing Library configured
 
@@ -45,7 +47,8 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Validation**: Zod 3.x
 - **UI Components**: Shadcn/ui (Radix UI primitives)
 - **Styling**: Tailwind CSS 3.x
-- **Rich Text Editor**: Tiptap 2.x
+- **Rich Text Editor**: Tiptap 2.x with `@tiptap/extension-code-block-lowlight` + `lowlight`
+- **Syntax Highlighting**: `highlight.js` for rendered post content
 - **Icons**: Lucide React
 - **Charts**: Recharts 2.x
 - **Large List Virtualization**: react-virtuoso
@@ -243,6 +246,7 @@ The frontend has been audited for memory leaks. The following guards are in plac
 | `src/components/common/EmojiPicker.tsx` | All DOM event listeners removed in cleanup |
 | `src/components/common/SpotlightSearch.tsx` | `isMounted` flag + `window.keydown` listener cleanup |
 | `src/hooks/useUnsavedChanges.ts` | `beforeunload` listener removed in cleanup |
+| `src/components/common/TableOfContents.tsx` | `scroll` event listener removed on unmount |
 
 **When adding new async components**, follow this pattern:
 ```typescript

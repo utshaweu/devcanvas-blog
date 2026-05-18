@@ -13,6 +13,9 @@ import { CommentsSection } from '../comments/CommentsSection';
 import { ReadingProgressBar } from '@/components/common/ReadingProgressBar';
 import { BookmarkButton } from '@/components/common/BookmarkButton';
 import { useBookmarkStore } from '@/stores/bookmarkStore';
+import { TableOfContents } from '@/components/common/TableOfContents';
+import { useTableOfContents } from '@/hooks/useTableOfContents';
+import hljs from 'highlight.js';
 
 const CONTENT_PREVIEW_MAX_HEIGHT = 620;
 const CONTENT_PREVIEW_FADE_HEIGHT = 340;
@@ -29,6 +32,9 @@ export const BlogPostPage: React.FC = () => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [shouldShowSeeMore, setShouldShowSeeMore] = useState(false);
+
+  const headings = useTableOfContents(contentRef, currentPost?.id);
+
   const authorName = currentPost?.author?.name;
   const authorAvatarUrl = currentPost?.author?.avatar_url;
   const authorInitial = authorName?.charAt(0).toUpperCase();
@@ -94,6 +100,14 @@ export const BlogPostPage: React.FC = () => {
     }
   }, [isAuthenticated, user?.id, fetchBookmarkedIds]);
 
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    el.querySelectorAll<HTMLElement>('pre code').forEach((block) => {
+      hljs.highlightElement(block);
+    });
+  }, [currentPost?.id]);
+
   if (isLoading) {
     return (
       <div className="container-custom py-12 flex justify-center">
@@ -119,106 +133,129 @@ export const BlogPostPage: React.FC = () => {
   return (
     <article className="container-custom py-12">
       <ReadingProgressBar />
-      <div className="max-w-4xl mx-auto space-y-8">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+      <div className="xl:max-w-6xl max-w-4xl mx-auto">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t(TranslationKey.BACK_TO_BLOG)}
         </Button>
 
-        <header className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold">{currentPost.title}</h1>
-          
-          <div className="flex items-center gap-4 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              {authorAvatarUrl ? (
-                <img
-                  src={authorAvatarUrl}
-                  alt={authorName ?? ''}
-                  className="h-10 w-10 rounded-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-medium text-accent-foreground">
-                  {authorInitial}
+        <div className="xl:grid xl:grid-cols-[1fr_260px] xl:gap-10">
+          {/* Main content */}
+          <div className="min-w-0 space-y-8">
+            <header className="space-y-4">
+              <h1 className="text-4xl md:text-5xl font-bold">{currentPost.title}</h1>
+
+              <div className="flex items-center gap-4 text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  {authorAvatarUrl ? (
+                    <img
+                      src={authorAvatarUrl}
+                      alt={authorName ?? ''}
+                      className="h-10 w-10 rounded-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent font-medium text-accent-foreground">
+                      {authorInitial}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-foreground">{authorName}</p>
+                    <p className="text-sm">{formatRelativeTime(currentPost.published_at || currentPost.created_at)} • {formatDate(currentPost.published_at || currentPost.created_at)}</p>
+                  </div>
                 </div>
-              )}
-              <div>
-                <p className="font-medium text-foreground">{authorName}</p>
-                <p className="text-sm">{formatRelativeTime(currentPost.published_at || currentPost.created_at)} • {formatDate(currentPost.published_at || currentPost.created_at)}</p>
               </div>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Eye className="h-4 w-4" />
-              {currentPost.views} {t(TranslationKey.VIEWS)}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {calculateReadingTime(currentPost.content)} min read
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLikeClick}
-              className="flex items-center gap-1 hover:text-red-500 transition-colors"
-            >
-              <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-              {currentPost.likes}
-            </Button>
-            <BookmarkButton postId={currentPost.id} />
-          </div>
-
-          {currentPost.excerpt && (
-            <p className="text-lg leading-relaxed text-primary-foreground font-medium">{currentPost.excerpt}</p>
-          )}
-
-          <img
-            src={currentPost.featured_image || DEFAULT_FEATURED_IMAGE}
-            alt={currentPost.title}
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            onError={handleFeaturedImageError}
-            className="w-full h-auto object-cover rounded-lg"
-          />
-        </header>
-
-        <div className="relative">
-          <div
-            ref={contentRef}
-            className={cn(
-              'prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none',
-              !isContentExpanded && 'overflow-hidden'
-            )}
-            style={!isContentExpanded ? { maxHeight: `${CONTENT_PREVIEW_MAX_HEIGHT}px` } : undefined}
-            dangerouslySetInnerHTML={{ __html: currentPost.content }}
-          />
-
-          {!isContentExpanded && shouldShowSeeMore && (
-            <>
-              <div
-                className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/95 to-transparent"
-                style={{ height: `${CONTENT_PREVIEW_FADE_HEIGHT}px` }}
-              />
-              <div className="absolute inset-x-0 bottom-6 flex justify-center">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  {currentPost.views} {t(TranslationKey.VIEWS)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {calculateReadingTime(currentPost.content)} min read
+                </span>
                 <Button
                   variant="ghost"
-                  onClick={() => setIsContentExpanded(true)}
-                  className="h-auto bg-transparent px-2 py-1 text-base font-semibold shadow-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-accent"
+                  size="sm"
+                  onClick={handleLikeClick}
+                  className="flex items-center gap-1 hover:text-red-500 transition-colors"
                 >
-                  <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-                    {t(TranslationKey.SEE_MORE)}
-                  </span>
+                  <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                  {currentPost.likes}
                 </Button>
+                <BookmarkButton postId={currentPost.id} />
               </div>
-            </>
-          )}
-        </div>
 
-        <CommentsSection postId={currentPost.id} />
+              {currentPost.excerpt && (
+                <p className="text-lg leading-relaxed text-primary-foreground font-medium">{currentPost.excerpt}</p>
+              )}
+
+              <img
+                src={currentPost.featured_image || DEFAULT_FEATURED_IMAGE}
+                alt={currentPost.title}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                onError={handleFeaturedImageError}
+                className="w-full h-auto object-cover rounded-lg"
+              />
+            </header>
+
+            {/* Mobile TOC (above content, below xl) */}
+            <div className="xl:hidden">
+              <TableOfContents
+                headings={headings}
+                variant="mobile"
+                onNavigate={() => setIsContentExpanded(true)}
+              />
+            </div>
+
+            <div className="relative">
+              <div
+                ref={contentRef}
+                className={cn(
+                  'prose prose-slate dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-hr:border-border max-w-none',
+                  !isContentExpanded && 'overflow-hidden'
+                )}
+                style={!isContentExpanded ? { maxHeight: `${CONTENT_PREVIEW_MAX_HEIGHT}px` } : undefined}
+                dangerouslySetInnerHTML={{ __html: currentPost.content }}
+              />
+
+              {!isContentExpanded && shouldShowSeeMore && (
+                <>
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/95 to-transparent"
+                    style={{ height: `${CONTENT_PREVIEW_FADE_HEIGHT}px` }}
+                  />
+                  <div className="absolute inset-x-0 bottom-6 flex justify-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsContentExpanded(true)}
+                      className="h-auto bg-transparent px-2 py-1 text-base font-semibold shadow-none hover:bg-transparent focus-visible:ring-2 focus-visible:ring-accent"
+                    >
+                      <span className="bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+                        {t(TranslationKey.SEE_MORE)}
+                      </span>
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <CommentsSection postId={currentPost.id} />
+          </div>
+
+          {/* Desktop TOC sidebar */}
+          <aside className="hidden xl:block">
+            <TableOfContents
+              headings={headings}
+              variant="desktop"
+              onNavigate={() => setIsContentExpanded(true)}
+            />
+          </aside>
+        </div>
       </div>
     </article>
   );

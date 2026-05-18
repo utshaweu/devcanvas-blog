@@ -20,6 +20,8 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Reading Progress Bar**: Fixed top bar showing scroll progress on blog post pages
 - **Estimated Read Time**: Calculated at 200 WPM, shown on post cards and post page
 - **Reading List**: Bookmark posts to a personal reading list stored in Supabase (`bookmarks` table with RLS); managed via `useBookmarkStore` (Zustand) with optimistic updates
+- **Table of Contents**: Auto-generated sticky sidebar (desktop) + collapsible accordion (mobile) from `h1`/`h2`/`h3` headings; scroll-listener active tracking with last-heading guard; `useTableOfContents` hook injects IDs into rendered DOM
+- **Code Syntax Highlighting**: Editor uses `@tiptap/extension-code-block-lowlight` with `lowlight@^2` for live highlighting and a language selector; viewer uses `highlight.js` (`hljs.highlightElement`) on rendered `pre code` blocks with GitHub-inspired light/dark token colors
 
 ## Tech Stack (DO NOT SUGGEST ALTERNATIVES)
 
@@ -38,7 +40,8 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 ### UI Components
 - Shadcn/ui (Radix UI primitives)
 - Lucide React (icons)
-- Tiptap 2.x (rich text editor)
+- Tiptap 2.x (rich text editor with `@tiptap/extension-code-block-lowlight@^2.27.2` + `lowlight@^2`)
+- `highlight.js` — viewer-side syntax highlighting on blog post pages
 - Emoji-mart (shared emoji picker data + UI)
 - Custom FileUpload component (with progress tracking)
 - Custom PasswordInput component (with visibility toggle)
@@ -1032,7 +1035,8 @@ src/
 │   │   └── ...
 │   ├── common/          # Reusable components
 │   │   ├── LoadMoreButton.tsx  # Pagination button
-│   │   ├── RichTextEditor.tsx  # Tiptap editor
+│   │   ├── RichTextEditor.tsx  # Tiptap editor (CodeBlockLowlight + language selector)
+│   │   ├── TableOfContents.tsx # Sticky TOC sidebar + mobile accordion
 │   │   └── ...
 │   └── layout/          # Header, Footer
 ├── features/
@@ -1046,6 +1050,7 @@ src/
 │   └── ThemeContext.tsx     # Theme management
 ├── hooks/               # Custom hooks
 │   ├── useTranslation.ts    # i18n hook
+│   ├── useTableOfContents.ts # Extracts & IDs h1/h2/h3 nodes from a content ref
 │   └── ...
 ├── stores/              # Zustand stores
 │   ├── authStore.ts
@@ -1057,6 +1062,66 @@ src/
 └── lib/
     └── supabase.ts      # Supabase client
 ```
+
+## Table of Contents Pattern
+
+```typescript
+import { TableOfContents } from '@/components/common/TableOfContents';
+import { useTableOfContents } from '@/hooks/useTableOfContents';
+
+// In BlogPostPage:
+const contentRef = useRef<HTMLDivElement | null>(null);
+const headings = useTableOfContents(contentRef, currentPost?.id);
+
+// Desktop sidebar (xl+)
+<aside className="hidden xl:block">
+  <TableOfContents headings={headings} variant="desktop" onNavigate={() => setIsContentExpanded(true)} />
+</aside>
+
+// Mobile collapsible (below xl)
+<div className="xl:hidden">
+  <TableOfContents headings={headings} variant="mobile" onNavigate={() => setIsContentExpanded(true)} />
+</div>
+```
+
+**Rules:**
+- Use `variant="desktop"` in the sidebar `aside` (hidden below xl) and `variant="mobile"` in main content flow (hidden at xl+)
+- Never render `variant="both"` on `BlogPostPage` — it causes duplicate display
+- `useTableOfContents` mutates DOM IDs on heading elements; call it with a stable `dep` (e.g., `currentPost?.id`) to re-run on post change
+- The scroll listener in `TableOfContents` is cleaned up on unmount — do not remove the cleanup
+- Click handler scrolls to `getBoundingClientRect().top + scrollY - 80` to clear the fixed navbar
+- `scroll-margin-top: 80px` on `.prose h1/h2/h3/h4` in `globals.css` handles anchor navigation
+
+## Code Syntax Highlighting Pattern
+
+**Editor (Tiptap):**
+```typescript
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { lowlight } from 'lowlight';
+
+// In useEditor extensions:
+StarterKit.configure({ codeBlock: false }), // disable built-in
+CodeBlockLowlight.configure({ lowlight }),    // add lowlight-powered version
+```
+
+**Viewer (BlogPostPage):**
+```typescript
+import hljs from 'highlight.js';
+
+useEffect(() => {
+  const el = contentRef.current;
+  if (!el) return;
+  el.querySelectorAll<HTMLElement>('pre code').forEach((block) => {
+    hljs.highlightElement(block);
+  });
+}, [currentPost?.id]);
+```
+
+**Rules:**
+- Pin `@tiptap/extension-code-block-lowlight` to `^2.x` — v3 requires `@tiptap/core@3.x` and is incompatible
+- Language selector (`<select>`) shown in toolbar only when `editor.isActive('codeBlock')` — uses `updateAttributes('codeBlock', { language })`
+- hljs token CSS lives in `globals.css` — GitHub-inspired light/dark palette; do not use a separate hljs theme stylesheet
+- The `.hljs { background: transparent !important; }` rule ensures our custom `pre` background shows through
 
 ## Import Order
 

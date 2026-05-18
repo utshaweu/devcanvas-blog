@@ -18,6 +18,8 @@ Full-stack blog platform with:
 - Reading Progress Bar (scroll-based, fixed top bar with gradient)
 - Estimated Read Time (200 WPM, displayed on post cards and post page)
 - Reading List / Bookmarks (save posts to personal list, stored in Supabase, Zustand store with optimistic updates)
+- Table of Contents (auto-generated from h1/h2/h3 in post content; sticky desktop sidebar + mobile collapsible accordion; scroll-listener active tracking)
+- Code Syntax Highlighting (editor: CodeBlockLowlight + lowlight@^2 with language selector; viewer: highlight.js with GitHub-inspired light/dark token colors)
 - Rich text editor (Tiptap)
 - Reusable emoji picker (shared in editor and comments)
 - 404 error page (beautiful, animated)
@@ -32,7 +34,8 @@ Full-stack blog platform with:
 - **Emoji:** emoji-mart with shared `EmojiPicker` component
 - **Virtualization:** react-virtuoso (`VirtualizedGrid`)
 - **Backend:** Supabase (PostgreSQL + Auth + Storage)
-- **Editor:** Tiptap for rich text
+- **Editor:** Tiptap for rich text with `CodeBlockLowlight` (`@tiptap/extension-code-block-lowlight@^2`) + `lowlight@^2`
+- **Syntax Highlighting (viewer):** `highlight.js` — `hljs.highlightElement()` on `pre code` nodes after post render
 - **i18n:** Custom translation system with enum keys
 
 ## Architecture
@@ -294,6 +297,7 @@ setItems(prev => {
 | `EmojiPicker.tsx` | All event listeners removed in cleanup |
 | `SpotlightSearch.tsx` | `isMounted` flag + `window.keydown` cleanup |
 | `useUnsavedChanges.ts` | `beforeunload` listener removed in cleanup |
+| `TableOfContents.tsx` | `scroll` event listener removed on unmount (`window.removeEventListener`) |
 
 **Zustand stores** are module-level singletons — do NOT add `isMountedRef` guards inside store actions.
 
