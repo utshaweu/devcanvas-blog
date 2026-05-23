@@ -353,7 +353,7 @@ For environment-specific MCP URLs, use Vite mode files:
 VITE_MCP_WS_URL=http://localhost:8080
 
 # .env.production (production build)
-VITE_MCP_WS_URL=https://devcanvas-blog-production.up.railway.app
+VITE_MCP_WS_URL=https://devcanvas-blog.onrender.com
 ```
 
 4. **Set up Supabase Database**
@@ -1229,7 +1229,7 @@ Make sure to set these environment variables in your deployment platform:
 ```
 VITE_SUPABASE_URL=your_production_supabase_url
 VITE_SUPABASE_ANON_KEY=your_production_anon_key
-VITE_MCP_WS_URL=https://devcanvas-blog-production.up.railway.app
+VITE_MCP_WS_URL=https://devcanvas-blog.onrender.com
 VITE_APP_NAME=DevCanvas Blog
 VITE_APP_URL=https://your-domain.com
 ```
