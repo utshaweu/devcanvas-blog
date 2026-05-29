@@ -69,6 +69,7 @@ The repository is compatible with several AI models to assist developers:
 - **Search UI:** Reusable `SearchBar` component for blog listing search
 - **Author Hover UI:** Reusable `AuthorHoverCard` component for post author preview panels
 - **Share UI:** Reusable `ShareButton` component (clipboard copy + Web Share API sheet)
+- **OAuth UI:** Reusable `OAuthButtons` component (Google + GitHub buttons with divider, per-button loading spinner, `mode` prop for signin/signup label text)
 - **Dialog Component:** `src/components/ui/dialog.tsx` - Modal dialog for user interactions
   - Used by UpdatePasswordDialog for secure password changes
   - Supports animations and smooth transitions
@@ -758,6 +759,80 @@ const { fontFamily, toggleFontFamily } = useFontFamily();
 - Persist preference in `localStorage` with key `devcanvas-font-family`
 - Apply global class on `<html>` (`font-acme`) and style via `globals.css`
 - Supported font values: `'inter' | 'acme'`
+
+### OAuth Login Pattern
+
+Use the reusable `OAuthButtons` component from `src/components/common/OAuthButtons.tsx` for Google and GitHub login on any auth page.
+
+```typescript
+import { OAuthButtons } from '@/components/common/OAuthButtons';
+import { useAuth } from '@/hooks/useAuth';
+import { useGlobalToast } from '@/contexts/ToastContext';
+import { TranslationKey } from '@/i18n';
+
+const { loginWithOAuth } = useAuth();
+const { error: toastError } = useGlobalToast();
+const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
+
+const handleOAuth = async (provider: 'google' | 'github') => {
+  setOauthLoading(provider);
+  try {
+    await loginWithOAuth(provider);
+    // Supabase redirects the browser — no further action needed
+  } catch (err: unknown) {
+    toastError(t(TranslationKey.OAUTH_ERROR), err instanceof Error ? err.message : '');
+    setOauthLoading(null);
+  }
+};
+
+<OAuthButtons
+  loading={oauthLoading}
+  disabled={isLoading}
+  mode="signin"         // or "signup"
+  onGoogle={() => handleOAuth('google')}
+  onGithub={() => handleOAuth('github')}
+/>
+```
+
+**Props:**
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `loading` | `'google' \| 'github' \| null` | — | Which button shows spinner |
+| `disabled` | `boolean` | `false` | Disables all buttons (e.g. while form submits) |
+| `mode` | `'signin' \| 'signup'` | `'signin'` | Switches `aria-label` text per context |
+| `onGoogle` | `() => void` | — | Google button callback |
+| `onGithub` | `() => void` | — | GitHub button callback |
+| `className` | `string` | — | Optional wrapper class |
+
+**Translation Keys (OAuthButtons-specific):**
+- `OR_CONTINUE_WITH` — divider label
+- `SIGN_IN_WITH_GOOGLE` / `SIGN_UP_WITH_GOOGLE` — Google button `aria-label`
+- `SIGN_IN_WITH_GITHUB` / `SIGN_UP_WITH_GITHUB` — GitHub button `aria-label`
+- `OAUTH_ERROR` — error toast title on OAuth failure
+
+**Auth action in store (`authStore.ts` / `useAuth.ts`):**
+```typescript
+loginWithOAuth: async (provider: 'google' | 'github') => {
+  set({ isLoading: true, error: null });
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: { redirectTo: `${window.location.origin}/dashboard` },
+  });
+  if (error) { set({ error: error.message, isLoading: false }); throw error; }
+  // isLoading stays true — browser is redirecting
+};
+```
+
+**Rules:**
+- Always use `OAuthButtons` instead of inline Google/GitHub button markup
+- `loginWithOAuth` intentionally keeps `isLoading: true` after calling — Supabase redirects the browser away; the existing `onAuthStateChange` in `authStore` picks up the session on return
+- Supabase Dashboard → Authentication → URL Configuration **must** allowlist:
+  - `http://localhost:3012/dashboard`
+  - `https://devcanvas-blog.vercel.app/dashboard`
+- GitHub OAuth App: Homepage URL = `https://devcanvas-blog.vercel.app`; Callback URL = `https://<project>.supabase.co/auth/v1/callback`
+- Google OAuth App: Authorized Redirect URI = `https://<project>.supabase.co/auth/v1/callback`
+
+**Used in:** `LoginPage.tsx`, `SignupPage.tsx`
 
 ### 9. Protected Routes Pattern
 
@@ -2683,6 +2758,6 @@ npm run type-check      # Check TypeScript types
 
 **This AGENTS.md file should be your primary reference when working on the DevCanvas Blog project. Keep it updated as the project evolves!**
 
-**Last Updated:** May 9, 2026
-**Version:** 1.0.0
+**Last Updated:** May 30, 2026
+**Version:** 1.1.0
 **Maintainer:** DevCanvas Team

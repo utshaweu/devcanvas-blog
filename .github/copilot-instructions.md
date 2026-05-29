@@ -22,6 +22,7 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - **Reading List**: Bookmark posts to a personal reading list stored in Supabase (`bookmarks` table with RLS); managed via `useBookmarkStore` (Zustand) with optimistic updates
 - **Table of Contents**: Auto-generated sticky sidebar (desktop) + collapsible accordion (mobile) from `h1`/`h2`/`h3` headings; scroll-listener active tracking with last-heading guard; `useTableOfContents` hook injects IDs into rendered DOM
 - **Code Syntax Highlighting**: Editor uses `@tiptap/extension-code-block-lowlight` with `lowlight@^2` for live highlighting and a language selector; viewer uses `highlight.js` (`hljs.highlightElement`) on rendered `pre code` blocks with GitHub-inspired light/dark token colors
+- **OAuth Login**: Google & GitHub sign-in/sign-up via Supabase Auth providers; reusable `OAuthButtons` component used on LoginPage and SignupPage
 
 ## Tech Stack (DO NOT SUGGEST ALTERNATIVES)
 
@@ -49,12 +50,19 @@ You are assisting with **DevCanvas Blog** - a production-ready, full-stack blogg
 - Reusable `ShareButton` component (clipboard copy + Web Share API)
 - VirtualizedGrid component (react-virtuoso powered)
 - Reusable chart wrappers: `LineChartView`, `BarChartView`, `PieChartView`
+- Reusable `OAuthButtons` component (Google + GitHub buttons with divider, loading states, `mode` prop for signin/signup label text)
 
 ### Backend & Storage
 - Supabase (PostgreSQL + Auth + Storage)
 - Supabase Storage buckets:
   - `avatars` (500KB limit, public)
   - `featured-images` (500KB limit, public)
+
+### OAuth Providers
+- Google (`supabase.auth.signInWithOAuth({ provider: 'google' })`)
+- GitHub (`supabase.auth.signInWithOAuth({ provider: 'github' })`)
+- Redirect URL uses `window.location.origin` dynamically (works for both `localhost:3012` and `devcanvas-blog.vercel.app`)
+- Supabase Dashboard → Authentication → URL Configuration must allowlist both `http://localhost:3012/dashboard` and `https://devcanvas-blog.vercel.app/dashboard`
 
 ### MCP & Environment Variables
 - Frontend MCP endpoint is configured via `VITE_MCP_WS_URL`

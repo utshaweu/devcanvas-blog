@@ -17,6 +17,7 @@ interface AuthState {
   
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
+  loginWithOAuth: (provider: 'google' | 'github') => Promise<void>;
   signup: (credentials: SignupCredentials) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
@@ -133,6 +134,26 @@ export const useAuthStore = create<AuthState>()(
             error: error instanceof Error ? error.message : 'Failed to login',
             isLoading: false,
             isAuthenticated: false,
+          });
+          throw error;
+        }
+      },
+
+      loginWithOAuth: async (provider: 'google' | 'github') => {
+        set({ isLoading: true, error: null });
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider,
+            options: {
+              redirectTo: `${window.location.origin}/dashboard`,
+            },
+          });
+          if (error) throw error;
+          // Redirect is handled by Supabase — loading state stays true until navigation
+        } catch (error: unknown) {
+          set({
+            error: error instanceof Error ? error.message : `Failed to sign in with ${provider}`,
+            isLoading: false,
           });
           throw error;
         }

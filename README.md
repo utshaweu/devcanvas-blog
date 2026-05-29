@@ -33,6 +33,7 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **MCP Chatbot**: WebSocket chatbot connected to a local/deployed MCP bridge and Supabase-backed MCP tools
 - **Table of Contents**: Auto-generated sticky sidebar (desktop) + collapsible accordion (mobile) from post headings; scroll-listener active tracking with navbar offset
 - **Code Syntax Highlighting**: Live `CodeBlockLowlight` + `lowlight` in editor with language selector; `highlight.js` GitHub-inspired palette on published posts
+- **OAuth Login**: Google & GitHub sign-in/sign-up via Supabase Auth providers; reusable `OAuthButtons` component used on Login and Signup pages
 - **Memory Safe**: Audited for timer/interval leaks, async unmount guards (`isMountedRef`), and bounded message arrays — no heap growth in long sessions
 - **Testing Ready**: Jest and React Testing Library configured
 
@@ -52,10 +53,11 @@ A modern, full-featured blog platform built with React, TypeScript, and Supabase
 - **Icons**: Lucide React
 - **Charts**: Recharts 2.x
 - **Large List Virtualization**: react-virtuoso
+- **OAuth**: Google & GitHub via `supabase.auth.signInWithOAuth`; reusable `OAuthButtons` component
 
 ### Backend & Database
 - **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
+- **Authentication**: Supabase Auth (email/password + Google & GitHub OAuth)
 - **Storage**: Supabase Storage (for avatars and images)
   - File upload with progress tracking
   - Image preview and management

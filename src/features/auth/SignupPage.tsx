@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { OAuthButtons } from '@/components/common/OAuthButtons';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 
@@ -28,9 +29,10 @@ type SignupFormData = z.infer<typeof signupSchema>;
 
 export const SignupPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup, loginWithOAuth } = useAuth();
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
   const [showPasswords, setShowPasswords] = useState({
     password: false,
     confirm: false,
@@ -55,6 +57,16 @@ export const SignupPage: React.FC = () => {
       toastError(t(TranslationKey.SIGNUP_FAILED_TITLE), t(TranslationKey.SIGNUP_FAILED_MESSAGE));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOAuthSignUp = async (provider: 'google' | 'github') => {
+    setOauthLoading(provider);
+    try {
+      await loginWithOAuth(provider);
+    } catch (err: unknown) {
+      toastError(t(TranslationKey.OAUTH_ERROR), err instanceof Error ? err.message : '');
+      setOauthLoading(null);
     }
   };
 
@@ -120,7 +132,7 @@ export const SignupPage: React.FC = () => {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || oauthLoading !== null}>
               {isLoading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
@@ -130,6 +142,14 @@ export const SignupPage: React.FC = () => {
                 t(TranslationKey.SIGN_UP)
               )}
             </Button>
+
+            <OAuthButtons
+              loading={oauthLoading}
+              disabled={isLoading}
+              mode="signup"
+              onGoogle={() => handleOAuthSignUp('google')}
+              onGithub={() => handleOAuthSignUp('github')}
+            />
 
             <div className="text-center text-sm text-muted-foreground">
               {t(TranslationKey.ALREADY_HAVE_ACCOUNT)}{' '}
