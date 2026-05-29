@@ -605,6 +605,13 @@ const { data, error } = await supabase
 if (error) throw error;
 ```
 
+### Public Schema API Grants
+> **Supabase change (effective May 30 2026 for new projects, October 30 2026 for all):**
+> New `public` schema tables are not exposed to the Data API by default.
+> Run `GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;` plus per-table grants
+> (and `ALTER DEFAULT PRIVILEGES` for future tables) in the Supabase SQL Editor.
+> Full SQL is documented in `README.md`, `AGENTS.md`, and `.github/copilot-instructions.md`.
+
 ### Error Display
 ```typescript
 {error && (

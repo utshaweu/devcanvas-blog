@@ -679,6 +679,57 @@ CREATE POLICY "Users can insert own bookmarks" ON public.bookmarks FOR INSERT WI
 CREATE POLICY "Users can delete own bookmarks" ON public.bookmarks FOR DELETE USING (auth.uid() = user_id);
 CREATE INDEX IF NOT EXISTS bookmarks_user_id_idx ON public.bookmarks(user_id);
 CREATE INDEX IF NOT EXISTS bookmarks_post_id_idx ON public.bookmarks(post_id);
+
+-- ============================================
+-- Public Schema API Grants
+-- ============================================
+-- Supabase change (effective May 30 2026 for new projects,
+-- October 30 2026 enforced for all existing projects):
+-- New tables in the "public" schema are NOT exposed to the
+-- Data API (PostgREST / supabase-js) by default.
+-- Run this block once — and re-run whenever you add a new table.
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+GRANT SELECT ON public.users TO anon, authenticated;
+GRANT INSERT, UPDATE ON public.users TO authenticated;
+
+GRANT SELECT ON public.posts TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.posts TO authenticated;
+
+GRANT SELECT ON public.comments TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.comments TO authenticated;
+
+GRANT SELECT ON public.categories TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.categories TO authenticated;
+
+GRANT SELECT ON public.tags TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.tags TO authenticated;
+
+GRANT SELECT ON public.post_tags TO anon, authenticated;
+GRANT INSERT, DELETE ON public.post_tags TO authenticated;
+
+GRANT SELECT ON public.post_likes TO anon, authenticated;
+GRANT INSERT, DELETE ON public.post_likes TO authenticated;
+
+GRANT SELECT ON public.bookmarks TO authenticated;
+GRANT INSERT, DELETE ON public.bookmarks TO authenticated;
+
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated, anon;
+
+GRANT EXECUTE ON FUNCTION public.toggle_post_like(uuid)     TO authenticated;
+GRANT EXECUTE ON FUNCTION public.increment_post_views(uuid) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.sync_post_comments_count() TO authenticated;
+
+-- Future-proof: auto-grant on any new table/function
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT ON TABLES TO anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT USAGE, SELECT ON SEQUENCES TO authenticated, anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT EXECUTE ON FUNCTIONS TO authenticated, anon;
 ```
 
 > Notes for existing databases:

@@ -202,6 +202,60 @@ WHERE p.comments <> COALESCE(c.actual_comments, 0)
 ORDER BY p.created_at DESC;
 ```
 
+### Public Schema API Grants
+
+> **Supabase change (effective May 30 2026 for new projects, October 30 2026 enforced for all):**
+> New tables in the `public` schema are **not** exposed to the Data API (PostgREST / supabase-js) by default.
+> Run the SQL below once in the Supabase SQL Editor — or re-run it whenever you add a new table.
+
+```sql
+-- Schema visibility
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+-- Table-level grants (RLS still enforces per-row rules)
+GRANT SELECT ON public.users TO anon, authenticated;
+GRANT INSERT, UPDATE ON public.users TO authenticated;
+
+GRANT SELECT ON public.posts TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.posts TO authenticated;
+
+GRANT SELECT ON public.comments TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.comments TO authenticated;
+
+GRANT SELECT ON public.categories TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.categories TO authenticated;
+
+GRANT SELECT ON public.tags TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.tags TO authenticated;
+
+GRANT SELECT ON public.post_tags TO anon, authenticated;
+GRANT INSERT, DELETE ON public.post_tags TO authenticated;
+
+GRANT SELECT ON public.post_likes TO anon, authenticated;
+GRANT INSERT, DELETE ON public.post_likes TO authenticated;
+
+GRANT SELECT ON public.bookmarks TO authenticated;
+GRANT INSERT, DELETE ON public.bookmarks TO authenticated;
+
+-- Sequence grants (needed for INSERT with uuid/serial defaults)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated, anon;
+
+-- RPC / function grants
+GRANT EXECUTE ON FUNCTION public.toggle_post_like(uuid)     TO authenticated;
+GRANT EXECUTE ON FUNCTION public.increment_post_views(uuid) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.sync_post_comments_count() TO authenticated;
+
+-- Future-proof: any new table/function created in public inherits these grants
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT ON TABLES TO anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT USAGE, SELECT ON SEQUENCES TO authenticated, anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT EXECUTE ON FUNCTIONS TO authenticated, anon;
+```
+
 ## Design System (NEVER CHANGE)
 
 ### Color Palette
