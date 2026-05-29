@@ -289,6 +289,12 @@ export enum TranslationKey {
   BOOKMARK_REMOVED_MESSAGE = 'bookmarkRemovedMessage',
   LOGIN_REQUIRED_TO_BOOKMARK = 'loginRequiredToBookmark',
   LOGIN_REQUIRED_TO_BOOKMARK_MESSAGE = 'loginRequiredToBookmarkMessage',
+  OR_CONTINUE_WITH = 'orContinueWith',
+  SIGN_IN_WITH_GOOGLE = 'signInWithGoogle',
+  SIGN_IN_WITH_GITHUB = 'signInWithGithub',
+  SIGN_UP_WITH_GOOGLE = 'signUpWithGoogle',
+  SIGN_UP_WITH_GITHUB = 'signUpWithGithub',
+  OAUTH_ERROR = 'oauthError',
 }
 
 export type LanguageKey = TranslationKey;
@@ -583,6 +589,12 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.BOOKMARK_REMOVED_MESSAGE]: 'This post has been removed from your reading list.',
     [TranslationKey.LOGIN_REQUIRED_TO_BOOKMARK]: 'Login Required',
     [TranslationKey.LOGIN_REQUIRED_TO_BOOKMARK_MESSAGE]: 'Please log in to save posts to your reading list.',
+    [TranslationKey.OR_CONTINUE_WITH]: 'Or continue with',
+    [TranslationKey.SIGN_IN_WITH_GOOGLE]: 'Sign in with Google',
+    [TranslationKey.SIGN_IN_WITH_GITHUB]: 'Sign in with GitHub',
+    [TranslationKey.SIGN_UP_WITH_GOOGLE]: 'Sign up with Google',
+    [TranslationKey.SIGN_UP_WITH_GITHUB]: 'Sign up with GitHub',
+    [TranslationKey.OAUTH_ERROR]: 'OAuth sign-in failed. Please try again.',
   },
   bn: {
     [TranslationKey.WELCOME_BACK]: 'ফিরে এসে স্বাগতম',
@@ -873,6 +885,12 @@ export const translations: Record<Language, Record<LanguageKey, string>> = {
     [TranslationKey.BOOKMARK_REMOVED_MESSAGE]: 'এই পোস্টটি আপনার পড়ার তালিকা থেকে মুছে ফেলা হয়েছে।',
     [TranslationKey.LOGIN_REQUIRED_TO_BOOKMARK]: 'লগইন প্রয়োজন',
     [TranslationKey.LOGIN_REQUIRED_TO_BOOKMARK_MESSAGE]: 'পোস্ট পড়ার তালিকায় সংরক্ষণ করতে লগইন করুন।',
+    [TranslationKey.OR_CONTINUE_WITH]: 'অথবা দিয়ে চালিয়ে যান',
+    [TranslationKey.SIGN_IN_WITH_GOOGLE]: 'Google দিয়ে সাইন ইন করুন',
+    [TranslationKey.SIGN_IN_WITH_GITHUB]: 'GitHub দিয়ে সাইন ইন করুন',
+    [TranslationKey.SIGN_UP_WITH_GOOGLE]: 'Google দিয়ে সাইন আপ করুন',
+    [TranslationKey.SIGN_UP_WITH_GITHUB]: 'GitHub দিয়ে সাইন আপ করুন',
+    [TranslationKey.OAUTH_ERROR]: 'OAuth সাইন-ইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।',
   },
 };
 

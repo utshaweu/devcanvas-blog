@@ -598,3 +598,12 @@ export interface TableOfContentsProps {
   onNavigate?: () => void;
   variant?: 'mobile' | 'desktop' | 'both';
 }
+
+export interface OAuthButtonsProps {
+  loading: 'google' | 'github' | null;
+  disabled?: boolean;
+  mode?: 'signin' | 'signup';
+  onGoogle: () => void;
+  onGithub: () => void;
+  className?: string;
+}

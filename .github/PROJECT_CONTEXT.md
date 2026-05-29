@@ -20,6 +20,7 @@ Full-stack blog platform with:
 - Reading List / Bookmarks (save posts to personal list, stored in Supabase, Zustand store with optimistic updates)
 - Table of Contents (auto-generated from h1/h2/h3 in post content; sticky desktop sidebar + mobile collapsible accordion; scroll-listener active tracking)
 - Code Syntax Highlighting (editor: CodeBlockLowlight + lowlight@^2 with language selector; viewer: highlight.js with GitHub-inspired light/dark token colors)
+- OAuth Login: Google & GitHub sign-in/sign-up via Supabase Auth; reusable `OAuthButtons` component
 - Rich text editor (Tiptap)
 - Reusable emoji picker (shared in editor and comments)
 - 404 error page (beautiful, animated)
@@ -313,6 +314,56 @@ Analytics chart interfaces should be centralized in `src/types/index.ts` and imp
 Rules:
 - Ensure tooltip contrast works in both light and dark themes
 - Avoid overflowing X-axis labels in compact chart cards
+
+### OAuthButtons Component
+```typescript
+import { OAuthButtons } from '@/components/common/OAuthButtons';
+
+// On LoginPage
+<OAuthButtons
+  loading={oauthLoading}
+  disabled={isLoading}
+  mode="signin"
+  onGoogle={() => handleOAuthSignIn('google')}
+  onGithub={() => handleOAuthSignIn('github')}
+/>
+
+// On SignupPage
+<OAuthButtons
+  loading={oauthLoading}
+  disabled={isLoading}
+  mode="signup"
+  onGoogle={() => handleOAuthSignUp('google')}
+  onGithub={() => handleOAuthSignUp('github')}
+/>
+```
+
+**Props:**
+- `loading: 'google' | 'github' | null` — which button shows spinner
+- `disabled: boolean` — disables all buttons (e.g. while form is submitting)
+- `mode: 'signin' | 'signup'` — changes `aria-label` text per context
+- `onGoogle / onGithub: () => void` — click callbacks
+- `className?: string` — optional wrapper class
+
+**Includes:** divider ("Or continue with"), Google SVG logo (colored), GitHub SVG logo (monochrome), `LoadingSpinner` per button, bilingual `aria-label` via `TranslationKey`.
+
+**Translation keys:** `OR_CONTINUE_WITH`, `SIGN_IN_WITH_GOOGLE`, `SIGN_IN_WITH_GITHUB`, `SIGN_UP_WITH_GOOGLE`, `SIGN_UP_WITH_GITHUB`, `OAUTH_ERROR`
+
+**Auth action in store:**
+```typescript
+// authStore.ts / useAuth.ts
+const { loginWithOAuth } = useAuth();
+await loginWithOAuth('google'); // or 'github'
+// Supabase redirects the browser — no token handling needed
+// Existing onAuthStateChange in authStore picks up the session on return
+```
+
+Rules:
+- Always use `OAuthButtons` for Google/GitHub login — do NOT duplicate inline button markup
+- `loginWithOAuth` keeps `isLoading: true` after calling because Supabase redirects away — this is expected
+- Supabase Dashboard → Authentication → URL Configuration must allowlist:
+  - `http://localhost:3012/dashboard`
+  - `https://devcanvas-blog.vercel.app/dashboard`
 
 ### SearchBar Component
 ```typescript

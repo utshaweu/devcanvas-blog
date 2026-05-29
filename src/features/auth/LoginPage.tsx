@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { OAuthButtons } from '@/components/common/OAuthButtons';
 import { useTranslation } from '@/hooks/useTranslation';
 import { TranslationKey } from '@/i18n';
 
@@ -24,9 +25,10 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, loginWithOAuth } = useAuth();
   const { success: toastSuccess, error: toastError } = useGlobalToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'github' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
   
@@ -58,6 +60,17 @@ export const LoginPage: React.FC = () => {
       toastError('Login failed', err instanceof Error ? err.message : 'Failed to login. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
+    setOauthLoading(provider);
+    try {
+      await loginWithOAuth(provider);
+      // Supabase redirects the browser — no further action needed here
+    } catch (err: unknown) {
+      toastError(t(TranslationKey.OAUTH_ERROR), err instanceof Error ? err.message : '');
+      setOauthLoading(null);
     }
   };
 
@@ -103,7 +116,7 @@ export const LoginPage: React.FC = () => {
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || oauthLoading !== null}>
               {isLoading ? (
                 <>
                   <LoadingSpinner size="sm" className="mr-2" />
@@ -113,6 +126,14 @@ export const LoginPage: React.FC = () => {
                 t(TranslationKey.LOG_IN)
               )}
             </Button>
+
+            <OAuthButtons
+              loading={oauthLoading}
+              disabled={isLoading}
+              mode="signin"
+              onGoogle={() => handleOAuthSignIn('google')}
+              onGithub={() => handleOAuthSignIn('github')}
+            />
 
             <div className="text-center text-sm text-muted-foreground">
               {t(TranslationKey.DONT_HAVE_ACCOUNT)}{' '}
